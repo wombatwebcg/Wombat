@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32602.291
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Infrastructure", "Wombat.Infrastructure\Wombat.Infrastructure.csproj", "{E74A0863-BF3A-4F35-B01E-E61558AFD4C7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.IndustrialProtocol", "Wombat.IndustrialProtocol\Wombat.IndustrialProtocol.csproj", "{A9D938C1-7479-4FFB-BC51-3DD5E8C8E09B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E74A0863-BF3A-4F35-B01E-E61558AFD4C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E74A0863-BF3A-4F35-B01E-E61558AFD4C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E74A0863-BF3A-4F35-B01E-E61558AFD4C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E74A0863-BF3A-4F35-B01E-E61558AFD4C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9D938C1-7479-4FFB-BC51-3DD5E8C8E09B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9D938C1-7479-4FFB-BC51-3DD5E8C8E09B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9D938C1-7479-4FFB-BC51-3DD5E8C8E09B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9D938C1-7479-4FFB-BC51-3DD5E8C8E09B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54386BB9-FE51-4151-8E01-C7E7E1FA2585}
+	EndGlobalSection
+EndGlobal

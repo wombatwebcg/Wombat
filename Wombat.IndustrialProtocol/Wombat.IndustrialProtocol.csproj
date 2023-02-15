@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+	  <TargetFramework>netstandard2.0</TargetFramework>
+	  <Authors>wombatwebcg</Authors>
+	  <Company></Company>
+	  <Product></Product>
+	  <Description>基于网络开源项目整理的工业通讯库</Description>
+	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+	  <NeutralLanguage></NeutralLanguage>
+	  <PackageTags>plc;modubs</PackageTags>
+	  <PackageProjectUrl>https://github.com/wombatwebcg/Wombat.git</PackageProjectUrl>
+	  <Copyright>wombatwebcg</Copyright>
+	  <RepositoryUrl>https://github.com/wombatwebcg/Wombat.git</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+
+
+
+
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
