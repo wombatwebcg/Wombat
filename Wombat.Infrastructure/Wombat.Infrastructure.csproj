@@ -12,6 +12,7 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Infrastucture</PackageTags>
 		<Copyright>wombatwebcg</Copyright>
+		<Version>1.0.1</Version>
 	</PropertyGroup>
 
 

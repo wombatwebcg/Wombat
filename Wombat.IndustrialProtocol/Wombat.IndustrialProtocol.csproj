@@ -14,6 +14,7 @@
 	  <Copyright>wombatwebcg</Copyright>
 	  <RepositoryUrl>https://github.com/wombatwebcg/Wombat.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
+	  <Version>1.0.1</Version>
   </PropertyGroup>
 
 

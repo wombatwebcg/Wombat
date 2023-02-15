@@ -296,6 +296,26 @@ namespace Wombat.IndustrialProtocol
             return result;
 
         }
+
+
+        public virtual OperationResult<string> SendPackageReliable(string command, Encoding encoding)
+        {
+           var result = SendPackageReliable(encoding.GetBytes(command));
+            if(result.IsSuccess)
+            {
+                return new OperationResult<string>(result)
+                {
+                    Value = encoding.GetString(result.Value)
+                };
+            }
+            else
+            {
+                return new OperationResult<string>(result);
+ 
+
+            }
+        }
+
         #endregion
 
     }
