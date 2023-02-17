@@ -927,7 +927,7 @@ namespace Wombat.Infrastructure
     /// <summary>
     /// 一个高级的混合线程同步锁，采用了基元用户加基元内核同步构造实现，并包含了自旋和线程所有权
     /// </summary>
-    internal sealed class AdvancedHybirdLock : IDisposable
+    public sealed class AdvancedHybirdLock : IDisposable
     {
 
         #region IDisposable Support

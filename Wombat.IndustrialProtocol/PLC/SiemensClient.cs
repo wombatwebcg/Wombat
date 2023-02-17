@@ -17,7 +17,7 @@ namespace Wombat.IndustrialProtocol.PLC
     public class SiemensClient : IEthernetClientBase
     {
         protected Socket _socket;
-
+        private AdvancedHybirdLock _advancedHybirdLock; 
         /// <summary>
         /// CPU版本
         /// </summary>
@@ -57,6 +57,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         public byte Rack { get; private set; }
 
+
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -65,13 +67,14 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="timeout">超时时间</param>
         /// <param name="slot">PLC的插槽号</param>
         /// <param name="rack">PLC的机架号</param>
-        public SiemensClient(SiemensVersion version, IPEndPoint ipAndPoint, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
+        public SiemensClient(SiemensVersion version, IPEndPoint ipAndPoint, byte slot = 0x00, byte rack = 0x00)
         {
             Slot = slot;
             Rack = rack;
             this.version = version;
             IpEndPoint = ipAndPoint;
             DataFormat = EndianFormat.DCBA;
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="slot">PLC的槽号</param>
         /// <param name="rack">PLC的机架号</param>
         /// <param name="timeout">超时时间</param>
-        public SiemensClient(SiemensVersion version, string ip, int port, byte slot = 0x00, byte rack = 0x00, int timeout = 1500)
+        public SiemensClient(SiemensVersion version, string ip, int port, byte slot = 0x00, byte rack = 0x00)
         {
             Slot = slot;
             Rack = rack;
@@ -91,6 +94,9 @@ namespace Wombat.IndustrialProtocol.PLC
             if (!IPAddress.TryParse(ip, out IPAddress address))
                 address = Dns.GetHostEntry(ip).AddressList?.FirstOrDefault();
             IpEndPoint = new IPEndPoint(address, port);
+            DataFormat = EndianFormat.DCBA;
+            _advancedHybirdLock = new AdvancedHybirdLock();
+
         }
 
         /// <summary>
@@ -219,33 +225,34 @@ namespace Wombat.IndustrialProtocol.PLC
         public override OperationResult<byte[]> SendPackageSingle(byte[] command)
         {
             //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            lock (this)
+            _advancedHybirdLock.Enter();
+            OperationResult<byte[]> result = new OperationResult<byte[]>();
+            try
             {
-                OperationResult<byte[]> result = new OperationResult<byte[]>();
-                try
-                {
-                    _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
+                _socket.Send(command);
+                var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
+                if (!socketReadResul.IsSuccess)
+                    return socketReadResul;
+                var headPackage = socketReadResul.Value;
 
-                    socketReadResul = SocketRead(_socket, GetContentLength(headPackage));
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                socketReadResul = SocketRead(_socket, GetContentLength(headPackage));
+                if (!socketReadResul.IsSuccess)
+                    return socketReadResul;
+                var dataPackage = socketReadResul.Value;
 
-                    result.Value = headPackage.Concat(dataPackage).ToArray();
-                    return result.EndTime();
-                }
-                catch (Exception ex)
-                {
-                    result.IsSuccess = false;
-                    result.Message = ex.Message;
-                    result.AddMessage2List();
-                    return result.EndTime();
-                }
+                result.Value = headPackage.Concat(dataPackage).ToArray();
+                _advancedHybirdLock.Leave();
+                return result.EndTime();
             }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+                result.AddMessage2List();
+                _advancedHybirdLock.Leave();
+                return result.EndTime();
+            }
+
         }
 
         /// <summary>
