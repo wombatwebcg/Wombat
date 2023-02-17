@@ -108,7 +108,7 @@ namespace Wombat.IndustrialProtocol
         /// <summary>
         /// 结束时间统计
         /// </summary>
-        internal OperationResult EndTime()
+        public OperationResult EndTime()
         {
             TimeConsuming = (DateTime.Now - InitialTime).TotalMilliseconds;
             return this;

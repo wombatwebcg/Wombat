@@ -71,7 +71,7 @@ namespace Wombat.IndustrialProtocol.PLC
             Rack = rack;
             this.version = version;
             IpEndPoint = ipAndPoint;
-           
+            DataFormat = EndianFormat.DCBA;
         }
 
         /// <summary>
@@ -282,12 +282,14 @@ namespace Wombat.IndustrialProtocol.PLC
                     sendResult.Message = $"读取{address}失败，{ sendResult.Message}";
                     return result.SetInfo(sendResult).EndTime();
                 }
-
                 var dataPackage = sendResult.Value;
+
+                //length = dataPackage.Length - 21;
+
                 byte[] responseData = new byte[length];
                 Array.Copy(dataPackage, dataPackage.Length - length, responseData, 0, length);
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
-                result.Value = responseData.Reverse().ToArray();
+                result.Value = responseData.ToArray();
 
                 //0x04 读 0x01 读取一个长度 //如果是批量读取，批量读取方法里面有验证
                 if (dataPackage[19] == 0x04 && dataPackage[20] == 0x01)
@@ -357,7 +359,7 @@ namespace Wombat.IndustrialProtocol.PLC
             OperationResult result = new OperationResult();
             try
             {
-                Array.Reverse(data);
+                //Array.Reverse(data);
                 //发送写入信息
                 var arg = ConvertWriteArg(address, data, isBit);
                 byte[] command = GetWriteCommand(arg);
@@ -527,39 +529,39 @@ namespace Wombat.IndustrialProtocol.PLC
                         continue;
                     }
 
-                    var readResut = responseData.Skip(cursor).Take(item.ReadWriteLength).Reverse().ToArray();
+                    var readResult = responseData.Skip(cursor).Take(item.ReadWriteLength).Reverse().ToArray();
                     cursor += item.ReadWriteLength == 1 ? 2 : item.ReadWriteLength;
                     switch (item.DataType)
                     {
                         case DataTypeEnum.Bool:
-                            value = BitConverter.ToBoolean(readResut, 0) ? 1 : 0;
+                            value = BitConverter.ToBoolean(readResult, 0) ? 1 : 0;
                             break;
                         case DataTypeEnum.Byte:
-                            value = readResut[0];
+                            value = readResult[0];
                             break;
                         case DataTypeEnum.Int16:
-                            value = BitConverter.ToInt16(readResut, 0);
+                            value = BitConverter.ToInt16(readResult, 0);
                             break;
                         case DataTypeEnum.UInt16:
-                            value = BitConverter.ToUInt16(readResut, 0);
+                            value = BitConverter.ToUInt16(readResult, 0);
                             break;
                         case DataTypeEnum.Int32:
-                            value = BitConverter.ToInt32(readResut, 0);
+                            value = BitConverter.ToInt32(readResult, 0);
                             break;
                         case DataTypeEnum.UInt32:
-                            value = BitConverter.ToUInt32(readResut, 0);
+                            value = BitConverter.ToUInt32(readResult, 0);
                             break;
                         case DataTypeEnum.Int64:
-                            value = BitConverter.ToInt64(readResut, 0);
+                            value = BitConverter.ToInt64(readResult, 0);
                             break;
                         case DataTypeEnum.UInt64:
-                            value = BitConverter.ToUInt64(readResut, 0);
+                            value = BitConverter.ToUInt64(readResult, 0);
                             break;
                         case DataTypeEnum.Float:
-                            value = BitConverter.ToSingle(readResut, 0);
+                            value = BitConverter.ToSingle(readResult, 0);
                             break;
                         case DataTypeEnum.Double:
-                            value = BitConverter.ToDouble(readResut, 0);
+                            value = BitConverter.ToDouble(readResult, 0);
                             break;
                         default:
                             throw new Exception($"未定义数据类型：{item.DataType}");
@@ -915,8 +917,8 @@ namespace Wombat.IndustrialProtocol.PLC
             command[1] = 0x00;//[0][1]固定报文头
             command[2] = (byte)(command.Length / 256);
             command[3] = (byte)(command.Length % 256);//[2][3]整个读取请求长度为0x1F= 31 
-            command[4] = 0x02;
-            command[5] = 0xF0;
+            command[4] = 0x02; // 固定 -> Fixed
+            command[5] = 0xF0; // 固定 -> Fixed
             command[6] = 0x80;//COTP
             command[7] = 0x32;//协议ID
             command[8] = 0x01;//1  客户端发送命令 3 服务器回复命令
@@ -977,9 +979,9 @@ namespace Wombat.IndustrialProtocol.PLC
             command[1] = 0x00;//[0][1]固定报文头
             command[2] = (byte)((command.Length) / 256);
             command[3] = (byte)((command.Length) % 256);//[2][3]整个读取请求长度
-            command[4] = 0x02;
-            command[5] = 0xF0;
-            command[6] = 0x80;
+            command[4] = 0x02; // 固定 -> Fixed
+            command[5] = 0xF0; // 固定 -> Fixed
+            command[6] = 0x80; // 固定 -> Fixed
             command[7] = 0x32;//protocol Id
             command[8] = 0x01;//1  客户端发送命令 3 服务器回复命令 Job
             command[9] = 0x00;

@@ -246,9 +246,11 @@ namespace Wombat.IndustrialProtocol.Modbus
                 }
                 catch (Exception ex2)
                 {
-                    OperationResult<byte[]> result = new OperationResult<byte[]>();
-                    result.IsSuccess = false;
-                    result.Message = ex2.Message;
+                    OperationResult<byte[]> result = new OperationResult<byte[]>
+                    {
+                        IsSuccess = false,
+                        Message = ex2.Message
+                    };
                     result.AddMessage2List();
                     return result.EndTime();
                 }
@@ -265,7 +267,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="readLength">读取长度</param>
         /// <param name="byteFormatting">大小端转换</param>
         /// <returns></returns>
-        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3)
+        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
             var result = new OperationResult<byte[]>();
 
@@ -282,7 +284,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             {
                 var chenkHead = GetCheckHead(functionCode);
                 //1 获取命令（组装报文）
-                byte[] command = GetReadCommand(address, stationNumber, functionCode, (ushort)readLength, chenkHead);
+                byte[] command = GetReadCommand(address, stationNumber, functionCode, (ushort)readLength, chenkHead,isPlcAddress);
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 //获取响应报文
                 var sendResult = SendPackageReliable(command);
@@ -340,7 +342,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="byteFormatting">大小端设置</param>
         /// <returns></returns>
-        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16)
+        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16,bool isPlcAddress = false)
         {
             var result = new OperationResult();
             if (!_socket?.Connected ?? true)
@@ -352,7 +354,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             try
             {
                 var chenkHead = GetCheckHead(functionCode);
-                var command = GetWriteCommand(address, values, stationNumber, functionCode, chenkHead);
+                var command = GetWriteCommand(address, values, stationNumber, functionCode, chenkHead,isPlcAddress);
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
@@ -397,7 +399,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5)
+        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
             var result = new OperationResult();
             if (!_socket?.Connected ?? true)
@@ -409,7 +411,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             try
             {
                 var chenkHead = GetCheckHead(functionCode);
-                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, chenkHead);
+                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, chenkHead, isPlcAddress);
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
@@ -448,9 +450,9 @@ namespace Wombat.IndustrialProtocol.Modbus
             return result.EndTime();
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
-            return Write(address, value.TransByte(), stationNumber, functionCode);
+            return Write(address, value.TransByte(), stationNumber, functionCode, isPlcAddress);
         }
 
         #endregion
@@ -467,6 +469,11 @@ namespace Wombat.IndustrialProtocol.Modbus
             return new byte[] { (byte)random.Next(255), (byte)random.Next(255) };
         }
 
+        public virtual string TranPLCAddress(string address)
+        {
+            return address;
+        }
+
         /// <summary>
         /// 获取读取命令
         /// </summary>
@@ -475,10 +482,10 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="length">读取长度</param>
         /// <returns></returns>
-        public byte[] GetReadCommand(string address, byte stationNumber, byte functionCode, ushort length, byte[] check = null)
+        public byte[] GetReadCommand(string address, byte stationNumber, byte functionCode, ushort length, byte[] check = null, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var readAddress = ushort.Parse(address?.Trim());
-
             byte[] buffer = new byte[12];
             buffer[0] = check?[0] ?? 0x19;
             buffer[1] = check?[1] ?? 0xB2;//Client发出的检验信息
@@ -504,8 +511,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public byte[] GetWriteCommand(string address, byte[] values, byte stationNumber, byte functionCode, byte[] check = null)
+        public byte[] GetWriteCommand(string address, byte[] values, byte stationNumber, byte functionCode, byte[] check = null, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var writeAddress = ushort.Parse(address?.Trim());
 
             byte[] buffer = new byte[13 + values.Length];
@@ -533,10 +541,10 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public byte[] GetWriteCoilCommand(string address, bool value, byte stationNumber, byte functionCode, byte[] check = null)
+        public byte[] GetWriteCoilCommand(string address, bool value, byte stationNumber, byte functionCode, byte[] check = null, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var writeAddress = ushort.Parse(address?.Trim());
-
             byte[] buffer = new byte[12];
             buffer[0] = check?[0] ?? 0x19;
             buffer[1] = check?[1] ?? 0xB2;//Client发出的检验信息     

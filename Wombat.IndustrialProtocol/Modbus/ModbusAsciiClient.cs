@@ -35,7 +35,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="readLength">读取长度</param>
         /// <returns></returns>
-        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3)
+        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3,bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
 
@@ -43,7 +43,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             try
             {
                 //获取命令（组装报文）
-                byte[] command = GetReadCommand(address, stationNumber, functionCode,(ushort) readLength);
+                byte[] command = GetReadCommand(address, stationNumber, functionCode,(ushort) readLength, isPlcAddress: isPlcAddress);
                 var commandLRC = DataConvert.ByteArrayToAsciiArray(LRCHelper.GetLRC(command));
 
                 var finalCommand = new byte[commandLRC.Length + 3];
@@ -103,13 +103,13 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
-        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5)
+        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
             var result = new OperationResult();
             try
             {
-                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode);
+                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
 
                 var commandAscii = DataConvert.ByteArrayToAsciiArray(LRCHelper.GetLRC(command));
                 var finalCommand = new byte[commandAscii.Length + 3];
@@ -163,14 +163,14 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16)
+        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16,bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
 
             var result = new OperationResult();
             try
             {
-                var command = GetWriteCommand(address, values, stationNumber, functionCode);
+                var command = GetWriteCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
 
                 var commandAscii = DataConvert.ByteArrayToAsciiArray(LRCHelper.GetLRC(command));
                 var finalCommand = new byte[commandAscii.Length + 3];

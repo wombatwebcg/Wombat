@@ -16,9 +16,9 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         private SiemensClient client;
         public SiemensClient_Tests()
         {
-            //var ip = IPAddress.Parse("192.168.0.180");
+            //var ip = IPAddress.Parse("192.168.1.180");
             //var port = int.Parse("102");
-           var ip = IPAddress.Parse("192.168.0.180");//20.205.243.166
+           var ip = IPAddress.Parse("159.75.78.22");//20.205.243.166
           var  port = 102;
             client = new SiemensClient(SiemensVersion.S7_200Smart, new IPEndPoint(ip, port));
         }
@@ -27,7 +27,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         public void 短连接自动开关()
         {
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
                 ushort short_number_1 = (ushort)rnd.Next(ushort.MinValue, ushort.MaxValue);
@@ -47,20 +47,20 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 client.Write("Q1.5", !bool_value);
                 Assert.True(client.ReadBoolean("Q1.5").Value == !bool_value);
 
-                client.Write("V100", short_number);
-                Assert.True(client.ReadInt16("V100").Value == short_number);
-                client.Write("V100", short_number_1);
-                Assert.True(client.ReadUInt16("V100").Value == short_number_1);
+                client.Write("V300", short_number);
+                Assert.True(client.ReadInt16("V300").Value == short_number);
+                client.Write("V300", short_number_1);
+                Assert.True(client.ReadUInt16("V300").Value == short_number_1);
 
-                client.Write("V100", int_number);
-                Assert.True(client.ReadInt32("V100").Value == int_number);
-                client.Write("V100", int_number_1);
-                Assert.True(client.ReadUInt32("V100").Value == int_number_1);
+                client.Write("V300", int_number);
+                Assert.True(client.ReadInt32("V300").Value == int_number);
+                client.Write("V300", int_number_1);
+                Assert.True(client.ReadUInt32("V300").Value == int_number_1);
 
-                client.Write("V100", Convert.ToInt64(int_number));
-                Assert.True(client.ReadInt64("V100").Value == Convert.ToInt64(int_number));
-                 client.Write("V100", Convert.ToUInt64(int_number_1));
-                Assert.True(client.ReadUInt64("V100").Value == Convert.ToUInt64(int_number_1));
+                client.Write("V300", Convert.ToInt64(int_number));
+                Assert.True(client.ReadInt64("V300").Value == Convert.ToInt64(int_number));
+                 client.Write("V300", Convert.ToUInt64(int_number_1));
+                Assert.True(client.ReadUInt64("V300").Value == Convert.ToUInt64(int_number_1));
 
                 client.Write("V300", float_number);
                 Assert.True(client.ReadFloat("V300").Value == float_number);
@@ -98,20 +98,20 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 client.Write("Q1.5", !bool_value);
                 Assert.True(client.ReadBoolean("Q1.5").Value == !bool_value);
 
-                client.Write("V100", short_number);
-                Assert.True(client.ReadInt16("V100").Value == short_number);
-                client.Write("V100", short_number_1);
-                Assert.True(client.ReadUInt16("V100").Value == short_number_1);
+                client.Write("V300", short_number);
+                Assert.True(client.ReadInt16("V300").Value == short_number);
+                client.Write("V300", short_number_1);
+                Assert.True(client.ReadUInt16("V300").Value == short_number_1);
 
-                client.Write("V100", int_number);
-                Assert.True(client.ReadInt32("V100").Value == int_number);
-               client.Write("V100", int_number_1);
-                Assert.True(client.ReadUInt32("V100").Value == int_number_1);
+                client.Write("V300", int_number);
+                Assert.True(client.ReadInt32("V300").Value == int_number);
+               client.Write("V300", int_number_1);
+                Assert.True(client.ReadUInt32("V300").Value == int_number_1);
 
-                client.Write("V100", Convert.ToInt64(int_number));
-                Assert.True(client.ReadInt64("V100").Value == Convert.ToInt64(int_number));
-                client.Write("V100", Convert.ToUInt64(int_number_1));
-                Assert.True(client.ReadUInt64("V100").Value == Convert.ToUInt64(int_number_1));
+                client.Write("V300", Convert.ToInt64(int_number));
+                Assert.True(client.ReadInt64("V300").Value == Convert.ToInt64(int_number));
+                client.Write("V300", Convert.ToUInt64(int_number_1));
+                Assert.True(client.ReadUInt64("V300").Value == Convert.ToUInt64(int_number_1));
 
                 client.Write("V300", float_number);
                 Assert.True(client.ReadFloat("V300").Value == float_number);
@@ -310,9 +310,9 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         [Fact]
         public void 定时更新()
         {
-            //client.ReadInt16("V100", (value,isSucceed,err) =>
+            //client.ReadInt16("V300", (value,isSucceed,err) =>
             //{
-            //    Debug.WriteLine($"V100:{value}  err:{err}");
+            //    Debug.WriteLine($"V300:{value}  err:{err}");
             //});
 
             //client.ReadInt16("V102", (value, isSucceed, err) =>

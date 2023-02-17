@@ -65,7 +65,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="readLength">读取长度</param>
         /// <param name="byteFormatting"></param>
         /// <returns></returns>
-        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3)
+        public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
 
@@ -73,7 +73,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             try
             {
                 //获取命令（组装报文）
-                byte[] command = GetReadCommand(address, stationNumber, functionCode, (ushort)readLength);
+                byte[] command = GetReadCommand(address, stationNumber, functionCode, (ushort)readLength,isPlcAddress:isPlcAddress);
                 var commandCRC16 = CRC16Helper.GetCRC16(command);
                 result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
 
@@ -128,13 +128,13 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
-        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5)
+        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
             var result = new OperationResult();
             try
             {
-                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode);
+                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
                 var commandCRC16 = CRC16Helper.GetCRC16(command);
                 result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
                 //发送命令并获取响应报文
@@ -176,9 +176,9 @@ namespace Wombat.IndustrialProtocol.Modbus
             return result.EndTime();
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
-            return Write(address, value.TransByte(), stationNumber, functionCode);
+            return Write(address, value.TransByte(), stationNumber, functionCode,isPlcAddress);
         }
 
 
@@ -190,14 +190,14 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16)
+        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
         {
             if (!IsConnect) Connect();
 
             var result = new OperationResult();
             try
             {
-                var command = GetWriteCommand(address, values, stationNumber, functionCode);
+                var command = GetWriteCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
 
                 var commandCRC16 = CRC16Helper.GetCRC16(command);
                 result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
@@ -271,6 +271,12 @@ namespace Wombat.IndustrialProtocol.Modbus
 
         #region 获取命令
 
+        public virtual string TranPLCAddress(string address)
+        {
+            return address;
+        }
+
+
         /// <summary>
         /// 获取读取命令
         /// </summary>
@@ -279,8 +285,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="length">读取长度</param>
         /// <returns></returns>
-        public static byte[] GetReadCommand(string address, byte stationNumber, byte functionCode, ushort length)
+        public byte[] GetReadCommand(string address, byte stationNumber, byte functionCode, ushort length, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var readAddress = ushort.Parse(address?.Trim());
             byte[] buffer = new byte[6];
             buffer[0] = stationNumber;  //站号
@@ -300,8 +307,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public static byte[] GetWriteCommand(string address, byte[] values, byte stationNumber, byte functionCode)
+        public  byte[] GetWriteCommand(string address, byte[] values, byte stationNumber, byte functionCode, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var readAddress = ushort.Parse(address?.Trim());
             byte[] buffer = new byte[7 + values.Length];
             buffer[0] = stationNumber; //站号
@@ -323,8 +331,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public static byte[] GetWriteCoilCommand(string address, bool value, byte stationNumber, byte functionCode)
+        public  byte[] GetWriteCoilCommand(string address, bool value, byte stationNumber, byte functionCode, bool isPlcAddress = false)
         {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
             var readAddress = ushort.Parse(address?.Trim());
             byte[] buffer = new byte[6];
             buffer[0] = stationNumber;//站号

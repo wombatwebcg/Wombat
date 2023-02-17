@@ -213,16 +213,9 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">索引位置</param>
         /// <returns>short对象</returns>
-        public static short TransInt16(this byte[] buffer, int index, bool reverse = false)
+        public static short TransInt16(this byte[] buffer, int index=0, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[2];
-                tmp[0] = buffer[1 + index];
-                tmp[1] = buffer[0 + index];
-                buffer = tmp;
-            }
-            return BitConverter.ToInt16(buffer, index);
+            return TransInt16(buffer, index,1, reverse)[0];
         }
 
         /// <summary>
@@ -234,12 +227,22 @@ namespace Wombat.Infrastructure
         /// <returns>short数组对象</returns>
         public static short[] TransInt16(this byte[] buffer, int index, int length, bool reverse = false)
         {
-            short[] tmp = new short[length];
+            short[] result = new short[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransInt16(buffer, index + 2 * i,reverse);
+                byte[] temp = new byte[2];
+                if (reverse)
+                {
+                    temp[0] = buffer[1 + index + 2 * i];
+                    temp[1] = buffer[0 + index + 2 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 2 * i, temp, 0, 2);
+                }              
+                result[i] = BitConverter.ToInt16(temp, 0);
             }
-            return tmp;
+            return result;
         }
 
 
@@ -249,16 +252,9 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">索引位置</param>
         /// <returns>ushort对象</returns>
-        public static ushort TransUInt16(this byte[] buffer, int index, bool reverse = false)
+        public static ushort TransUInt16(this byte[] buffer, int index=0, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[2];
-                tmp[0] = buffer[1 + index];
-                tmp[1] = buffer[0 + index];
-                buffer = tmp;
-            }
-            return BitConverter.ToUInt16(buffer, index);
+            return TransUInt16(buffer, index, 1, reverse)[0];
         }
 
         /// <summary>
@@ -270,12 +266,22 @@ namespace Wombat.Infrastructure
         /// <returns>ushort数组对象</returns>
         public static ushort[] TransUInt16(this byte[] buffer, int index, int length, bool reverse = false)
         {
-            ushort[] tmp = new ushort[length];
+            ushort[] result = new ushort[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransUInt16(buffer, index + 2 * i,reverse);
+                byte[] temp = new byte[2];
+                if (reverse)
+                {
+                    temp[0] = buffer[1 + index + 2 * i];
+                    temp[1] = buffer[0 + index + 2 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 2 * i, temp, 0, 2);
+                }
+                result[i] = BitConverter.ToUInt16(temp, 0);
             }
-            return tmp;
+            return result;
         }
 
 
@@ -286,19 +292,9 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">索引位置</param>
         /// <returns>int对象</returns>
-        public static int TransInt32(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
+        public static int TransInt32(this byte[] buffer, int index=0, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[4];
-                tmp[0] = buffer[3 + index];
-                tmp[1] = buffer[2 + index];
-                tmp[2] = buffer[1 + index];
-                tmp[3] = buffer[0 + index];
-                buffer = tmp;
-            }
-
-            return BitConverter.ToInt32(ByteTransDataFormat4(buffer, index, format), 0);
+            return TransInt32(buffer, index, 1, format, reverse)[0];
         }
 
         /// <summary>
@@ -310,12 +306,25 @@ namespace Wombat.Infrastructure
         /// <returns>int数组对象</returns>
         public static int[] TransInt32(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            int[] tmp = new int[length];
+            int[] result = new int[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransInt32(buffer, index + 4 * i, format,reverse);
+                byte[] temp = new byte[4];
+
+                if (reverse)
+                {
+                    temp[0] = buffer[3 + index + 4 * i];
+                    temp[1] = buffer[2 + index + 4 * i];
+                    temp[2] = buffer[1 + index + 4 * i];
+                    temp[3] = buffer[0 + index + 4 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 4 * i, temp, 0, 4);
+                }
+                result[i] = BitConverter.ToInt32(ByteTransDataFormat4(temp, 0, format), 0);
             }
-            return tmp;
+            return result;
         }
 
 
@@ -326,18 +335,9 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">索引位置</param>
         /// <returns>uint对象</returns>
-        public static uint TransUInt32(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
+        public static uint TransUInt32(this byte[] buffer, int index = 0, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[4];
-                tmp[0] = buffer[3 + index];
-                tmp[1] = buffer[2 + index];
-                tmp[2] = buffer[1 + index];
-                tmp[3] = buffer[0 + index];
-                buffer = tmp;
-            }
-            return BitConverter.ToUInt32(ByteTransDataFormat4(buffer, index,format), 0);
+            return TransUInt32(buffer, index, 1, format, reverse)[0];
         }
 
         /// <summary>
@@ -349,12 +349,25 @@ namespace Wombat.Infrastructure
         /// <returns>uint数组对象</returns>
         public static uint[] TransUInt32(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            uint[] tmp = new uint[length];
+            uint[] result = new uint[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransUInt32(buffer, index + 4 * i,format,reverse);
+                byte[] temp = new byte[4];
+
+                if (reverse)
+                {
+                    temp[0] = buffer[3 + index + 4 * i];
+                    temp[1] = buffer[2 + index + 4 * i];
+                    temp[2] = buffer[1 + index + 4 * i];
+                    temp[3] = buffer[0 + index + 4 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 4 * i, temp, 0, 4);
+                }
+                result[i] = BitConverter.ToUInt32(ByteTransDataFormat4(temp, 0, format), 0);
             }
-            return tmp;
+            return result;
         }
 
         /// <summary>
@@ -365,21 +378,7 @@ namespace Wombat.Infrastructure
         /// <returns>long对象</returns>
         public static long TransInt64(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[8];
-                tmp[0] = buffer[7 + index];
-                tmp[1] = buffer[6 + index];
-                tmp[2] = buffer[5 + index];
-                tmp[3] = buffer[4 + index];
-                tmp[4] = buffer[3 + index];
-                tmp[5] = buffer[2 + index];
-                tmp[6] = buffer[1 + index];
-                tmp[7] = buffer[0 + index];
-                buffer = tmp;
-            }
-
-            return BitConverter.ToInt64(ByteTransDataFormat8(buffer, index,format), 0);
+            return TransInt64(buffer, index, 1, format, reverse)[0];
         }
 
         /// <summary>
@@ -391,12 +390,28 @@ namespace Wombat.Infrastructure
         /// <returns>long数组对象</returns>
         public static long[] TransInt64(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            long[] tmp = new long[length];
+            long[] result = new long[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransInt64(buffer, index + 8 * i,format,reverse);
+                byte[] temp = new byte[8];
+                if (reverse)
+                {
+                    temp[0] = buffer[7 + index + 8 * i];
+                    temp[1] = buffer[6 + index + 8 * i];
+                    temp[2] = buffer[5 + index + 8 * i];
+                    temp[3] = buffer[4 + index + 8 * i];
+                    temp[4] = buffer[3 + index + 8 * i];
+                    temp[5] = buffer[2 + index + 8 * i];
+                    temp[6] = buffer[1 + index + 8 * i];
+                    temp[7] = buffer[0 + index + 8 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 8 * i, temp, 0, 8);
+                }
+                result[i] = BitConverter.ToInt64(ByteTransDataFormat8(temp, 0, format), 0);
             }
-            return tmp;
+            return result;
         }
 
 
@@ -408,21 +423,7 @@ namespace Wombat.Infrastructure
         /// <returns>ulong对象</returns>
         public static ulong TransUInt64(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[8];
-                tmp[0] = buffer[7 + index];
-                tmp[1] = buffer[6 + index];
-                tmp[2] = buffer[5 + index];
-                tmp[3] = buffer[4 + index];
-                tmp[4] = buffer[3 + index];
-                tmp[5] = buffer[2 + index];
-                tmp[6] = buffer[1 + index];
-                tmp[7] = buffer[0 + index];
-                buffer = tmp;
-            }
-
-            return BitConverter.ToUInt64(ByteTransDataFormat8(buffer, index,format), 0);
+            return TransUInt64(buffer, index, 1, format, reverse)[0];
         }
 
         /// <summary>
@@ -434,12 +435,28 @@ namespace Wombat.Infrastructure
         /// <returns>ulong数组对象</returns>
         public static ulong[] TransUInt64(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            ulong[] tmp = new ulong[length];
+            ulong[] result = new ulong[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransUInt64(buffer, index + 8 * i,format,reverse);
+                byte[] temp = new byte[8];
+                if (reverse)
+                {
+                    temp[0] = buffer[7 + index + 8 * i];
+                    temp[1] = buffer[6 + index + 8 * i];
+                    temp[2] = buffer[5 + index + 8 * i];
+                    temp[3] = buffer[4 + index + 8 * i];
+                    temp[4] = buffer[3 + index + 8 * i];
+                    temp[5] = buffer[2 + index + 8 * i];
+                    temp[6] = buffer[1 + index + 8 * i];
+                    temp[7] = buffer[0 + index + 8 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 8 * i, temp, 0, 8);
+                }
+                result[i] = BitConverter.ToUInt64(ByteTransDataFormat8(temp, 0, format), 0);
             }
-            return tmp;
+            return result;
         }
 
         /// <summary>
@@ -448,19 +465,9 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存对象</param>
         /// <param name="index">索引位置</param>
         /// <returns>float对象</returns>
-        public static float TransFloat(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
+        public static float TransFloat(this byte[] buffer, int index=0, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[4];
-                tmp[0] = buffer[3 + index];
-                tmp[1] = buffer[2 + index];
-                tmp[2] = buffer[1 + index];
-                tmp[3] = buffer[0 + index];
-                buffer = tmp;
-            }
-
-            return BitConverter.ToSingle(ByteTransDataFormat4(buffer, index,format), 0);
+            return TransFloat(buffer, index, 1, format, reverse)[0];
         }
 
         /// <summary>
@@ -473,12 +480,26 @@ namespace Wombat.Infrastructure
         public static float[] TransFloat(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
 
-            float[] tmp = new float[length];
+            float[] reuslt = new float[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransFloat(buffer, index + 4 * i,format,reverse);
+                byte[] temp = new byte[4];
+                if (reverse)
+                {
+                    temp[0] = buffer[3 + index + 4 * i];
+                    temp[1] = buffer[2 + index + 4 * i];
+                    temp[2] = buffer[1 + index + 4 * i];
+                    temp[3] = buffer[0 + index + 4 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 4 * i, temp, 0, 4);
+
+                }
+                reuslt[i] = BitConverter.ToSingle(ByteTransDataFormat4(temp, 0, format), 0);
+
             }
-            return tmp;
+            return reuslt;
         }
 
 
@@ -488,25 +509,10 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存对象</param>
         /// <param name="index">索引位置</param>
         /// <returns>double对象</returns>
-        public static double TransDouble(this byte[] buffer, int index, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
+        public static double TransDouble(this byte[] buffer, int index=0, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            if (reverse)
-            {
-                byte[] tmp = new byte[8];
-                tmp[0] = buffer[7 + index];
-                tmp[1] = buffer[6 + index];
-                tmp[2] = buffer[5 + index];
-                tmp[3] = buffer[4 + index];
-                tmp[4] = buffer[3 + index];
-                tmp[5] = buffer[2 + index];
-                tmp[6] = buffer[1 + index];
-                tmp[7] = buffer[0 + index];
-                buffer = tmp;
-            }
-
-            return BitConverter.ToDouble(ByteTransDataFormat8(buffer, index,format), 0);
+           return TransDouble(buffer, index, 1, format, reverse)[0];
         }
-
         /// <summary>
         /// 从缓存中提取double数组结果
         /// </summary>
@@ -516,12 +522,28 @@ namespace Wombat.Infrastructure
         /// <returns>double数组对象</returns>
         public static double[] TransDouble(this byte[] buffer, int index, int length, EndianFormat format = EndianFormat.ABCD, bool reverse = false)
         {
-            double[] tmp = new double[length];
+            double[] result = new double[length];
             for (int i = 0; i < length; i++)
             {
-                tmp[i] = TransDouble(buffer, index + 8 * i,format,reverse);
+                byte[] temp = new byte[8];
+                if (reverse)
+                {
+                    temp[0] = buffer[7 + index + 8 * i];
+                    temp[1] = buffer[6 + index + 8 * i];
+                    temp[2] = buffer[5 + index + 8 * i];
+                    temp[3] = buffer[4 + index + 8 * i];
+                    temp[4] = buffer[3 + index + 8 * i];
+                    temp[5] = buffer[2 + index + 8 * i];
+                    temp[6] = buffer[1 + index + 8 * i];
+                    temp[7] = buffer[0 + index + 8 * i];
+                }
+                else
+                {
+                    Array.Copy(buffer, index + 8 * i, temp, 0, 8);
+                }
+                result[i]=  BitConverter.ToDouble(ByteTransDataFormat8(temp, 0, format), 0);
             }
-            return tmp;
+            return result;
         }
 
 
@@ -603,9 +625,9 @@ namespace Wombat.Infrastructure
             {
                 if(reverse)
                 {
-                    byte[] tmp = BitConverter.GetBytes(values[i]);
-                    Array.Reverse(tmp);
-                    tmp.CopyTo(buffer, 2 * i);
+                    byte[] temp = BitConverter.GetBytes(values[i]);
+                    Array.Reverse(temp);
+                    temp.CopyTo(buffer, 2 * i);
 
                 }
                 else

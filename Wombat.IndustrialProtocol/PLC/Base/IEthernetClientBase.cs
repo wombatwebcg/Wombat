@@ -141,10 +141,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<bool> ReadBoolean(string address)
         {
-            var readResut = Read(address, 1, isBit: true);
-            var result = new OperationResult<bool>(readResut);
+            var readResult = Read(address, 1, isBit: true);
+            var result = new OperationResult<bool>(readResult);
             if (result.IsSuccess)
-                result.Value = BitConverter.ToBoolean(readResut.Value, 0);
+                result.Value = BitConverter.ToBoolean(readResult.Value, 0);
             return result.EndTime();
         }
 
@@ -156,10 +156,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<bool[]> ReadBoolean(string address,int length)
         {
-            var readResut = Read(address, length, isBit: true);
-            var result = new OperationResult<bool[]>(readResut);
+            var readResult = Read(address, length, isBit: true);
+            var result = new OperationResult<bool[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransBool(0,length);
+                result.Value = readResult.Value.TransBool(0,length);
             return result.EndTime();
         }
 
@@ -193,11 +193,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<short> ReadInt16(string address)
         {
-            var readResut = Read(address, 2);
-            var result = new OperationResult<short>(readResut);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToInt16(readResut.Value, 0);
-            return result.EndTime();
+            var result = ReadInt16(address, 1);
+            return new OperationResult<short>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -207,10 +204,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<short[]> ReadInt16(string address,int length)
         {
-            var readResut = Read(address, 2*length);
-            var result = new OperationResult<short[]>(readResut);
+            var readResult = Read(address, 2*length);
+            var result = new OperationResult<short[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransInt16(0,length ,IsReverse);
+                result.Value = readResult.Value.TransInt16(0,length ,IsReverse);
             return result.EndTime();
         }
 
@@ -243,11 +240,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<ushort> ReadUInt16(string address)
         {
-            var readResut = Read(address, 2);
-            var result = new OperationResult<ushort>(readResut);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToUInt16(readResut.Value, 0);
-            return result.EndTime();
+            var result = ReadUInt16(address, 1);
+            return new OperationResult<ushort>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -257,10 +251,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<ushort[]> ReadUInt16(string address, int length)
         {
-            var readResut = Read(address, 2 * length);
-            var result = new OperationResult<ushort[]>(readResut);
+            var readResult = Read(address, 2 * length);
+            var result = new OperationResult<ushort[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransUInt16(0, length, IsReverse);
+                result.Value = readResult.Value.TransUInt16(0, length, IsReverse);
             return result.EndTime();
         }
 
@@ -294,11 +288,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<int> ReadInt32(string address)
         {
-            var readResut = Read(address, 4);
-            var result = new OperationResult<int>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransInt32(0, DataFormat, IsReverse);
-            return result.EndTime();
+            var result = ReadInt32(address, 1);
+            return new OperationResult<int>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -308,10 +299,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<int[]> ReadInt32(string address,int length)
         {
-            var readResut = Read(address, 4*length);
-            var result = new OperationResult<int[]>(readResut);
+            var readResult = Read(address, 4*length);
+            var result = new OperationResult<int[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransInt32(0,length ,DataFormat, IsReverse);
+                result.Value = readResult.Value.TransInt32(0,length ,DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -345,10 +336,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<uint> ReadUInt32(string address)
         {
-            var readResut = Read(address, 4);
-            var result = new OperationResult<uint>(readResut);
+            var readResult = Read(address, 4);
+            var result = new OperationResult<uint>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransUInt32(0, DataFormat, IsReverse);
+                result.Value = readResult.Value.TransUInt32(0, DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -360,10 +351,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<uint[]> ReadUInt32(string address,int length)
         {
-            var readResut = Read(address, 4 * length);
-            var result = new OperationResult<uint[]>(readResut);
+            var readResult = Read(address, 4 * length);
+            var result = new OperationResult<uint[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransUInt32(0, length, DataFormat, IsReverse);
+                result.Value = readResult.Value.TransUInt32(0, length, DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -398,11 +389,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<long> ReadInt64(string address)
         {
-            var readResut = Read(address, 8);
-            var result = new OperationResult<long>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransInt64(0,DataFormat,IsReverse);
-            return result.EndTime();
+            var result = ReadInt64(address, 1);
+            return new OperationResult<long>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -412,10 +400,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<long[]> ReadInt64(string address,int length)
         {
-            var readResut = Read(address, 8*length);
-            var result = new OperationResult<long[]>(readResut);
+            var readResult = Read(address, 8*length);
+            var result = new OperationResult<long[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransInt64(0,length ,DataFormat, IsReverse);
+                result.Value = readResult.Value.TransInt64(0,length ,DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -449,11 +437,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<ulong> ReadUInt64(string address)
         {
-            var readResut = Read(address, 8);
-            var result = new OperationResult<ulong>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransUInt64(0, DataFormat, IsReverse);
-            return result.EndTime();
+            var result = ReadUInt64(address, 1);
+            return new OperationResult<ulong>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -463,10 +448,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<ulong[]> ReadUInt64(string address,int length)
         {
-            var readResut = Read(address, 8*length);
-            var result = new OperationResult<ulong[]>(readResut);
+            var readResult = Read(address, 8*length);
+            var result = new OperationResult<ulong[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransUInt64(0,length ,DataFormat, IsReverse);
+                result.Value = readResult.Value.TransUInt64(0,length ,DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -501,11 +486,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<float> ReadFloat(string address)
         {
-            var readResut = Read(address, 4);
-            var result = new OperationResult<float>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransFloat(0, DataFormat, IsReverse);
-            return result.EndTime();
+            var result = ReadFloat(address, 1);
+            return new OperationResult<float>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -515,10 +497,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<float[]> ReadFloat(string address,int length)
         {
-            var readResut = Read(address, 4*length);
-            var result = new OperationResult<float[]>(readResut);
+            var readResult = Read(address, 4*length);
+            var result = new OperationResult<float[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransFloat(0, length, DataFormat, IsReverse);
+                result.Value = readResult.Value.TransFloat(0, length, DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -552,11 +534,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<double> ReadDouble(string address)
         {
-            var readResut = Read(address, 8);
-            var result = new OperationResult<double>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransDouble(0, DataFormat, IsReverse);
-            return result.EndTime();
+            var result = ReadDouble(address, 1);
+            return new OperationResult<double>(result.Value[0]).EndTime();
         }
 
         /// <summary>
@@ -566,10 +545,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<double[]> ReadDouble(string address,int length)
         {
-            var readResut = Read(address, 8*length);
-            var result = new OperationResult<double[]>(readResut);
+            var readResult = Read(address, 8*length);
+            var result = new OperationResult<double[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransDouble(0,length, DataFormat, IsReverse);
+                result.Value = readResult.Value.TransDouble(0,length, DataFormat, IsReverse);
             return result.EndTime();
         }
 
@@ -598,10 +577,10 @@ namespace Wombat.IndustrialProtocol.PLC
 
         public OperationResult<string> ReadString(string address, int length)
         {
-            var readResut = Read(address, 4 * length);
-            var result = new OperationResult<string>(readResut);
+            var readResult = Read(address, 4 * length);
+            var result = new OperationResult<string>(readResult);
             if (result.IsSuccess)
-                result.Value = readResut.Value.TransString(0, length, encoding:Encoding.ASCII);
+                result.Value = readResult.Value.TransString(0, length, encoding:Encoding.ASCII);
             return result.EndTime();
         }
 
@@ -661,7 +640,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult Write(string address, short value)
         {
-            return Write(address, value.TransByte());
+            return Write(address, value.TransByte(IsReverse) );
         }
 
         /// <summary>
@@ -672,7 +651,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult Write(string address, short[] value)
         {
-            return Write(address, value.TransByte());
+            return Write(address, value.TransByte(IsReverse));
         }
 
 
@@ -684,7 +663,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult Write(string address, ushort value)
         {
-            return Write(address, BitConverter.GetBytes(value));
+            return Write(address, value.TransByte(IsReverse));
         }
 
         /// <summary>
@@ -695,7 +674,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult Write(string address, ushort[] value)
         {
-            return Write(address, value.TransByte());
+            return Write(address, value.TransByte(IsReverse));
         }
 
         /// <summary>

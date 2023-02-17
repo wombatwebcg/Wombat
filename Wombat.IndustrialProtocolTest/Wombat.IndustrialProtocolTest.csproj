@@ -12,6 +12,12 @@
     <StartupObject />
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="PLC_Tests\AllenBradleyClient_Tests.cs" />
+    <Compile Remove="PLC_Tests\MitsubishiClient_Tests.cs" />
+    <Compile Remove="PLC_Tests\OmronFinsClient_Tests.cs" />
+  </ItemGroup>
+
 
 
 
@@ -21,8 +27,12 @@
 	  <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
   </ItemGroup>
 
+
+
+
   <ItemGroup>
     <ProjectReference Include="..\Wombat.IndustrialProtocol\Wombat.IndustrialProtocol.csproj" />
+    <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

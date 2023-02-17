@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Text;
+using Wombat.IndustrialProtocol.Modbus;
 using Wombat.IndustrialProtocol.Models;
-using Wombat.Infrastructure;
 
-namespace Wombat.IndustrialProtocol.Modbus
+namespace Wombat.IndustrialProtocol.PLC
 {
-    public abstract class ModbusBase : BaseMessageModel, IModbusClient
+    public  abstract class PLCByModbusTcpBase : ModbusTcpClient
     {
+        protected PLCByModbusTcpBase(IPEndPoint ipAndPoint) : base(ipAndPoint)
+        {
+        }
 
-
-
-
+        protected PLCByModbusTcpBase(string ip, int port) : base(ip, port)
+        {
+        }
         #region  Read 读取
         /// <summary>
         /// 读取数据
@@ -22,7 +25,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="readLength">读取长度</param>
         /// <returns></returns>
-        public abstract  OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false);
+        public  new OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.Read(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Int16
@@ -31,23 +35,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<short> ReadInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,stationNumber:stationNumber,functionCode: functionCode,isPlcAddress: isPlcAddress);
-            var result = new OperationResult<short>(readResult);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToInt16(readResult.Value, 0);
-            return result.EndTime();
-        }
+        public new OperationResult<short> ReadInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+          => base.ReadInt16(address, stationNumber, functionCode, isPlcAddress);
 
-        public OperationResult<short[]> ReadInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<short[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt16(0, readLength,true);
-            return result.EndTime();
-        }
+        public new OperationResult<short[]> ReadInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+          => base.ReadInt16(address,readLength ,stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -59,54 +51,12 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="left">按位取值从左边开始取</param>
         /// <returns></returns>
-        public OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = false)
-        {
-            string[] adds = address.Split('.');
-            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<short>(readResult);
-            if (result.IsSuccess)
-            {
-                result.Value = BitConverter.ToInt16(readResult.Value, 0);
-                if (adds.Length >= 2)
-                {
-                    var index = int.Parse(adds[1].Trim());
-                    var binaryArray = result.Value.TransByte().TransBool(0, 16);
-                    if (left)
-                    {
-                        var length = binaryArray.Length - 16;
-                        result.Value = short.Parse(binaryArray[length + index].ToString());
-                    }
-                    else
-                        result.Value = short.Parse(binaryArray[binaryArray.Length - 1 - index].ToString());
-                }
-            }
-            return result.EndTime();
-        }
+        public new OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
+          => base.ReadInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
 
-        /// <summary>
-        /// 读取UInt16
-        /// </summary>
-        /// <param name="address">寄存器起始地址</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        /// <returns></returns>
-        public OperationResult<ushort> ReadUInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ushort>(readResult);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToUInt16(readResult.Value, 0);
-            return result.EndTime();
-        }
 
-        public OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ushort[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt16(0, readLength, true);
-            return result.EndTime();
-        }
+        public new OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+          => base.ReadUInt16(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 按位的方式读取
@@ -116,29 +66,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         /// <param name="left">按位取值从左边开始取</param>
         /// <returns></returns>
-        public OperationResult<ushort> ReadUInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = false)
-        {
-            string[] adds = address.Split('.');
-            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ushort>(readResult);
-            if (result.IsSuccess)
-            {
-                result.Value = BitConverter.ToUInt16(readResult.Value, 0);
-                if (adds.Length >= 2)
-                {
-                    var index = int.Parse(adds[1].Trim());
-                    var binaryArray = DataConvert.IntToBinaryArray(result.Value, 16);
-                    if (left)
-                    {
-                        var length = binaryArray.Length - 16;
-                        result.Value = ushort.Parse(binaryArray[length + index].ToString());
-                    }
-                    else
-                        result.Value = ushort.Parse(binaryArray[binaryArray.Length - 1 - index].ToString());
-                }
-            }
-            return result.EndTime();
-        }
+        public new OperationResult<ushort> ReadUInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
+            => base.ReadUInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
 
         /// <summary>
         /// 读取Int32
@@ -147,14 +76,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<int> ReadInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<int>(readResult);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToInt32(readResult.Value, 0);
-            return result.EndTime();
-        }
+        public new OperationResult<int> ReadInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadInt32(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Int32
@@ -163,15 +86,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<int[]> ReadInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, (ushort)(2*readLength), stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<int[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt32(0,length: readLength,format:DataFormat,reverse:IsReverse);
-            return result.EndTime();
-        }
-
+        public new OperationResult<int[]> ReadInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadInt32(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取UInt32
@@ -180,14 +96,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<uint> ReadUInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<uint>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt32(0,format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<uint> ReadUInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadUInt32(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取UInt32
@@ -196,14 +106,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<uint[]> ReadUInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 2* readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<uint[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt32(0,length: readLength, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<uint[]> ReadUInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadUInt32(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Int64
@@ -212,14 +116,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<long> ReadInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<long>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt64(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<long> ReadInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadInt64(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Int64
@@ -228,14 +126,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<long[]> ReadInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<long[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt64(0,readLength, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<long[]> ReadInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadInt64(address,readLength ,stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -245,14 +137,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<ulong> ReadUInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ulong>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt64(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<ulong> ReadUInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            =>base.ReadUInt64(address, stationNumber, functionCode, isPlcAddress);
+
         /// <summary>
         /// 读取UInt64
         /// </summary>
@@ -260,14 +147,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<ulong[]> ReadUInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 4 * readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ulong[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt64(0, readLength, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<ulong[]> ReadUInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadUInt64(address,readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Float
@@ -276,14 +157,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<float> ReadFloat(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<float>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransFloat(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<float> ReadFloat(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadFloat(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Float
@@ -292,14 +167,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<float[]> ReadFloat(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 2*readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<float[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransFloat(0,readLength ,format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<float[]> ReadFloat(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadFloat(address,readLength,stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -309,14 +178,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<double> ReadDouble(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<double>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransDouble(0,format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<double> ReadDouble(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadDouble(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Double
@@ -325,14 +188,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<double[]> ReadDouble(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<double[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransDouble(0,readLength, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
-        }
+        public new OperationResult<double[]> ReadDouble(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+            => base.ReadDouble(address,readLength ,stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -344,14 +201,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<bool> ReadCoil(string address, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool>(readResult);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToBoolean(readResult.Value, 0);
-            return result.EndTime();
-        }
+        public new OperationResult<bool> ReadCoil(string address, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = true)
+            => base.ReadCoil(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取线圈
@@ -360,14 +211,8 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public OperationResult<bool[]> ReadCoil(string address, int readLength, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = false)
-        {
-            var readResult = Read(address: address,readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool[]>(readResult);
-            if (result.IsSuccess)
-                result.Value = readResult.Value.TransBool(0,readLength);
-            return result.EndTime();
-        }
+        public new OperationResult<bool[]> ReadCoil(string address, int readLength, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = true)
+            => base.ReadCoil(address,readLength ,stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -378,12 +223,12 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public OperationResult<bool> ReadDiscrete(string address, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = false)
+        public new OperationResult<bool> ReadDiscrete(string address, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = true)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool>(readResult);
+            var readResut = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
+            var result = new OperationResult<bool>(readResut);
             if (result.IsSuccess)
-                result.Value = BitConverter.ToBoolean(readResult.Value, 0);
+                result.Value = BitConverter.ToBoolean(readResut.Value, 0);
             return result.EndTime();
         }
 
@@ -394,12 +239,12 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public OperationResult<bool[]> ReadDiscrete(string address, int readLength, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = false)
+        public new OperationResult<bool[]> ReadDiscrete(string address, int readLength, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = true)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool[]>(readResult);
+            var readResut = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
+            var result = new OperationResult<bool[]>(readResut);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransBool(0, readLength);
+                result.Value = readResut.Value.TransBool(0, readLength);
             return result.EndTime();
         }
 
@@ -412,7 +257,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<short> ReadInt16(string beginAddress, string address, byte[] values)
+        public new OperationResult<short> ReadInt16(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -422,7 +267,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 var byteArry = values.Skip(interval * 2).Take(2).ToArray();
                 return new OperationResult<short>
                 {
-                    Value = byteArry.TransInt16(0,IsReverse)
+                    Value = byteArry.TransInt16(0, IsReverse)
                 };
             }
             catch (Exception ex)
@@ -437,7 +282,7 @@ namespace Wombat.IndustrialProtocol.Modbus
 
 
 
-        public OperationResult<short> ReadInt16(int beginAddress, int address, byte[] values)
+        public new OperationResult<short> ReadInt16(int beginAddress, int address, byte[] values)
         {
             return ReadInt16(beginAddress.ToString(), address.ToString(), values);
         }
@@ -449,7 +294,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<ushort> ReadUInt16(string beginAddress, string address, byte[] values)
+        public new OperationResult<ushort> ReadUInt16(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -459,7 +304,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 var byteArry = values.Skip(interval * 2).Take(2).Reverse().ToArray();
                 return new OperationResult<ushort>
                 {
-                    Value = byteArry.TransUInt16(0,IsReverse)
+                    Value = byteArry.TransUInt16(0, IsReverse)
                 };
             }
             catch (Exception ex)
@@ -472,7 +317,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<ushort> ReadUInt16(int beginAddress, int address, byte[] values)
+        public new OperationResult<ushort> ReadUInt16(int beginAddress, int address, byte[] values)
         {
             return ReadUInt16(beginAddress.ToString(), address.ToString(), values);
         }
@@ -484,7 +329,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<int> ReadInt32(string beginAddress, string address, byte[] values)
+        public new OperationResult<int> ReadInt32(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -495,7 +340,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray();
                 return new OperationResult<int>
                 {
-                    Value = byteArry.TransInt32(0,DataFormat,IsReverse)
+                    Value = byteArry.TransInt32(0, DataFormat, IsReverse)
                 };
             }
             catch (Exception ex)
@@ -508,7 +353,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<int> ReadInt32(int beginAddress, int address, byte[] values)
+        public new OperationResult<int> ReadInt32(int beginAddress, int address, byte[] values)
         {
             return ReadInt32(beginAddress.ToString(), address.ToString(), values);
         }
@@ -520,7 +365,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<uint> ReadUInt32(string beginAddress, string address, byte[] values)
+        public new OperationResult<uint> ReadUInt32(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -544,7 +389,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<uint> ReadUInt32(int beginAddress, int address, byte[] values)
+        public new OperationResult<uint> ReadUInt32(int beginAddress, int address, byte[] values)
         {
             return ReadUInt32(beginAddress.ToString(), address.ToString(), values);
         }
@@ -556,7 +401,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<long> ReadInt64(string beginAddress, string address, byte[] values)
+        public new OperationResult<long> ReadInt64(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -580,7 +425,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<long> ReadInt64(int beginAddress, int address, byte[] values)
+        public new OperationResult<long> ReadInt64(int beginAddress, int address, byte[] values)
         {
             return ReadInt64(beginAddress.ToString(), address.ToString(), values);
         }
@@ -592,7 +437,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<ulong> ReadUInt64(string beginAddress, string address, byte[] values)
+        public new OperationResult<ulong> ReadUInt64(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -616,7 +461,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<ulong> ReadUInt64(int beginAddress, int address, byte[] values)
+        public new OperationResult<ulong> ReadUInt64(int beginAddress, int address, byte[] values)
         {
             return ReadUInt64(beginAddress.ToString(), address.ToString(), values);
         }
@@ -628,7 +473,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<float> ReadFloat(string beginAddress, string address, byte[] values)
+        public new OperationResult<float> ReadFloat(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -652,7 +497,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<float> ReadFloat(int beginAddress, int address, byte[] values)
+        public new OperationResult<float> ReadFloat(int beginAddress, int address, byte[] values)
         {
             return ReadFloat(beginAddress.ToString(), address.ToString(), values);
         }
@@ -664,7 +509,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<double> ReadDouble(string beginAddress, string address, byte[] values)
+        public new OperationResult<double> ReadDouble(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -688,7 +533,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<double> ReadDouble(int beginAddress, int address, byte[] values)
+        public new OperationResult<double> ReadDouble(int beginAddress, int address, byte[] values)
         {
             return ReadDouble(beginAddress.ToString(), address.ToString(), values);
         }
@@ -700,7 +545,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<bool> ReadCoil(string beginAddress, string address, byte[] values)
+        public new OperationResult<bool> ReadCoil(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -727,7 +572,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<bool> ReadCoil(int beginAddress, int address, byte[] values)
+        public new OperationResult<bool> ReadCoil(int beginAddress, int address, byte[] values)
         {
             return ReadCoil(beginAddress.ToString(), address.ToString(), values);
         }
@@ -739,7 +584,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="address">读取地址</param>
         /// <param name="values">批量读取的值</param>
         /// <returns></returns>
-        public OperationResult<bool> ReadDiscrete(string beginAddress, string address, byte[] values)
+        public new OperationResult<bool> ReadDiscrete(string beginAddress, string address, byte[] values)
         {
             if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
                 throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
@@ -766,7 +611,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
         }
 
-        public OperationResult<bool> ReadDiscrete(int beginAddress, int address, byte[] values)
+        public new OperationResult<bool> ReadDiscrete(int beginAddress, int address, byte[] values)
         {
             return ReadDiscrete(beginAddress.ToString(), address.ToString(), values);
         }
@@ -930,7 +775,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="addresses"></param>
         /// <param name="retryCount">如果读取异常，重试次数</param>
         /// <returns></returns>
-        public OperationResult<List<ModbusOutput>> BatchRead(List<ModbusInput> addresses, uint retryCount = 1)
+        public new OperationResult<List<ModbusOutput>> BatchRead(List<ModbusInput> addresses, uint retryCount = 1)
         {
             var result = BatchRead(addresses);
             for (int i = 0; i < retryCount; i++)
@@ -957,7 +802,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
-        public abstract OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false);
+        public new abstract OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true);
 
 
         /// <summary>
@@ -967,7 +812,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
-        public abstract OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false);
+        public new abstract OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true);
 
         /// <summary>
         /// 写入
@@ -977,7 +822,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public abstract OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false);
+        public new abstract OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true);
 
         /// <summary>
         /// 写入
@@ -986,38 +831,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode,isPlcAddress);
-        }
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">寄存器地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, short[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode,isPlcAddress);
-        }
-
-
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">寄存器地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
         }
-
         /// <summary>
         /// 写入
         /// </summary>
@@ -1025,7 +843,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, ushort[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, short[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1039,9 +857,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, int value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
-            var values = value.TransByte(DataFormat,IsReverse);
+            var values = value.TransByte(IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
         }
 
@@ -1052,37 +870,9 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, int[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, ushort[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
-            var values = value.TransByte(DataFormat,IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
-
-
-
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">寄存器地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, uint value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
-
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">寄存器地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, uint[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
+            var values = value.TransByte(IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
         }
 
@@ -1094,7 +884,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, long value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, int value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1107,7 +897,22 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, long[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, int[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            var values = value.TransByte(DataFormat, IsReverse);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+        }
+
+
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        public new OperationResult Write(string address, uint value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1120,7 +925,21 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, ulong value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, uint[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            var values = value.TransByte(DataFormat, IsReverse);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+        }
+
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        public new OperationResult Write(string address, long value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1133,7 +952,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, ulong[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, long[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1146,19 +965,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, float value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address">寄存器地址</param>
-        /// <param name="value">写入的值</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, float[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, ulong value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1171,7 +978,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, double value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, ulong[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1184,7 +991,45 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, double[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public new OperationResult Write(string address, float value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            var values = value.TransByte(DataFormat, IsReverse);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+        }
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        public new OperationResult Write(string address, float[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            var values = value.TransByte(DataFormat, IsReverse);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+        }
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        public new OperationResult Write(string address, double value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            var values = value.TransByte(DataFormat, IsReverse);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+        }
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="value">写入的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        public new OperationResult Write(string address, double[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
             var values = value.TransByte(DataFormat, IsReverse);
             return Write(address, values, stationNumber, functionCode, isPlcAddress);
@@ -1192,6 +1037,7 @@ namespace Wombat.IndustrialProtocol.Modbus
 
 
         #endregion
+
 
     }
 }
