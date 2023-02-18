@@ -21,6 +21,7 @@ namespace Wombat.IndustrialProtocol.PLC
         protected const int BufferSize = 4096;
 
 
+
         /// <summary>
         /// Socket读取
         /// </summary>
@@ -92,12 +93,21 @@ namespace Wombat.IndustrialProtocol.PLC
                     //如果出现异常，则进行一次重试         
                     var conentOperationResult = Connect();
                     if (!conentOperationResult.IsSuccess)
+                    {
                         return new OperationResult<byte[]>(conentOperationResult);
 
-                    return SendPackageSingle(command);
+                    }
+                    else
+                    {
+                        result = SendPackageSingle(command); ;
+                        return result.EndTime();
+                    }
                 }
                 else
-                    return result;
+                {
+                    return result.EndTime();
+
+                }
             }
             catch (Exception ex)
             {
@@ -107,13 +117,18 @@ namespace Wombat.IndustrialProtocol.PLC
                     //如果出现异常，则进行一次重试                
                     var conentOperationResult = Connect();
                     if (!conentOperationResult.IsSuccess)
+                    {
                         return new OperationResult<byte[]>(conentOperationResult);
-
-                    return SendPackageSingle(command);
+                    }
+                    else
+                    {
+                      var  result = SendPackageSingle(command); ;
+                        return result.EndTime();
+                    }
                 }
                 catch (Exception ex2)
                 {
-                    OperationResult<byte[]> result = new OperationResult<byte[]>();
+                    var result = new OperationResult<byte[]>();
                     result.IsSuccess = false;
                     result.Message = ex2.Message;
                     result.AddMessage2List();
@@ -139,13 +154,10 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public OperationResult<bool> ReadBoolean(string address)
+        public virtual OperationResult<bool> ReadBoolean(string address)
         {
-            var readResult = Read(address, 1, isBit: true);
-            var result = new OperationResult<bool>(readResult);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToBoolean(readResult.Value, 0);
-            return result.EndTime();
+            var result = ReadBoolean(address, 1);
+            return new OperationResult<bool>(result.Value[0]).EndTime();
         }
 
 
@@ -154,8 +166,9 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public OperationResult<bool[]> ReadBoolean(string address,int length)
+        public virtual OperationResult<bool[]> ReadBoolean(string address,int length)
         {
+            //int reallength = (int)Math.Ceiling(length*1.0 /8);
             var readResult = Read(address, length, isBit: true);
             var result = new OperationResult<bool[]>(readResult);
             if (result.IsSuccess)

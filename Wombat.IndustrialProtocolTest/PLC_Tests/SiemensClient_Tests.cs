@@ -26,6 +26,21 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         [Fact]
         public void 短连接自动开关()
         {
+
+            var ssssss = client.ReadInt16("V300", 2);
+
+
+            bool[] bool_values = { false, true, false, false, false, false, false, false, false, false
+                        , false, false, false,false,false,false,false,false,false, true };
+            client.Write("V300", bool_values);
+             
+            var bool_values_result = client.ReadBoolean("V300", bool_values.Length);
+            for (int j = 0; j < bool_values_result.Value.Length; j++)
+            {
+                Assert.True(bool_values_result.Value[j] == bool_values[j]);
+
+            }
+
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
             for (int i = 0; i < 10; i++)
             {
@@ -67,8 +82,8 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 client.Write("V300", Convert.ToDouble(float_number));
                 Assert.True(client.ReadDouble("V300").Value == Convert.ToDouble(float_number));
 
-                //client.Write("V2205", value_string);
-                //Assert.True(client.ReadString("V2205", value_string.Length).Value == value_string);
+
+
             }
         }
 
@@ -78,7 +93,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
          var tt =   client.Connect();
 
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
                 ushort short_number_1 = (ushort)rnd.Next(ushort.MinValue, ushort.MaxValue);

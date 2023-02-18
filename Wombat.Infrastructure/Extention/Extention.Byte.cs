@@ -161,7 +161,7 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">位的索引</param>
         /// <returns>bool对象</returns>
-        public static bool TransBool(this byte[] buffer, int index)
+        public static bool TransBool(this byte[] buffer, int index=0)
         {
             return ((buffer[index] & 0x01) == 0x01);
         }
@@ -176,9 +176,15 @@ namespace Wombat.Infrastructure
         /// <returns>bool数组</returns>
         public static bool[] TransBool(this byte[] buffer, int index, int length)
         {
-            byte[] tmp = new byte[length];
-            Array.Copy(buffer, index, tmp, 0, length);
-            return ByteToBoolArray(tmp, length * 8);
+            byte[] temp = new byte[length];
+            int bufferLength = (int)Math.Ceiling((buffer.Length - index) * 1.0 / 8);
+            int realLength = (int)Math.Ceiling((length) * 1.0 / 8);
+            if (bufferLength < realLength)
+            {
+                realLength = bufferLength;
+            }
+            Array.Copy(buffer, index, temp, 0, realLength);
+            return ByteToBoolArray(buffer, length);
         }
 
         /// <summary>

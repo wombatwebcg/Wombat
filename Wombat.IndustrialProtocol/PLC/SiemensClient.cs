@@ -119,7 +119,9 @@ namespace Wombat.IndustrialProtocol.PLC
                 IAsyncResult connectResult = _socket.BeginConnect(IpEndPoint, null, null);
                 //阻塞当前线程           
                 if (!connectResult.AsyncWaitHandle.WaitOne(Timeout))
+                {
                     throw new TimeoutException("连接超时");
+                }
                 _socket.EndConnect(connectResult);
 
                 var Command1 = SiemensConstant.Command1;
@@ -159,13 +161,17 @@ namespace Wombat.IndustrialProtocol.PLC
 
                 var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
                 if (!socketReadResul.IsSuccess)
+                {
                     return socketReadResul;
+                }
                 var head1 = socketReadResul.Value;
 
 
                 socketReadResul = SocketRead(_socket, GetContentLength(head1));
                 if (!socketReadResul.IsSuccess)
+                {
                     return socketReadResul;
+                }
                 var content1 = socketReadResul.Value;
 
                 result.Response = string.Join(" ", head1.Concat(content1).Select(t => t.ToString("X2")));
@@ -176,12 +182,17 @@ namespace Wombat.IndustrialProtocol.PLC
 
                 socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
                 if (!socketReadResul.IsSuccess)
+                {
                     return socketReadResul;
+                }
                 var head2 = socketReadResul.Value;
 
                 socketReadResul = SocketRead(_socket, GetContentLength(head2));
                 if (!socketReadResul.IsSuccess)
+                {
                     return socketReadResul;
+
+                }
                 var content2 = socketReadResul.Value;
 
                 result.Response2 = string.Join(" ", head2.Concat(content2).Select(t => t.ToString("X2")));
@@ -225,7 +236,6 @@ namespace Wombat.IndustrialProtocol.PLC
         public override OperationResult<byte[]> SendPackageSingle(byte[] command)
         {
             //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            _advancedHybirdLock.Enter();
             OperationResult<byte[]> result = new OperationResult<byte[]>();
             try
             {
@@ -241,7 +251,6 @@ namespace Wombat.IndustrialProtocol.PLC
                 var dataPackage = socketReadResul.Value;
 
                 result.Value = headPackage.Concat(dataPackage).ToArray();
-                _advancedHybirdLock.Leave();
                 return result.EndTime();
             }
             catch (Exception ex)
@@ -249,11 +258,43 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.IsSuccess = false;
                 result.Message = ex.Message;
                 result.AddMessage2List();
-                _advancedHybirdLock.Leave();
                 return result.EndTime();
             }
 
         }
+
+
+        /// <summary>
+        /// 读取Boolean
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        public override OperationResult<bool> ReadBoolean(string address)
+        {
+            var readResult = Read(address, 1, isBit: true);
+            var result = new OperationResult<bool>(readResult);
+            if (result.IsSuccess)
+                result.Value = readResult.Value.TransBool(0, 1)[0];
+            return result.EndTime();
+        }
+
+
+
+        /// <summary>
+        /// 读取Boolean
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        public override OperationResult<bool[]> ReadBoolean(string address, int length)
+        {
+            var readResult = Read(address, length*2, isBit: true);
+            var result = new OperationResult<bool[]>(readResult);
+            if (result.IsSuccess)
+                result.Value = readResult.Value.TransBool(0, length);
+            return result.EndTime();
+        }
+
+
 
         /// <summary>
         /// 读取字节数组
@@ -264,12 +305,14 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public override OperationResult<byte[]> Read(string address, int length, bool isBit = false)
         {
+            _advancedHybirdLock.Enter();
             if (!_socket?.Connected ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
                 {
                     connectResult.Message = $"读取{address}失败，{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
                     return new OperationResult<byte[]>(connectResult);
                 }
             }
@@ -287,6 +330,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 if (!sendResult.IsSuccess)
                 {
                     sendResult.Message = $"读取{address}失败，{ sendResult.Message}";
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
                 }
                 var dataPackage = sendResult.Value;
@@ -317,6 +361,7 @@ namespace Wombat.IndustrialProtocol.PLC
                         result.Message = $"读取{address}失败，异常代码[{21}]:{dataPackage[21]}";
                     }
                 }
+ 
             }
             catch (SocketException ex)
             {
@@ -341,8 +386,9 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect) Disconnect();
+                if (IsConnect&!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -355,6 +401,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public override OperationResult Write(string address, byte[] data, bool isBit = false)
         {
+            _advancedHybirdLock.Enter();
             if (!_socket?.Connected ?? true)
             {
                 var connectResult = Connect();
@@ -373,7 +420,10 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return sendResult;
+                }
 
                 var dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
@@ -420,6 +470,7 @@ namespace Wombat.IndustrialProtocol.PLC
             {
                 if (IsConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -942,6 +993,10 @@ namespace Wombat.IndustrialProtocol.PLC
             for (int i = 0; i < datas.Length; i++)
             {
                 var data = datas[i];
+                if (data.ReadWriteBit & data.ReadWriteLength >= 2)
+                {
+                    data.ReadWriteBit = false;
+                }
                 command[19 + i * 12] = 0x12;//variable specification
                 command[20 + i * 12] = 0x0A;//Length of following address specification
                 command[21 + i * 12] = 0x10;//Syntax Id: S7ANY 
@@ -1007,6 +1062,12 @@ namespace Wombat.IndustrialProtocol.PLC
             for (int i = 0; i < writes.Length; i++)
             {
                 var write = writes[i];
+                if (write.ReadWriteBit & (write.WriteData.Length > 1 | write.WriteData[0] >= 2))
+                {
+                    write.ReadWriteBit = false;
+                }
+
+
                 var typeCode = write.TypeCode;
                 var beginAddress = write.BeginAddress;
                 var dbBlock = write.DbBlock;
@@ -1031,6 +1092,10 @@ namespace Wombat.IndustrialProtocol.PLC
             for (int i = 0; i < writes.Length; i++)
             {
                 var write = writes[i];
+                if(write.ReadWriteBit & (write.WriteData.Length >1 | write.WriteData[0]>=2))
+                {
+                    write.ReadWriteBit = false;
+                }
                 var writeData = write.WriteData;
                 var coefficient = write.ReadWriteBit ? 1 : 8;
 

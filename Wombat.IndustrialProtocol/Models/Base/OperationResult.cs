@@ -6,22 +6,7 @@ using System.Text;
 namespace Wombat.IndustrialProtocol
 {
 
-    /*******************************************************************************
-     * 
-     *    用户返回多个结果数据的一个类，允许返回操作结果，文本信息，错误代号，等等
-     *
-     *    Used to the return result class in the synchronize communication and communication for industrial Ethernet
-     *    
-     *    时间：2017年11月20日 11:43:57
-     *    更新：废除原先的2个结果派生类，新增10个泛型派生类，来满足绝大多数的场景使用
-     *    
-     *    时间：2018年3月11日 22:08:08
-     *    更新：新增一些静态方法来方便的获取带有参数的成功对象，新增快速复制错误信息的方法
-     *    
-     *    时间：2018年8月23日 12:19:36
-     *    更新：新增两个不同的结果对象构造方法
-     * 
-     *******************************************************************************/
+
 
 
     /// <summary>
@@ -31,8 +16,6 @@ namespace Wombat.IndustrialProtocol
     /// 当 <see cref="IsSuccess"/> 为 True 时，忽略 <see cref="Message"/> 及 <see cref="ErrorCode"/> 的值
     /// </remarks>
     /// 
-
-
     public class OperationResult
     {
         #region Constructor
@@ -163,6 +146,10 @@ namespace Wombat.IndustrialProtocol
                 Message = orgin.Message,
                 Exception = orgin.Exception,
                 InitialTime = orgin.InitialTime,
+                Requst = orgin.Requst,
+                Requst2 = orgin.Requst2,
+                Response = orgin.Response,
+                Response2 = orgin.Response2
             };
             foreach (var message in orgin.MessageList)
             {
@@ -224,7 +211,20 @@ namespace Wombat.IndustrialProtocol
         /// <param name="msg">错误消息</param>
         public OperationResult(OperationResult result)
         {
-            Assignment(result);
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
         }
 
         /// <summary>
@@ -233,7 +233,20 @@ namespace Wombat.IndustrialProtocol
         /// <param name="msg">错误消息</param>
         public OperationResult(OperationResult result,T data)
         {
-            Assignment(result);
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
             Value = data;
         }
 
@@ -297,8 +310,23 @@ namespace Wombat.IndustrialProtocol
         /// <summary>
         /// 实例化一个默认的结果对象
         /// </summary>
-        public OperationResult() : base()
+        public OperationResult(OperationResult result) : base()
         {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+
         }
 
         /// <summary>
@@ -307,7 +335,20 @@ namespace Wombat.IndustrialProtocol
         /// <param name="msg">错误消息</param>
         public OperationResult(OperationResult result, T1 data1,T2 data2)
         {
-            Assignment(result);
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
             Value1 = data1;
             Value2 = data2;
 
