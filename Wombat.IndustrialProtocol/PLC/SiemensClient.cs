@@ -215,14 +215,14 @@ namespace Wombat.IndustrialProtocol.PLC
             try
             {
                 _socket?.SafeClose();
-                return result;
+                return result.EndTime();
             }
             catch (Exception ex)
             {
                 result.IsSuccess = false;
                 result.Message = ex.Message;
                 result.Exception = ex;
-                return result;
+                return result.EndTime();
             }
 
         }
@@ -313,7 +313,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 {
                     connectResult.Message = $"读取{address}失败，{ connectResult.Message}";
                     _advancedHybirdLock.Leave();
-                    return new OperationResult<byte[]>(connectResult);
+                    return new OperationResult<byte[]>(connectResult).EndTime();
                 }
             }
             var result = new OperationResult<byte[]>();
@@ -361,7 +361,12 @@ namespace Wombat.IndustrialProtocol.PLC
                         result.Message = $"读取{address}失败，异常代码[{21}]:{dataPackage[21]}";
                     }
                 }
- 
+                if (IsUseLongConnect)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.EndTime();
+                }
+
             }
             catch (SocketException ex)
             {
@@ -386,7 +391,7 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect&!IsUseLongConnect) Disconnect();
+                if (IsConnect) Disconnect();
             }
             _advancedHybirdLock.Leave();
             return result.EndTime();
@@ -407,7 +412,8 @@ namespace Wombat.IndustrialProtocol.PLC
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
                 {
-                    return connectResult;
+                    _advancedHybirdLock.Leave();
+                    return connectResult.EndTime();
                 }
             }
             OperationResult result = new OperationResult();
@@ -443,6 +449,11 @@ namespace Wombat.IndustrialProtocol.PLC
                 {
                     result.IsSuccess = false;
                     result.Message = $"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}";
+                }
+                if (IsUseLongConnect)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.EndTime();
                 }
             }
             catch (SocketException ex)
