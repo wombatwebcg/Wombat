@@ -18,16 +18,20 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <summary>
         /// 版本
         /// </summary>
-        public override string Version => version.ToString();
+        public override string Version => _version.ToString();
 
-        private MitsubishiVersion version;
+        private MitsubishiVersion _version;
 
         protected Socket _socket;
+
+        private AdvancedHybirdLock _advancedHybirdLock;
+
 
         /// <summary>
         /// 是否是连接的
         /// </summary>
-        public override bool IsConnect => _socket.Connected;
+        /// 
+        public override bool IsConnect => _socket == null ? false : _socket.Connected;
 
         /// <summary>
         /// 构造函数
@@ -38,10 +42,23 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="timeout">超时时间</param>
         public MitsubishiClient(MitsubishiVersion version, string ip, int port)
         {
-            this.version = version;
+            this._version = version;
             if (!IPAddress.TryParse(ip, out IPAddress address))
                 address = Dns.GetHostEntry(ip).AddressList?.FirstOrDefault();
             IpEndPoint = new IPEndPoint(address, port);
+            _advancedHybirdLock = new AdvancedHybirdLock();
+        }
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        /// <param name="version"></param>
+        /// <param name="ipAndPoint"></param>
+        public MitsubishiClient(MitsubishiVersion version ,IPEndPoint ipAndPoint)
+        {
+            this._version = version;
+            IpEndPoint = ipAndPoint;
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
         /// <summary>
@@ -203,7 +220,18 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public override OperationResult<byte[]> Read(string address, int length, bool isBit = false)
         {
-            if (!_socket?.Connected ?? true) Connect();
+            _advancedHybirdLock.Enter();
+            if (!_socket?.Connected ?? true)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"读取{address}失败，{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return new OperationResult<byte[]>(connectResult).EndTime();
+                }
+
+            }
             var result = new OperationResult<byte[]>();
             try
             {
@@ -211,7 +239,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
 
-                switch (version)
+                switch (_version)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -225,12 +253,13 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
 
                 OperationResult<byte[]> sendResult = new OperationResult<byte[]>();
-                switch (version)
+                switch (_version)
                 {
                     case MitsubishiVersion.A_1E:
                         var lenght = command[10] + command[11] * 256;
                         if (isBit)
-                            sendResult = SendPackage(command, (int)Math.Ceiling(lenght * 0.5) + 2);
+                            sendResult = 
+                                SendPackage(command, (int)Math.Ceiling(lenght * 0.5) + 2);
                         else
                             sendResult = SendPackage(command, lenght * 2 + 2);
                         break;
@@ -238,7 +267,12 @@ namespace Wombat.IndustrialProtocol.PLC
                         sendResult = SendPackageReliable(command);
                         break;
                 }
-                if (!sendResult.IsSuccess) return sendResult;
+                if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave(); ;
+                    return sendResult;
+
+                }
 
                 byte[] dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
@@ -246,7 +280,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 var bufferLength = length;
                 byte[] responseValue = null;
 
-                switch (version)
+                switch (_version)
                 {
                     case MitsubishiVersion.A_1E:
                         responseValue = new byte[dataPackage.Length - 2];
@@ -280,8 +314,9 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -295,23 +330,23 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public override OperationResult Write(string address, byte[] data, bool isBit = false)
         {
+            _advancedHybirdLock.Enter();
             if (!_socket?.Connected ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
                 {
-                    return connectResult;
+                    _advancedHybirdLock.Leave();
+                    return connectResult.EndTime();
                 }
             }
             OperationResult result = new OperationResult();
             try
             {
-                Array.Reverse(data);
-
                 //发送写入信息
                 MitsubishiMCAddress arg = null;
                 byte[] command = null;
-                switch (version)
+                switch (_version)
                 {
                     case MitsubishiVersion.A_1E:
                         arg = ConvertArg_A_1E(address);
@@ -325,7 +360,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
 
                 OperationResult<byte[]> sendResult = new OperationResult<byte[]>();
-                switch (version)
+                switch (_version)
                 {
                     case MitsubishiVersion.A_1E:
                         sendResult = SendPackage(command, 2);
@@ -334,8 +369,11 @@ namespace Wombat.IndustrialProtocol.PLC
                         sendResult = SendPackageReliable(command);
                         break;
                 }
-                if (!sendResult.IsSuccess) return sendResult;
-
+                if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return sendResult;
+                }
                 byte[] dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
             }
@@ -362,8 +400,9 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -468,7 +507,7 @@ namespace Wombat.IndustrialProtocol.PLC
             command[18] = typeCode[0];//数据类型
             command[19] = (byte)(length % 256);
             command[20] = (byte)(length / 256); //长度
-            data.Reverse().ToArray().CopyTo(command, 21);
+            data.ToArray().CopyTo(command, 21);
             return command;
         }
 
@@ -498,7 +537,7 @@ namespace Wombat.IndustrialProtocol.PLC
             command[9] = typeCode[0];        //数据类型
             command[10] = (byte)(length % 256);
             command[11] = (byte)(length / 256);
-            data.Reverse().ToArray().CopyTo(command, 12);
+            data.ToArray().CopyTo(command, 12);
             return command;
         }
         #endregion

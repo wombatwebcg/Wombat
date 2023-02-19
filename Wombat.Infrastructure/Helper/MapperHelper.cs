@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wombat.Infrastructure
 { 
-    public  class Mapper
+    public  class MapperHelper
     {
         /// <summary>
         /// 通过反射，将 T1 映射为 T2

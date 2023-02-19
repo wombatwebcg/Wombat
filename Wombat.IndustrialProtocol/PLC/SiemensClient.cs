@@ -27,20 +27,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// 是否是连接的
         /// </summary>
         /// 
-        public override bool IsConnect
-        {
-            get
-            {
-                if(_socket!=null)
-                {
-                    return _socket.Connected;
-                }
-                else
-                {
-                   return false;
-                }
-            }
-        }
+        public override bool IsConnect => _socket == null ? false : _socket.Connected;
 
         /// <summary>
         /// 版本
@@ -74,6 +61,7 @@ namespace Wombat.IndustrialProtocol.PLC
             this.version = version;
             IpEndPoint = ipAndPoint;
             DataFormat = EndianFormat.DCBA;
+            IsReverse = true;
             _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
@@ -95,6 +83,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 address = Dns.GetHostEntry(ip).AddressList?.FirstOrDefault();
             IpEndPoint = new IPEndPoint(address, port);
             DataFormat = EndianFormat.DCBA;
+            IsReverse = true;
             _advancedHybirdLock = new AdvancedHybirdLock();
 
         }
@@ -235,32 +224,34 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public override OperationResult<byte[]> SendPackageSingle(byte[] command)
         {
-            //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
-            OperationResult<byte[]> result = new OperationResult<byte[]>();
-            try
+            lock (this)
             {
-                _socket.Send(command);
-                var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var headPackage = socketReadResul.Value;
+                //从发送命令到读取响应为最小单元，避免多线程执行串数据（可线程安全执行）
+                OperationResult<byte[]> result = new OperationResult<byte[]>();
+                try
+                {
+                    _socket.Send(command);
+                    var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
+                    if (!socketReadResul.IsSuccess)
+                        return socketReadResul;
+                    var headPackage = socketReadResul.Value;
 
-                socketReadResul = SocketRead(_socket, GetContentLength(headPackage));
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var dataPackage = socketReadResul.Value;
+                    socketReadResul = SocketRead(_socket, GetContentLength(headPackage));
+                    if (!socketReadResul.IsSuccess)
+                        return socketReadResul;
+                    var dataPackage = socketReadResul.Value;
 
-                result.Value = headPackage.Concat(dataPackage).ToArray();
-                return result.EndTime();
+                    result.Value = headPackage.Concat(dataPackage).ToArray();
+                    return result.EndTime();
+                }
+                catch (Exception ex)
+                {
+                    result.IsSuccess = false;
+                    result.Message = ex.Message;
+                    result.AddMessage2List();
+                    return result.EndTime();
+                }
             }
-            catch (Exception ex)
-            {
-                result.IsSuccess = false;
-                result.Message = ex.Message;
-                result.AddMessage2List();
-                return result.EndTime();
-            }
-
         }
 
 
@@ -361,11 +352,6 @@ namespace Wombat.IndustrialProtocol.PLC
                         result.Message = $"读取{address}失败，异常代码[{21}]:{dataPackage[21]}";
                     }
                 }
-                if (IsUseLongConnect)
-                {
-                    _advancedHybirdLock.Leave();
-                    return result.EndTime();
-                }
 
             }
             catch (SocketException ex)
@@ -391,7 +377,7 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect) Disconnect();
+                if (!IsUseLongConnect) Disconnect();
             }
             _advancedHybirdLock.Leave();
             return result.EndTime();
@@ -450,11 +436,6 @@ namespace Wombat.IndustrialProtocol.PLC
                     result.IsSuccess = false;
                     result.Message = $"写入{address}失败，异常代码[{offset}]:{dataPackage[offset]}";
                 }
-                if (IsUseLongConnect)
-                {
-                    _advancedHybirdLock.Leave();
-                    return result.EndTime();
-                }
             }
             catch (SocketException ex)
             {
@@ -479,7 +460,7 @@ namespace Wombat.IndustrialProtocol.PLC
             }
             finally
             {
-                if (IsConnect) Disconnect();
+                if (!IsUseLongConnect) Disconnect();
             }
             _advancedHybirdLock.Leave();
             return result.EndTime();
