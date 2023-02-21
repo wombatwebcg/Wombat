@@ -14,9 +14,10 @@
 
   <ItemGroup>
     <Compile Remove="PLC_Tests\AllenBradleyClient_Tests.cs" />
-    <Compile Remove="PLC_Tests\MitsubishiClient_Tests.cs" />
     <Compile Remove="PLC_Tests\OmronFinsClient_Tests.cs" />
   </ItemGroup>
+
+
 
 
 

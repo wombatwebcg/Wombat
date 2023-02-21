@@ -157,7 +157,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public virtual OperationResult<bool> ReadBoolean(string address)
         {
             var result = ReadBoolean(address, 1);
-            return new OperationResult<bool>(result.Value[0]).EndTime();
+            if(result.IsSuccess)
+                return new OperationResult<bool>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<bool>(result).EndTime();
         }
 
 
@@ -207,7 +210,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<short> ReadInt16(string address)
         {
             var result = ReadInt16(address, 1);
-            return new OperationResult<short>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<short>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<short>(result).EndTime();
         }
 
         /// <summary>
@@ -254,7 +260,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<ushort> ReadUInt16(string address)
         {
             var result = ReadUInt16(address, 1);
-            return new OperationResult<ushort>(result.Value[0]).EndTime();
+            if(result.IsSuccess)
+                return new OperationResult<ushort>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<ushort>(result).EndTime();
         }
 
         /// <summary>
@@ -302,7 +311,11 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<int> ReadInt32(string address)
         {
             var result = ReadInt32(address, 1);
-            return new OperationResult<int>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<int>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<int>(result).EndTime();
+
         }
 
         /// <summary>
@@ -403,7 +416,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<long> ReadInt64(string address)
         {
             var result = ReadInt64(address, 1);
-            return new OperationResult<long>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<long>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<long>(result).EndTime();
         }
 
         /// <summary>
@@ -451,7 +467,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<ulong> ReadUInt64(string address)
         {
             var result = ReadUInt64(address, 1);
-            return new OperationResult<ulong>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<ulong>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<ulong>(result).EndTime();
         }
 
         /// <summary>
@@ -500,7 +519,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<float> ReadFloat(string address)
         {
             var result = ReadFloat(address, 1);
-            return new OperationResult<float>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<float>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<float>(result).EndTime();
         }
 
         /// <summary>
@@ -548,7 +570,10 @@ namespace Wombat.IndustrialProtocol.PLC
         public OperationResult<double> ReadDouble(string address)
         {
             var result = ReadDouble(address, 1);
-            return new OperationResult<double>(result.Value[0]).EndTime();
+            if (result.IsSuccess)
+                return new OperationResult<double>(result.Value[0]).EndTime();
+            else
+                return new OperationResult<double>(result).EndTime();
         }
 
         /// <summary>
