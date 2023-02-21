@@ -158,7 +158,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadBoolean(address, 1);
             if(result.IsSuccess)
-                return new OperationResult<bool>(result.Value[0]).EndTime();
+                return new OperationResult<bool>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<bool>(result).EndTime();
         }
@@ -211,7 +211,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadInt16(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<short>(result.Value[0]).EndTime();
+                return new OperationResult<short>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<short>(result).EndTime();
         }
@@ -261,7 +261,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadUInt16(address, 1);
             if(result.IsSuccess)
-                return new OperationResult<ushort>(result.Value[0]).EndTime();
+                return new OperationResult<ushort>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<ushort>(result).EndTime();
         }
@@ -312,7 +312,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadInt32(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<int>(result.Value[0]).EndTime();
+                return new OperationResult<int>(result) {Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<int>(result).EndTime();
 
@@ -362,11 +362,11 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public OperationResult<uint> ReadUInt32(string address)
         {
-            var readResult = Read(address, 4);
-            var result = new OperationResult<uint>(readResult);
+            var result = ReadUInt32(address, 1);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt32(0, DataFormat, IsReverse);
-            return result.EndTime();
+                return new OperationResult<uint>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<uint>(result).EndTime();
         }
 
 
@@ -417,7 +417,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadInt64(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<long>(result.Value[0]).EndTime();
+                return new OperationResult<long>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<long>(result).EndTime();
         }
@@ -468,7 +468,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadUInt64(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<ulong>(result.Value[0]).EndTime();
+                return new OperationResult<ulong>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<ulong>(result).EndTime();
         }
@@ -520,7 +520,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadFloat(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<float>(result.Value[0]).EndTime();
+                return new OperationResult<float>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<float>(result).EndTime();
         }
@@ -571,7 +571,7 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             var result = ReadDouble(address, 1);
             if (result.IsSuccess)
-                return new OperationResult<double>(result.Value[0]).EndTime();
+                return new OperationResult<double>(result) { Value = result.Value[0] }.EndTime();
             else
                 return new OperationResult<double>(result).EndTime();
         }
