@@ -175,7 +175,7 @@ namespace Wombat.IndustrialProtocol.PLC
             var readResult = Read(address, length, isBit: true);
             var result = new OperationResult<bool[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransBool(0,length);
+                result.Value = readResult.Value.TransBool(0, length, IsReverse);
             return result.EndTime();
         }
 
@@ -642,7 +642,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public OperationResult Write(string address, bool value)
+        public virtual OperationResult Write(string address, bool value)
         {
             return Write(address, value ? new byte[] { 0x01 } : new byte[] { 0x00 }, true);
         }
@@ -653,7 +653,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="address">地址</param>
         /// <param name="value">值</param>
         /// <returns></returns>
-        public OperationResult Write(string address, bool[] value)
+        public virtual OperationResult Write(string address, bool[] value)
         {
             return Write(address, value.TransByte(),true);
         }

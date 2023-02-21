@@ -16,9 +16,11 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         private SiemensClient client;
         public SiemensClient_Tests()
         {
+
+
             //var ip = IPAddress.Parse("192.168.1.180");
             //var port = int.Parse("102");
-           var ip = IPAddress.Parse("159.75.78.22");//20.205.243.166
+            var ip = IPAddress.Parse("159.75.78.22");//20.205.243.166
           var  port = 102;
             client = new SiemensClient(SiemensVersion.S7_200Smart, new IPEndPoint(ip, port));
         }
@@ -26,6 +28,9 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         [Fact]
         public void 短连接自动开关()
         {
+
+
+
             client.IsUseLongConnect = false;
             
 

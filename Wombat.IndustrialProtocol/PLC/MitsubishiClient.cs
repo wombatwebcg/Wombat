@@ -211,6 +211,59 @@ namespace Wombat.IndustrialProtocol.PLC
         }
         #endregion
 
+
+
+        /// <summary>
+        /// 读取Boolean
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        public override OperationResult<bool> ReadBoolean(string address)
+        {
+            var readResut = Read(address, 1, isBit: true);
+            var result = new OperationResult<bool>(readResut);
+            if (result.IsSuccess)
+                result.Value = (readResut.Value[0] & 0b00010000) != 0;
+            return result.EndTime();
+        }
+
+
+
+        /// <summary>
+        /// 读取Boolean
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <returns></returns>
+        public override OperationResult<bool[]> ReadBoolean(string address, int length)
+        {
+            var readResult = Read(address, Convert.ToUInt16(length), isBit: true);
+            var result = new OperationResult<bool[]>(readResult);
+            if (result.IsSuccess)
+            {
+                result.Value = new bool[length];
+                for (ushort i = 0; i < length; i++)
+                {
+                    var index = i / 2;
+                    var isoffset = i % 2 == 0;
+                    if (isoffset)
+                        result.Value[i] = (readResult.Value[index] & 0b00010000) != 0;
+                    else
+                        result.Value[i] = (readResult.Value[index] & 0b00000001) != 0;
+                }
+
+            }
+            return result.EndTime();
+        }
+
+
+
+
+
+
+
+
+
+
         /// <summary>
         /// 读取数据
         /// </summary>
@@ -319,6 +372,36 @@ namespace Wombat.IndustrialProtocol.PLC
             _advancedHybirdLock.Leave();
             return result.EndTime();
         }
+
+
+
+        /// <summary>
+        /// 向PLC中位软元件写入bool数组，返回值说明，比如你写入M100,values[0]对应M100
+        /// </summary>
+        /// <param name="address">要写入的数据地址</param>
+        /// <param name="value">要写入的实际数据，长度为8的倍数</param>
+        /// <example>
+        /// 详细请查看<see cref="Write(string, bool[])"/>方法的示例
+        /// </example>
+        /// <returns>返回写入结果</returns>
+        public override OperationResult Write(string address, bool value)
+        {
+            return this.Write(address, new bool[] { value });
+        }
+
+
+
+        /// <summary>
+        /// 写入数据
+        /// </summary>
+        /// <param name="address">地址</param>
+        /// <param name="value">值</param>
+        /// <returns></returns>
+        public override OperationResult Write(string address, bool[] value)
+        {
+            return Write(address, TransBoolArrayToByteData(value), true);
+        }
+
 
 
         /// <summary>
@@ -472,6 +555,51 @@ namespace Wombat.IndustrialProtocol.PLC
             return command;
         }
 
+
+        /// <summary>
+        /// 将bool的组压缩成三菱格式的字节数组来表示开关量的
+        /// </summary>
+        /// <param name="value">原始的数据字节</param>
+        /// <returns>压缩过后的数据字节</returns>
+        internal static byte[] TransBoolArrayToByteData(bool[] value)
+        {
+            int length = (value.Length + 1) / 2;
+            byte[] buffer = new byte[length];
+            byte b1 = 0b00010000;
+            byte b2 = 0b00000001;
+            byte b3 = 0b00000000;
+
+
+            var b5 = b1 | b3;
+            for (ushort i = 0; i < value.Length; i++)
+            {
+                var index = i / 2;
+                var isoffset = i % 2 == 0;
+                if (isoffset)
+                    buffer[index] += value[i] ? b1 : b3;
+                else
+                    buffer[index] = value[i] ? b2 : b3;
+            }
+            return buffer;
+
+
+            //int length = (value.Length + 1) / 2;
+            //byte[] buffer = new byte[length];
+
+            //for (int i = 0; i < length; i++)
+            //{
+            //    if (value[i * 2 + 0]) buffer[i] += 0x10;
+            //    if ((i * 2 + 1) < value.Length)
+            //    {
+            //        if (value[i * 2 + 1]) buffer[i] += 0x01;
+            //    }
+            //}
+
+            //return buffer;
+        }
+
+
+
         /// <summary>
         /// 获取Qna_3E写入命令
         /// </summary>
@@ -510,6 +638,9 @@ namespace Wombat.IndustrialProtocol.PLC
             data.ToArray().CopyTo(command, 21);
             return command;
         }
+
+
+
 
         /// <summary>
         /// 获取A_1E写入命令
