@@ -23,7 +23,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         public void 短连接自动开关(MitsubishiVersion version, int port)
         {
             client = new MitsubishiClient(version, ip, port);
-
+            client.IsUseLongConnect = false;
             ReadWrite();
         }
 
@@ -34,7 +34,8 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         {
             client = new MitsubishiClient(version, ip, port);
 
-           var c = client.Connect();
+            client.Connect();
+            client.IsUseLongConnect = true;
 
             ReadWrite();
 
@@ -51,47 +52,48 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 float float_number = int_number / 100;
                 var bool_value = short_number % 2 == 1;
 
-                ////client.Write("Y100", true);
-                ////Assert.True(client.ReadBoolean("Y100").Value == true);
-                //client.Write("M900", true);
-                //var sss = client.ReadBoolean("M900");
-                //Assert.True(client.ReadBoolean("M900").Value == true);
-                //client.Write("M901", bool_value);
-                //Assert.True(client.ReadBoolean("M901").Value == bool_value);
-                //client.Write("M902", bool_value);
-                //Assert.True(client.ReadBoolean("M902").Value == bool_value);
-                //client.Write("M903", !bool_value);
-                //Assert.True(client.ReadBoolean("M903").Value == !bool_value);
-                //client.Write("M904", bool_value);
-                //Assert.True(client.ReadBoolean("M904").Value == bool_value);
-                ////client.Write("L100", !bool_value);
-                ////Assert.True(client.ReadBoolean("L100").Value == !bool_value);
-                ////client.Write("F100", bool_value);
-                ////Assert.True(client.ReadBoolean("F100").Value == bool_value);
-                ////client.Write("V100", !bool_value);
-                ////Assert.True(client.ReadBoolean("V100").Value == !bool_value);
-                ////client.Write("B100", bool_value);
-                ////Assert.True(client.ReadBoolean("B100").Value == bool_value);
-                ////client.Write("S100", bool_value);
-                ////Assert.True(client.ReadBoolean("S100").Value == bool_value);
+                //client.Write("Y100", true);
+                //Assert.True(client.ReadBoolean("Y100").Value == true);
+                client.Write("M900", true);
+                var sss = client.ReadBoolean("M900");
+                Assert.True(client.ReadBoolean("M900").Value == true);
+                client.Write("M901", bool_value);
+                Assert.True(client.ReadBoolean("M901").Value == bool_value);
+                client.Write("M902", bool_value);
+                Assert.True(client.ReadBoolean("M902").Value == bool_value);
+                client.Write("M903", !bool_value);
+                Assert.True(client.ReadBoolean("M903").Value == !bool_value);
+                client.Write("M904", bool_value);
+                Assert.True(client.ReadBoolean("M904").Value == bool_value);
+                //client.Write("L100", !bool_value);
+                //Assert.True(client.ReadBoolean("L100").Value == !bool_value);
+                //client.Write("F100", bool_value);
+                //Assert.True(client.ReadBoolean("F100").Value == bool_value);
+                //client.Write("V100", !bool_value);
+                //Assert.True(client.ReadBoolean("V100").Value == !bool_value);
+                //client.Write("B100", bool_value);
+                //Assert.True(client.ReadBoolean("B100").Value == bool_value);
+                //client.Write("S100", bool_value);
+                //Assert.True(client.ReadBoolean("S100").Value == bool_value);
 
-                //client.Write("D200", short_number);
-                //Assert.True(client.ReadInt16("D200").Value == short_number);
+                client.Write("D200", short_number);
+                Assert.True(client.ReadInt16("D200").Value == short_number);
 
-                //client.Write("D200", int_number);
-                //Assert.True(client.ReadInt32("D200").Value == int_number);
+                client.Write("D200", int_number);
+                Assert.True(client.ReadInt32("D200").Value == int_number);
 
-                //client.Write("D200", Convert.ToInt64(int_number));
-                //Assert.True(client.ReadInt64("D200").Value == Convert.ToInt64(int_number));
+                client.Write("D200", Convert.ToInt64(int_number));
+                Assert.True(client.ReadInt64("D200").Value == Convert.ToInt64(int_number));
 
-                //client.Write("D200", float_number);
-                //Assert.True(client.ReadFloat("D200").Value == float_number);
+                client.Write("D200", float_number);
+                Assert.True(client.ReadFloat("D200").Value == float_number);
 
-                //client.Write("D200", Convert.ToDouble(float_number));
-                //Assert.True(client.ReadDouble("D200").Value == Convert.ToDouble(float_number));
+                client.Write("D200", Convert.ToDouble(float_number));
+                Assert.True(client.ReadDouble("D200").Value == Convert.ToDouble(float_number));
 
-                bool[] bool_values = { true, true, false, false, false, false, false, false, false, false
+                bool[] bool_values = { false, true, false, false, true, false, false, false, false, false
                         , false, false, false,false,false,false,false,false,false, true };
+
                 var sss1 = client.Write("M900", bool_values);
                 var bool_values_result = client.ReadBoolean("M900", bool_values.Length);
                 for (int j = 0; j < bool_values_result.Value.Length; j++)

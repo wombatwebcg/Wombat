@@ -568,9 +568,6 @@ namespace Wombat.IndustrialProtocol.PLC
             byte b1 = 0b00010000;
             byte b2 = 0b00000001;
             byte b3 = 0b00000000;
-
-
-            var b5 = b1 | b3;
             for (ushort i = 0; i < value.Length; i++)
             {
                 var index = i / 2;
@@ -578,7 +575,7 @@ namespace Wombat.IndustrialProtocol.PLC
                 if (isoffset)
                     buffer[index] += value[i] ? b1 : b3;
                 else
-                    buffer[index] = value[i] ? b2 : b3;
+                    buffer[index] += value[i] ? b2 : b3;
             }
             return buffer;
 
@@ -611,7 +608,20 @@ namespace Wombat.IndustrialProtocol.PLC
         protected byte[] GetWriteCommand_Qna_3E(int beginAddress, byte[] typeCode, byte[] data, bool isBit)
         {
             var length = data.Length / 2;
-            if (isBit) length = 1;
+            //var length = data.Length*2 ;
+
+            if (isBit)
+            {
+                if(data.Length<2)
+                {
+                    length = 1;
+
+                }
+                else
+                {
+                    length = data.Length * 2;
+                }
+            }
 
             byte[] command = new byte[21 + data.Length];
             command[0] = 0x50;
