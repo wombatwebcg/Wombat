@@ -174,16 +174,23 @@ namespace Wombat.Infrastructure
         /// <param name="index">位的索引</param>
         /// <param name="length">bool长度</param>
         /// <returns>bool数组</returns>
-        public static bool[] TransBool(this byte[] buffer, int index, int length, bool reverse = false)
+        public static bool[] TransBool(this byte[] buffer, int index, int length, bool reverse = false, bool is8Bit = true)
         {
             byte[] temp = new byte[length];
-            int bufferLength = (int)Math.Ceiling((buffer.Length - index) * 1.0 / 8);
-            int realLength = (int)Math.Ceiling((length) * 1.0 / 8);
-            if (bufferLength < realLength)
+            if (is8Bit)
             {
-                realLength = bufferLength;
+                int bufferLength = (int)Math.Ceiling((buffer.Length - index) * 1.0 / 8);
+                int realLength = (int)Math.Ceiling((length) * 1.0 / 8);
+                if (bufferLength > realLength)
+                {
+                    realLength = bufferLength;
+                }
+                Array.Copy(buffer, index, temp, 0, realLength);
             }
-            Array.Copy(buffer, index, temp, 0, realLength);
+            else
+            {
+                Array.Copy(buffer, index, temp, 0, length);
+            }
             return ByteToBoolArray(temp, length);
         }
 

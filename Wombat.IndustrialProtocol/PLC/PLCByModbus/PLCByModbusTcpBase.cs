@@ -17,16 +17,13 @@ namespace Wombat.IndustrialProtocol.PLC
         {
         }
         #region  Read 读取
-        /// <summary>
-        /// 读取数据
-        /// </summary>
-        /// <param name="address">寄存器起始地址</param>
-        /// <param name="stationNumber">站号</param>
-        /// <param name="functionCode">功能码</param>
-        /// <param name="readLength">读取长度</param>
-        /// <returns></returns>
-        public  new OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            => base.Read(address, readLength, stationNumber, functionCode, isPlcAddress);
+
+
+        //public new  OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+        //{
+        //    return base.Read(address, readLength, stationNumber, functionCode, isPlcAddress);
+        //}
+
 
         /// <summary>
         /// 读取Int16
@@ -224,13 +221,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode"></param>
         /// <returns></returns>
         public new OperationResult<bool> ReadDiscrete(string address, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = true)
-        {
-            var readResut = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool>(readResut);
-            if (result.IsSuccess)
-                result.Value = BitConverter.ToBoolean(readResut.Value, 0);
-            return result.EndTime();
-        }
+            => base.ReadDiscrete(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取离散
@@ -240,590 +231,28 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode"></param>
         /// <returns></returns>
         public new OperationResult<bool[]> ReadDiscrete(string address, int readLength, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = true)
-        {
-            var readResut = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<bool[]>(readResut);
-            if (result.IsSuccess)
-                result.Value = readResut.Value.TransBool(0, readLength);
-            return result.EndTime();
-        }
+            => base.ReadDiscrete(address,readLength ,stationNumber, functionCode, isPlcAddress);
 
-
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<short> ReadInt16(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = addressInt - beginAddressInt;
-                var byteArry = values.Skip(interval * 2).Take(2).ToArray();
-                return new OperationResult<short>
-                {
-                    Value = byteArry.TransInt16(0, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<short>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-
-
-        public new OperationResult<short> ReadInt16(int beginAddress, int address, byte[] values)
-        {
-            return ReadInt16(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<ushort> ReadUInt16(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = addressInt - beginAddressInt;
-                var byteArry = values.Skip(interval * 2).Take(2).Reverse().ToArray();
-                return new OperationResult<ushort>
-                {
-                    Value = byteArry.TransUInt16(0, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<ushort>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<ushort> ReadUInt16(int beginAddress, int address, byte[] values)
-        {
-            return ReadUInt16(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<int> ReadInt32(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 2;
-                var offset = (addressInt - beginAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray();
-                return new OperationResult<int>
-                {
-                    Value = byteArry.TransInt32(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<int>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<int> ReadInt32(int beginAddress, int address, byte[] values)
-        {
-            return ReadInt32(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<uint> ReadUInt32(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 2;
-                var offset = (addressInt - beginAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray();
-                return new OperationResult<uint>
-                {
-                    Value = byteArry.TransUInt32(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<uint>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<uint> ReadUInt32(int beginAddress, int address, byte[] values)
-        {
-            return ReadUInt32(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<long> ReadInt64(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 4;
-                var offset = (addressInt - beginAddressInt) % 4 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray();
-                return new OperationResult<long>
-                {
-                    Value = byteArry.TransInt64(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<long>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<long> ReadInt64(int beginAddress, int address, byte[] values)
-        {
-            return ReadInt64(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<ulong> ReadUInt64(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 4;
-                var offset = (addressInt - beginAddressInt) % 4 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray();
-                return new OperationResult<ulong>
-                {
-                    Value = byteArry.TransUInt64(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<ulong>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<ulong> ReadUInt64(int beginAddress, int address, byte[] values)
-        {
-            return ReadUInt64(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<float> ReadFloat(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 2;
-                var offset = (addressInt - beginAddressInt) % 2 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 2 + offset).Take(2 * 2).ToArray();
-                return new OperationResult<float>
-                {
-                    Value = byteArry.TransFloat(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<float>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<float> ReadFloat(int beginAddress, int address, byte[] values)
-        {
-            return ReadFloat(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<double> ReadDouble(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = (addressInt - beginAddressInt) / 4;
-                var offset = (addressInt - beginAddressInt) % 4 * 2;//取余 乘以2（每个地址16位，占两个字节）
-                var byteArry = values.Skip(interval * 2 * 4 + offset).Take(2 * 4).ToArray();
-                return new OperationResult<double>
-                {
-                    Value = byteArry.TransDouble(0, DataFormat, IsReverse)
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<double>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<double> ReadDouble(int beginAddress, int address, byte[] values)
-        {
-            return ReadDouble(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<bool> ReadCoil(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = addressInt - beginAddressInt;
-                var index = (interval + 1) % 8 == 0 ? (interval + 1) / 8 : (interval + 1) / 8 + 1;
-                var binaryArray = Convert.ToInt32(values[index - 1]).IntToBinaryArray().ToArray().Reverse().ToArray();
-                var isBit = false;
-                if ((index - 1) * 8 + binaryArray.Length > interval)
-                    isBit = binaryArray[interval - (index - 1) * 8].ToString() == 1.ToString();
-                return new OperationResult<bool>()
-                {
-                    Value = isBit
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<bool>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<bool> ReadCoil(int beginAddress, int address, byte[] values)
-        {
-            return ReadCoil(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 从批量读取的数据字节提取对应的地址数据
-        /// </summary>
-        /// <param name="beginAddress">批量读取的起始地址</param>
-        /// <param name="address">读取地址</param>
-        /// <param name="values">批量读取的值</param>
-        /// <returns></returns>
-        public new OperationResult<bool> ReadDiscrete(string beginAddress, string address, byte[] values)
-        {
-            if (!int.TryParse(address?.Trim(), out int addressInt) || !int.TryParse(beginAddress?.Trim(), out int beginAddressInt))
-                throw new Exception($"只能是数字，参数address：{address}  beginAddress：{beginAddress}");
-            try
-            {
-                var interval = addressInt - beginAddressInt;
-                var index = (interval + 1) % 8 == 0 ? (interval + 1) / 8 : (interval + 1) / 8 + 1;
-                var binaryArray = Convert.ToInt32(values[index - 1]).IntToBinaryArray().ToArray().Reverse().ToArray();
-                var isBit = false;
-                if ((index - 1) * 8 + binaryArray.Length > interval)
-                    isBit = binaryArray[interval - (index - 1) * 8].ToString() == 1.ToString();
-                return new OperationResult<bool>()
-                {
-                    Value = isBit
-                };
-            }
-            catch (Exception ex)
-            {
-                return new OperationResult<bool>
-                {
-                    IsSuccess = false,
-                    Message = ex.Message
-                };
-            }
-        }
-
-        public new OperationResult<bool> ReadDiscrete(int beginAddress, int address, byte[] values)
-        {
-            return ReadDiscrete(beginAddress.ToString(), address.ToString(), values);
-        }
-
-        /// <summary>
-        /// 分批读取（批量读取，内部进行批量计算读取）
-        /// </summary>
-        /// <param name="addresses"></param>
-        /// <returns></returns>
-        private OperationResult<List<ModbusOutput>> BatchRead(List<ModbusInput> addresses)
-        {
-            var result = new OperationResult<List<ModbusOutput>>();
-            result.Value = new List<ModbusOutput>();
-            var functionCodes = addresses.Select(t => t.FunctionCode).Distinct();
-            foreach (var functionCode in functionCodes)
-            {
-                var stationNumbers = addresses.Where(t => t.FunctionCode == functionCode).Select(t => t.StationNumber).Distinct();
-                foreach (var stationNumber in stationNumbers)
-                {
-                    var addressList = addresses.Where(t => t.FunctionCode == functionCode && t.StationNumber == stationNumber)
-                        .DistinctBy(t => t.Address)
-                        .ToDictionary(t => t.Address, t => t.DataType);
-                    var tempOperationResult = BatchRead(addressList, stationNumber, functionCode);
-                    if (tempOperationResult.IsSuccess)
-                    {
-                        foreach (var item in tempOperationResult.Value)
-                        {
-                            result.Value.Add(new ModbusOutput()
-                            {
-                                Address = item.Key,
-                                FunctionCode = functionCode,
-                                StationNumber = stationNumber,
-                                Value = item.Value
-                            });
-                        }
-                    }
-                    else
-                    {
-                        result.SetInfo(tempOperationResult);
-                    }
-                    result.Requst = tempOperationResult.Requst;
-                    result.Response = tempOperationResult.Response;
-                }
-            }
-            return result.EndTime();
-        }
-
-        private OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addressList, byte stationNumber, byte functionCode)
-        {
-            var result = new OperationResult<Dictionary<string, object>>();
-            result.Value = new Dictionary<string, object>();
-
-            var addresses = addressList.Select(t => new KeyValuePair<int, DataTypeEnum>(int.Parse(t.Key), t.Value)).ToList();
-
-            var minAddress = addresses.Select(t => t.Key).Min();
-            var maxAddress = addresses.Select(t => t.Key).Max();
-            while (maxAddress >= minAddress)
-            {
-                int readLength = 121;//125 - 4 = 121
-
-                var tempAddress = addresses.Where(t => t.Key >= minAddress && t.Key <= minAddress + readLength).ToList();
-                //如果范围内没有数据。按正确逻辑不存在这种情况。
-                if (!tempAddress.Any())
-                {
-                    minAddress = minAddress + readLength;
-                    continue;
-                }
-
-                var tempMax = tempAddress.OrderByDescending(t => t.Key).FirstOrDefault();
-                switch (tempMax.Value)
-                {
-                    case DataTypeEnum.Bool:
-                    case DataTypeEnum.Byte:
-                    case DataTypeEnum.Int16:
-                    case DataTypeEnum.UInt16:
-                        readLength = tempMax.Key + 1 - minAddress;
-                        break;
-                    case DataTypeEnum.Int32:
-                    case DataTypeEnum.UInt32:
-                    case DataTypeEnum.Float:
-                        readLength = tempMax.Key + 2 - minAddress;
-                        break;
-                    case DataTypeEnum.Int64:
-                    case DataTypeEnum.UInt64:
-                    case DataTypeEnum.Double:
-                        readLength = tempMax.Key + 4 - minAddress;
-                        break;
-                    default:
-                        throw new Exception("Message BatchRead 未定义类型 -1");
-                }
-
-                var tempOperationResult = Read(minAddress.ToString(), Convert.ToUInt16(readLength), stationNumber: stationNumber, functionCode: functionCode);
-
-                result.Requst = tempOperationResult.Requst;
-                result.Response = tempOperationResult.Response;
-                if (!tempOperationResult.IsSuccess)
-                {
-                    result.IsSuccess = tempOperationResult.IsSuccess;
-                    result.Exception = tempOperationResult.Exception;
-                    result.ErrorCode = tempOperationResult.ErrorCode;
-                    result.Message = $"读取 地址:{minAddress} 站号:{stationNumber} 功能码:{functionCode} 失败。{tempOperationResult.Message}";
-                    result.AddMessage2List();
-                    return result.EndTime();
-                }
-
-                var rValue = tempOperationResult.Value.Reverse().ToArray();
-                foreach (var item in tempAddress)
-                {
-                    object tempVaue = null;
-
-                    switch (item.Value)
-                    {
-                        case DataTypeEnum.Bool:
-                            tempVaue = ReadCoil(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.Byte:
-                            throw new Exception("Message BatchRead 未定义类型 -2");
-                        case DataTypeEnum.Int16:
-                            tempVaue = ReadInt16(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.UInt16:
-                            tempVaue = ReadUInt16(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.Int32:
-                            tempVaue = ReadInt32(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.UInt32:
-                            tempVaue = ReadUInt32(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.Int64:
-                            tempVaue = ReadInt64(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.UInt64:
-                            tempVaue = ReadUInt64(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.Float:
-                            tempVaue = ReadFloat(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        case DataTypeEnum.Double:
-                            tempVaue = ReadDouble(minAddress.ToString(), item.Key.ToString(), rValue).Value;
-                            break;
-                        default:
-                            throw new Exception("Message BatchRead 未定义类型 -3");
-                    }
-
-                    result.Value.Add(item.Key.ToString(), tempVaue);
-                }
-                minAddress = minAddress + readLength;
-
-                if (addresses.Any(t => t.Key >= minAddress))
-                    minAddress = addresses.Where(t => t.Key >= minAddress).OrderBy(t => t.Key).FirstOrDefault().Key;
-                else
-                    return result.EndTime();
-            }
-            return result.EndTime();
-        }
-
-        /// <summary>
-        /// 分批读取
-        /// </summary>
-        /// <param name="addresses"></param>
-        /// <param name="retryCount">如果读取异常，重试次数</param>
-        /// <returns></returns>
-        public new OperationResult<List<ModbusOutput>> BatchRead(List<ModbusInput> addresses, uint retryCount = 1)
-        {
-            var result = BatchRead(addresses);
-            for (int i = 0; i < retryCount; i++)
-            {
-                if (!result.IsSuccess)
-                {
-                    WarningLog?.Invoke(result.Message, result.Exception);
-                    result = BatchRead(addresses);
-                }
-                else
-                    break;
-            }
-            return result;
-        }
 
 
         #endregion
 
         #region Write 写入
-        /// <summary>
-        /// 线圈写入
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="value"></param>
-        /// <param name="stationNumber"></param>
-        /// <param name="functionCode"></param>
-        public new abstract OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true);
 
+        public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true)
+        {
+            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);   
+        }
 
-        /// <summary>
-        /// 线圈写入
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="value"></param>
-        /// <param name="stationNumber"></param>
-        /// <param name="functionCode"></param>
-        public new abstract OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true);
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true)
+        {
+            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);   
+        }
 
-        /// <summary>
-        /// 写入
-        /// </summary>
-        /// <param name="address"></param>
-        /// <param name="values"></param>
-        /// <param name="stationNumber"></param>
-        /// <param name="functionCode"></param>
-        /// <returns></returns>
-        public new abstract OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true);
-
+        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        {
+            return base.Write(address, values, stationNumber, functionCode, isPlcAddress);  
+        }
         /// <summary>
         /// 写入
         /// </summary>
@@ -832,10 +261,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
+
         /// <summary>
         /// 写入
         /// </summary>
@@ -844,10 +271,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, short[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -858,10 +282,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -871,10 +292,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, ushort[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -885,10 +303,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, int value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -898,10 +313,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, int[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -913,10 +325,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, uint value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -926,10 +335,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, uint[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -940,10 +346,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, long value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -953,10 +356,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, long[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -966,10 +366,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, ulong value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -979,10 +376,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, ulong[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -992,10 +386,8 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, float value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
+
         /// <summary>
         /// 写入
         /// </summary>
@@ -1004,10 +396,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, float[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -1017,10 +406,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, double value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 写入
@@ -1030,10 +416,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         public new OperationResult Write(string address, double[] value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
-        {
-            var values = value.TransByte(DataFormat, IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
-        }
+            => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
 
         #endregion

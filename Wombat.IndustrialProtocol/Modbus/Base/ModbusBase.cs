@@ -33,19 +33,19 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<short> ReadInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,stationNumber:stationNumber,functionCode: functionCode,isPlcAddress: isPlcAddress);
-            var result = new OperationResult<short>(readResult);
+            var result = ReadInt16(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = BitConverter.ToInt16(readResult.Value, 0);
-            return result.EndTime();
+                return new OperationResult<short>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<short>(result).EndTime();
         }
 
         public OperationResult<short[]> ReadInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<short[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt16(0, readLength,true);
+                result.Value = readResult.Value.TransInt16(0, readLength,IsReverse);
             return result.EndTime();
         }
 
@@ -62,7 +62,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = false)
         {
             string[] adds = address.Split('.');
-            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             var result = new OperationResult<short>(readResult);
             if (result.IsSuccess)
             {
@@ -92,19 +92,19 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<ushort> ReadUInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ushort>(readResult);
+            var result = ReadUInt16(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = BitConverter.ToUInt16(readResult.Value, 0);
-            return result.EndTime();
+                return new OperationResult<ushort>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<ushort>(result).EndTime();
         }
 
         public OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<ushort[]>(readResult);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt16(0, readLength, true);
+                result.Value = readResult.Value.TransUInt16(0, readLength, IsReverse);
             return result.EndTime();
         }
 
@@ -119,7 +119,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public OperationResult<ushort> ReadUInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = false)
         {
             string[] adds = address.Split('.');
-            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(adds[0].Trim(), stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             var result = new OperationResult<ushort>(readResult);
             if (result.IsSuccess)
             {
@@ -149,11 +149,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<int> ReadInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<int>(readResult);
+            var result = ReadInt32(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = BitConverter.ToInt32(readResult.Value, 0);
-            return result.EndTime();
+                return new OperationResult<int>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<int>(result).EndTime();
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<int[]> ReadInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, (ushort)(2*readLength), stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, (ushort)(2*readLength), stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<int[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransInt32(0,length: readLength,format:DataFormat,reverse:IsReverse);
@@ -182,11 +182,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<uint> ReadUInt32(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<uint>(readResult);
+            var result = ReadUInt32(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt32(0,format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
+                return new OperationResult<uint>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<uint>(result).EndTime();
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<uint[]> ReadUInt32(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 2* readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, 2* readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<uint[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransUInt32(0,length: readLength, format: DataFormat, reverse: IsReverse);
@@ -214,11 +214,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<long> ReadInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<long>(readResult);
+            var result = ReadInt64(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransInt64(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
+                return new OperationResult<long>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<long>(result).EndTime();
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<long[]> ReadInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<long[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransInt64(0,readLength, format: DataFormat, reverse: IsReverse);
@@ -247,11 +247,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<ulong> ReadUInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<ulong>(readResult);
+            var result = ReadUInt64(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransUInt64(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
+                return new OperationResult<ulong>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<ulong>(result).EndTime();
         }
         /// <summary>
         /// 读取UInt64
@@ -262,7 +262,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<ulong[]> ReadUInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 4 * readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, 4 * readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<ulong[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransUInt64(0, readLength, format: DataFormat, reverse: IsReverse);
@@ -278,11 +278,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<float> ReadFloat(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,2, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<float>(readResult);
+            var result = ReadFloat(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransFloat(0, format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
+                return new OperationResult<float>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<float>(result).EndTime();
         }
 
         /// <summary>
@@ -294,7 +294,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<float[]> ReadFloat(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 2*readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, 2*readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<float[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransFloat(0,readLength ,format: DataFormat, reverse: IsReverse);
@@ -311,11 +311,11 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<double> ReadDouble(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,4, stationNumber: stationNumber, functionCode: functionCode);
-            var result = new OperationResult<double>(readResult);
+            var result = ReadDouble(address: address, readLength: 1, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             if (result.IsSuccess)
-                result.Value = readResult.Value.TransDouble(0,format: DataFormat, reverse: IsReverse);
-            return result.EndTime();
+                return new OperationResult<double>(result) { Value = result.Value[0] }.EndTime();
+            else
+                return new OperationResult<double>(result).EndTime();
         }
 
         /// <summary>
@@ -327,7 +327,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<double[]> ReadDouble(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, 4*readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<double[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransDouble(0,readLength, format: DataFormat, reverse: IsReverse);
@@ -346,7 +346,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<bool> ReadCoil(string address, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             var result = new OperationResult<bool>(readResult);
             if (result.IsSuccess)
                 result.Value = BitConverter.ToBoolean(readResult.Value, 0);
@@ -362,7 +362,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<bool[]> ReadCoil(string address, int readLength, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address,readLength: readLength, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address,readLength: readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<bool[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransBool(0,readLength);
@@ -380,7 +380,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<bool> ReadDiscrete(string address, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             var result = new OperationResult<bool>(readResult);
             if (result.IsSuccess)
                 result.Value = BitConverter.ToBoolean(readResult.Value, 0);
@@ -396,7 +396,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public OperationResult<bool[]> ReadDiscrete(string address, int readLength, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = false)
         {
-            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode);
+            var readResult = Read(address: address, stationNumber: stationNumber, functionCode: functionCode,isPlcAddress:isPlcAddress);
             var result = new OperationResult<bool[]>(readResult);
             if (result.IsSuccess)
                 result.Value = readResult.Value.TransBool(0, readLength);

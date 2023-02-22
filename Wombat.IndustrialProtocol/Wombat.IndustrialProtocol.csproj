@@ -17,10 +17,6 @@
 	  <Version>1.1.0</Version>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="PLC\InovanceClient.cs" />
-    <Compile Remove="PLC\PLCByModbus\PLCByModbusTcpBase.cs" />
-  </ItemGroup>
 
 
 
@@ -30,6 +26,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
+  </ItemGroup>
+
+
+
+
+
+
+
+  <ItemGroup>
+    <Folder Include="OPCUA\" />
   </ItemGroup>
 
 </Project>

@@ -31,7 +31,8 @@ namespace Wombat.IndustrialProtocol.Modbus
 
         private IPEndPoint _ipEndPoint;
 
-        public override bool IsConnect => _socket.Connected;
+        public override bool IsConnect => _socket == null ? false : _socket.Connected;
+
         /// <summary>
         /// 
         /// </summary>
