@@ -182,15 +182,15 @@ namespace Wombat.IndustrialProtocol.Modbus
                 try
                 {
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, 8);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, 8);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var headPackage = socketReadResult.Value;
                     int length = headPackage[4] * 256 + headPackage[5] - 2;
-                    socketReadResul = SocketRead(_socket, length);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                    socketReadResult = SocketRead(_socket, length);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var dataPackage = socketReadResult.Value;
 
                     result.Value = headPackage.Concat(dataPackage).ToArray();
                     return result.EndTime();

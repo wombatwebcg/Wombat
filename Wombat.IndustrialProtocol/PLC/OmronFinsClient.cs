@@ -97,10 +97,10 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.Requst = string.Join(" ", BasicCommand.Select(t => t.ToString("X2")));
                 _socket.Send(BasicCommand);
 
-                var socketReadResul = SocketRead(_socket, 8);
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var head = socketReadResul.Value;
+                var socketReadResult = SocketRead(_socket, 8);
+                if (!socketReadResult.IsSuccess)
+                    return socketReadResult;
+                var head = socketReadResult.Value;
 
                 byte[] buffer = new byte[4];
                 buffer[0] = head[7];
@@ -109,10 +109,10 @@ namespace Wombat.IndustrialProtocol.PLC
                 buffer[3] = head[4];
                 var length = BitConverter.ToInt32(buffer, 0);
 
-                socketReadResul = SocketRead(_socket, length);
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var content = socketReadResul.Value;
+                socketReadResult = SocketRead(_socket, length);
+                if (!socketReadResult.IsSuccess)
+                    return socketReadResult;
+                var content = socketReadResult.Value;
 
                 var headContent = head.Concat(content).ToArray();
                 result.Response = string.Join(" ", headContent.Select(t => t.ToString("X2")));
@@ -165,10 +165,10 @@ namespace Wombat.IndustrialProtocol.PLC
                 try
                 {
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, 8);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var head = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, 8);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var head = socketReadResult.Value;
 
                     byte[] buffer = new byte[4];
                     buffer[0] = head[7];
@@ -177,10 +177,10 @@ namespace Wombat.IndustrialProtocol.PLC
                     buffer[3] = head[4];
                     //4-7是Length字段 表示其后所有字段的总长度
                     var contentLength = BitConverter.ToInt32(buffer, 0);
-                    socketReadResul = SocketRead(_socket, contentLength);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                    socketReadResult = SocketRead(_socket, contentLength);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var dataPackage = socketReadResult.Value;
 
                     result.Value = head.Concat(dataPackage).ToArray();
                     return result.EndTime();

@@ -22,12 +22,10 @@ namespace Wombat.IndustrialProtocol
         /// </summary>
         protected Socket _socket;
 
-        /// <summary>
-        /// 是否自动打开关闭
-        /// </summary>
-        protected bool _isAutoOpen = true;
 
         private IPEndPoint _ipEndPoint;
+
+        public override bool IsConnect => _socket == null ? false : _socket.Connected;
 
 
         /// <summary>
@@ -60,7 +58,6 @@ namespace Wombat.IndustrialProtocol
 
         protected override OperationResult DoConnect()
         {
-            _isAutoOpen = false;
             var result = new OperationResult();
             _socket?.SafeClose();
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -92,7 +89,6 @@ namespace Wombat.IndustrialProtocol
 
         protected override OperationResult DoDisconnect()
         {
-            _isAutoOpen = true;
 
             OperationResult result = new OperationResult();
             try

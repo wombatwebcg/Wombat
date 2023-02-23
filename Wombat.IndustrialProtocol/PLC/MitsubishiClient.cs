@@ -130,17 +130,17 @@ namespace Wombat.IndustrialProtocol.PLC
                 try
                 {
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, 9);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, 9);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var headPackage = socketReadResult.Value;
 
                     //其后内容的总长度
                     var contentLength = BitConverter.ToUInt16(headPackage, 7);
-                    socketReadResul = SocketRead(_socket, contentLength);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                    socketReadResult = SocketRead(_socket, contentLength);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var dataPackage = socketReadResult.Value;
 
                     result.Value = headPackage.Concat(dataPackage).ToArray();
                     return result.EndTime();
@@ -171,10 +171,10 @@ namespace Wombat.IndustrialProtocol.PLC
                 {
                     OperationResult<byte[]> result = new OperationResult<byte[]>();
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, receiveCount);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, receiveCount);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var dataPackage = socketReadResult.Value;
 
                     result.Value = dataPackage.ToArray();
                     return result.EndTime();

@@ -60,10 +60,10 @@ namespace Wombat.IndustrialProtocol.Modbus
                     //发送命令
                     Base.Send(command);
                     //获取响应报文    
-                    var socketReadResul = SocketRead(Base, lenght);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    result.Value = socketReadResul.Value;
+                    var socketReadResult = SocketRead(Base, lenght);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    result.Value = socketReadResult.Value;
                     return result.EndTime();
                 }
             }

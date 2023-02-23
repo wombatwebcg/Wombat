@@ -84,15 +84,15 @@ namespace Wombat.IndustrialProtocol.PLC
                 result.Requst = string.Join(" ", RegisteredCommand.Select(t => t.ToString("X2")));
                 _socket.Send(RegisteredCommand);
 
-                var socketReadResul = SocketRead(_socket, 24);
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var head = socketReadResul.Value;
+                var socketReadResult = SocketRead(_socket, 24);
+                if (!socketReadResult.IsSuccess)
+                    return socketReadResult;
+                var head = socketReadResult.Value;
 
-                socketReadResul = SocketRead(_socket, GetContentLength(head));
-                if (!socketReadResul.IsSuccess)
-                    return socketReadResul;
-                var content = socketReadResul.Value;
+                socketReadResult = SocketRead(_socket, GetContentLength(head));
+                if (!socketReadResult.IsSuccess)
+                    return socketReadResult;
+                var content = socketReadResult.Value;
 
                 var response = head.Concat(content).ToArray();
                 result.Response = string.Join(" ", response.Select(t => t.ToString("X2")));
@@ -151,15 +151,15 @@ namespace Wombat.IndustrialProtocol.PLC
                 try
                 {
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, 24);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var head = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, 24);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var head = socketReadResult.Value;
 
-                    socketReadResul = SocketRead(_socket, GetContentLength(head));
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var content = socketReadResul.Value;
+                    socketReadResult = SocketRead(_socket, GetContentLength(head));
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var content = socketReadResult.Value;
 
                     result.Value = head.Concat(content).ToArray();
                     return result.EndTime();

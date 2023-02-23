@@ -148,20 +148,20 @@ namespace Wombat.IndustrialProtocol.PLC
                 //第一次初始化指令交互
                 _socket.Send(Command1);
 
-                var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
-                if (!socketReadResul.IsSuccess)
+                var socketReadResult = SocketRead(_socket, SiemensConstant.InitHeadLength);
+                if (!socketReadResult.IsSuccess)
                 {
-                    return socketReadResul;
+                    return socketReadResult;
                 }
-                var head1 = socketReadResul.Value;
+                var head1 = socketReadResult.Value;
 
 
-                socketReadResul = SocketRead(_socket, GetContentLength(head1));
-                if (!socketReadResul.IsSuccess)
+                socketReadResult = SocketRead(_socket, GetContentLength(head1));
+                if (!socketReadResult.IsSuccess)
                 {
-                    return socketReadResul;
+                    return socketReadResult;
                 }
-                var content1 = socketReadResul.Value;
+                var content1 = socketReadResult.Value;
 
                 result.Response = string.Join(" ", head1.Concat(content1).Select(t => t.ToString("X2")));
 
@@ -169,20 +169,20 @@ namespace Wombat.IndustrialProtocol.PLC
                 //第二次初始化指令交互
                 _socket.Send(Command2);
 
-                socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
-                if (!socketReadResul.IsSuccess)
+                socketReadResult = SocketRead(_socket, SiemensConstant.InitHeadLength);
+                if (!socketReadResult.IsSuccess)
                 {
-                    return socketReadResul;
+                    return socketReadResult;
                 }
-                var head2 = socketReadResul.Value;
+                var head2 = socketReadResult.Value;
 
-                socketReadResul = SocketRead(_socket, GetContentLength(head2));
-                if (!socketReadResul.IsSuccess)
+                socketReadResult = SocketRead(_socket, GetContentLength(head2));
+                if (!socketReadResult.IsSuccess)
                 {
-                    return socketReadResul;
+                    return socketReadResult;
 
                 }
-                var content2 = socketReadResul.Value;
+                var content2 = socketReadResult.Value;
 
                 result.Response2 = string.Join(" ", head2.Concat(content2).Select(t => t.ToString("X2")));
             }
@@ -231,15 +231,15 @@ namespace Wombat.IndustrialProtocol.PLC
                 try
                 {
                     _socket.Send(command);
-                    var socketReadResul = SocketRead(_socket, SiemensConstant.InitHeadLength);
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var headPackage = socketReadResul.Value;
+                    var socketReadResult = SocketRead(_socket, SiemensConstant.InitHeadLength);
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var headPackage = socketReadResult.Value;
 
-                    socketReadResul = SocketRead(_socket, GetContentLength(headPackage));
-                    if (!socketReadResul.IsSuccess)
-                        return socketReadResul;
-                    var dataPackage = socketReadResul.Value;
+                    socketReadResult = SocketRead(_socket, GetContentLength(headPackage));
+                    if (!socketReadResult.IsSuccess)
+                        return socketReadResult;
+                    var dataPackage = socketReadResult.Value;
 
                     result.Value = headPackage.Concat(dataPackage).ToArray();
                     return result.EndTime();
