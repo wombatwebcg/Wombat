@@ -71,7 +71,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 Logger?.LogError($"电脑没有查找到端口:{PortName}");
                 throw new Exception($"电脑没有查找到端口:{PortName}");
             }
-
+            if (IsConnect) _serialPortBase.Disconnect();
            _serialPortBase.PortName = PortName ?? throw new ArgumentNullException(nameof(PortName));
            _serialPortBase.BaudRate = BaudRate;
            _serialPortBase.Parity = Parity;
@@ -109,7 +109,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult<byte[]>();
-            if (!IsUseLongConnect)
+            if (!_serialPortBase?.IsConnect ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
@@ -186,7 +186,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult();
-            if (!IsUseLongConnect)
+            if (!_serialPortBase?.IsConnect ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
@@ -249,7 +249,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult();
-            if (!IsUseLongConnect)
+            if (!_serialPortBase?.IsConnect ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)
@@ -321,7 +321,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult();
-            if (!IsUseLongConnect)
+            if (!_serialPortBase?.IsConnect ?? true)
             {
                 var connectResult = Connect();
                 if (!connectResult.IsSuccess)

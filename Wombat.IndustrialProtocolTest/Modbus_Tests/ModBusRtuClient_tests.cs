@@ -15,12 +15,15 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         public ModbusRtuClient_tests()
         {
             client = new ModbusRtuClient("COM3", 9600, 8, StopBits.One, Parity.None);
+            //client = new ModbusRtuClient("COM23", 9600*4, 8, StopBits.One, Parity.None);
+
         }
 
         [Fact]
         public void  短连接自动开关()
         {
-            client.IsUseLongConnect = false;
+
+
             short Number = 33;
             client.Write("4", Number, stationNumber);
             Assert.True(client.ReadInt16("4", stationNumber).Value == Number);
