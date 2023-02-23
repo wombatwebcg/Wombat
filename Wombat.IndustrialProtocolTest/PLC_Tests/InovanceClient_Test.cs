@@ -8,7 +8,7 @@ using Wombat.IndustrialProtocol.PLC;
 using Xunit;
 using Wombat.Infrastructure;
 
-namespace Wombat.IndustrialProtocolTest.PLC_Tests
+namespace Wombat.IndustrialProtocolTest.PLCTests
 {
    public class InovanceClient_Test
     {
