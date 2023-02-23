@@ -19,7 +19,10 @@ namespace Wombat.IndustrialProtocol.Modbus
         public Handshake Handshake { get; set; } = Handshake.None;
 
 
-        public override bool IsConnect => _serialPortBase.IsConnect;
+        public override bool IsConnect => _serialPortBase == null ? false : _serialPortBase.IsConnect;
+
+
+        private AdvancedHybirdLock _advancedHybirdLock;
 
         /// <summary>
         /// 是否自动打开关闭
@@ -31,6 +34,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public ModbusSerialBase()
         {
             _serialPortBase = new SerialPortBase();
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
         /// <summary>
@@ -52,7 +56,43 @@ namespace Wombat.IndustrialProtocol.Modbus
             Handshake = handshake;
             Parity = parity;
             StopBits = stopBits;
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
+
+
+        /// <summary>
+        /// 连接
+        /// </summary>
+        /// <returns></returns>
+        protected override OperationResult DoConnect()
+        {
+            if (!DeviceInterfaceHelper.CheckSerialPort(PortName))
+            {
+                Logger?.LogError($"电脑没有查找到端口:{PortName}");
+                throw new Exception($"电脑没有查找到端口:{PortName}");
+            }
+
+           _serialPortBase.PortName = PortName ?? throw new ArgumentNullException(nameof(PortName));
+           _serialPortBase.BaudRate = BaudRate;
+           _serialPortBase.Parity = Parity;
+           _serialPortBase.DataBits = DataBits;
+           _serialPortBase.StopBits = StopBits;
+           _serialPortBase.Handshake = Handshake;
+           _serialPortBase.Timeout = Timeout;
+            return _serialPortBase.Connect();
+        }
+
+
+        /// <summary>
+        /// 关闭连接
+        /// </summary>
+        /// <returns></returns>
+        protected override OperationResult DoDisconnect()
+        {
+           return _serialPortBase.Disconnect();
+        }
+
+
 
 
         #region  Read 读取
@@ -67,11 +107,20 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
-            if (!IsConnect) Connect();
-
+            _advancedHybirdLock.Enter();
             var result = new OperationResult<byte[]>();
-            try
+            if (!IsUseLongConnect)
             {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
+            }
+            try
+                {
                 //获取命令（组装报文）
                 byte[] command = GetReadCommand(address, stationNumber, functionCode, (ushort)readLength,isPlcAddress:isPlcAddress);
                 var commandCRC16 = CRC16Helper.GetCRC16(command);
@@ -80,12 +129,16 @@ namespace Wombat.IndustrialProtocol.Modbus
                 //发送命令并获取响应报文
                 var sendResult = SendPackageReliable(commandCRC16);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
                     result.IsSuccess = false;
                     result.Message = "响应结果为空";
+                    _advancedHybirdLock.Leave();
                     return result.EndTime();
                 }
                 else if (!CRC16Helper.CheckCRC16(responsePackage))
@@ -113,8 +166,9 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (IsConnect) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -130,8 +184,18 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode"></param>
         public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
-            if (!IsConnect) Connect();
+            _advancedHybirdLock.Enter();
             var result = new OperationResult();
+            if (!IsUseLongConnect)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
+            }
             try
             {
                 var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
@@ -140,13 +204,17 @@ namespace Wombat.IndustrialProtocol.Modbus
                 //发送命令并获取响应报文
                 var sendResult = SendPackageReliable(commandCRC16);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var responsePackage = sendResult.Value;
 
                 if (!responsePackage.Any())
                 {
                     result.IsSuccess = false;
                     result.Message = "响应结果为空";
+                    _advancedHybirdLock.Leave();
                     return result.EndTime();
                 }
                 else if (!CRC16Helper.CheckCRC16(responsePackage))
@@ -171,14 +239,73 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (IsConnect) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0X0F, bool isPlcAddress = false)
         {
-            return Write(address, value.TransByte(), stationNumber, functionCode,isPlcAddress);
+            _advancedHybirdLock.Enter();
+            var result = new OperationResult();
+            if (!IsUseLongConnect)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
+            }
+            try
+            {
+                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
+                var commandCRC16 = CRC16Helper.GetCRC16(command);
+                result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
+                //发送命令并获取响应报文
+                var sendResult = SendPackageReliable(commandCRC16);
+                if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(sendResult).EndTime();
+                }
+                var responsePackage = sendResult.Value;
+
+                if (!responsePackage.Any())
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果为空";
+                    _advancedHybirdLock.Leave();
+                    return result.EndTime();
+                }
+                else if (!CRC16Helper.CheckCRC16(responsePackage))
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果CRC16Helper验证失败";
+                    //return result.EndTime();
+                }
+                else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
+                {
+                    result.IsSuccess = false;
+                    result.Message = ModbusHelper.ErrMsg(responsePackage[2]);
+                }
+                byte[] resultBuffer = new byte[responsePackage.Length - 2];
+                Buffer.BlockCopy(responsePackage, 0, resultBuffer, 0, resultBuffer.Length);
+                result.Response = string.Join(" ", responsePackage.Select(t => t.ToString("X2")));
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+            }
+            finally
+            {
+                if (!IsUseLongConnect) Disconnect();
+            }
+            _advancedHybirdLock.Leave();
+            return result.EndTime();
         }
 
 
@@ -192,9 +319,18 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
         {
-            if (!IsConnect) Connect();
-
+            _advancedHybirdLock.Enter();
             var result = new OperationResult();
+            if (!IsUseLongConnect)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
+            }
             try
             {
                 var command = GetWriteCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
@@ -203,12 +339,16 @@ namespace Wombat.IndustrialProtocol.Modbus
                 result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(commandCRC16);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var responsePackage = sendResult.Value;
                 if (!responsePackage.Any())
                 {
                     result.IsSuccess = false;
                     result.Message = "响应结果为空";
+                    _advancedHybirdLock.Leave();
                     return result.EndTime();
                 }
                 else if (!CRC16Helper.CheckCRC16(responsePackage))
@@ -233,28 +373,13 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (IsConnect) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
-        protected override OperationResult DoConnect()
-        {
 
-            if (!DeviceInterfaceHelper.CheckSerialPort(PortName))
-            {
-                Logger?.LogError($"电脑没有查找到端口:{PortName}");
-                throw new Exception($"电脑没有查找到端口:{PortName}");
-
-
-            }
-            return _serialPortBase.Connect();
-        }
-
-        protected override OperationResult DoDisconnect()
-        {
-            return _serialPortBase.Disconnect();
-        }
 
        public override OperationResult<byte[]> SendPackageReliable(byte[] command)
         {
@@ -344,6 +469,36 @@ namespace Wombat.IndustrialProtocol.Modbus
             buffer[5] = 0x00;
             return buffer;
         }
+
+
+        /// <summary>
+        /// 获取线圈写入命令
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <returns></returns>
+        public byte[] GetWriteCoilCommand(string address, bool[] values, byte stationNumber, byte functionCode, byte[] check = null, bool isPlcAddress = false)
+        {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
+            var writeAddress = ushort.Parse(address?.Trim());
+            int length = (values.Length + 1) / 2;
+            byte[] newValue = values.TransByte();
+
+            byte[] buffer = new byte[7 + newValue.Length];
+            buffer[0] = stationNumber; //站号
+            buffer[1] = functionCode;  //功能码
+            buffer[2] = BitConverter.GetBytes(writeAddress)[1];
+            buffer[3] = BitConverter.GetBytes(writeAddress)[0];//寄存器地址
+            buffer[4] = (byte)(values.Length / 2 / 256);
+            buffer[5] = (byte)(values.Length / 2 % 256);//写寄存器数量(除2是两个字节一个寄存器，寄存器16位。除以256是byte最大存储255。)              
+            buffer[6] = (byte)(newValue.Length);          //写字节的个数
+            newValue.CopyTo(buffer, 7);                   //把目标值附加到数组后面
+            return buffer;
+
+        }
+
 
         #endregion
 

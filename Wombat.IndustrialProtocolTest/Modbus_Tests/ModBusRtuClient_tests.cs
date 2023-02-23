@@ -14,12 +14,13 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         byte stationNumber = 1;//站号
         public ModbusRtuClient_tests()
         {
-            client = new ModbusRtuClient("COM2", 9600, 8, StopBits.One, Parity.None);
+            client = new ModbusRtuClient("COM3", 9600, 8, StopBits.One, Parity.None);
         }
 
         [Fact]
-        public async Task 短连接自动开关()
+        public void  短连接自动开关()
         {
+            client.IsUseLongConnect = false;
             short Number = 33;
             client.Write("4", Number, stationNumber);
             Assert.True(client.ReadInt16("4", stationNumber).Value == Number);
@@ -50,8 +51,10 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         }
 
         [Fact]
-        public async Task 长连接主动开关()
+        public void 长连接主动开关()
         {
+            client.IsUseLongConnect = true;
+
             client.Connect();
 
             short Number = 33;

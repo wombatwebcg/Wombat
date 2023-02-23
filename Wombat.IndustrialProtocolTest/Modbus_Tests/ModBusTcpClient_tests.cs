@@ -17,9 +17,8 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         byte stationNumber = 2;//站号
         public ModbusTcpClient_tests()
         {
-            //var ip = IPAddress.Parse("ip".GetConfig());
-            //var port = int.Parse("port".GetConfig());
-            //client = new ModbusTcpClient(new IPEndPoint(ip, port));
+            var ip = IPAddress.Parse("127.0.0.1");
+            client = new ModbusTcpClient(new IPEndPoint(ip, 502));
         }
 
         public bool ShortToBit(int value, int index)

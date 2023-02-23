@@ -24,10 +24,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// </summary>
         protected Socket _socket;
 
-        /// <summary>
-        /// 是否自动打开关闭
-        /// </summary>
-        protected bool _isAutoOpen = true;
+        private AdvancedHybirdLock _advancedHybirdLock;
 
         private IPEndPoint _ipEndPoint;
 
@@ -44,6 +41,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public ModbusSocketBase(IPEndPoint ipAndPoint)
         {
             _ipEndPoint = ipAndPoint;
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
         /// <summary>
@@ -59,6 +57,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             if (!IPAddress.TryParse(ip, out IPAddress address))
                 address = Dns.GetHostEntry(ip).AddressList?.FirstOrDefault();
             _ipEndPoint = new IPEndPoint(address, port);
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
 
@@ -66,7 +65,6 @@ namespace Wombat.IndustrialProtocol.Modbus
 
         protected override OperationResult DoConnect()
         {
-            _isAutoOpen = false;
             var result = new OperationResult();
             _socket?.SafeClose();
             _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -98,8 +96,6 @@ namespace Wombat.IndustrialProtocol.Modbus
 
         protected override OperationResult DoDisconnect()
         {
-            _isAutoOpen = true;
-
             OperationResult result = new OperationResult();
             try
             {
@@ -270,15 +266,17 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public override OperationResult<byte[]> Read(string address, int readLength = 1, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
+            _advancedHybirdLock.Enter();
             var result = new OperationResult<byte[]>();
 
             if (!_socket?.Connected ?? true)
             {
-                var conentResult = Connect();
-                if (!conentResult.IsSuccess)
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
                 {
-                    conentResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ conentResult.Message}";
-                    return result.SetInfo(conentResult);
+                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
                 }
             }
             try
@@ -292,6 +290,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 if (!sendResult.IsSuccess)
                 {
                     sendResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ sendResult.Message}";
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
                 }
                 var dataPackage = sendResult.Value;
@@ -330,6 +329,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             {
                 if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
@@ -345,12 +345,16 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16,bool isPlcAddress = false)
         {
+            _advancedHybirdLock.Enter();
             var result = new OperationResult();
             if (!_socket?.Connected ?? true)
             {
-                var conentResult = Connect();
-                if (!conentResult.IsSuccess)
-                    return result.SetInfo(conentResult);
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
             }
             try
             {
@@ -359,7 +363,10 @@ namespace Wombat.IndustrialProtocol.Modbus
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
@@ -391,6 +398,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             {
                 if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
         /// <summary>
@@ -402,12 +410,16 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode">功能码</param>
         public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
         {
+            _advancedHybirdLock.Enter();
             var result = new OperationResult();
             if (!_socket?.Connected ?? true)
             {
-                var conentResult = Connect();
-                if (!conentResult.IsSuccess)
-                    return result.SetInfo(conentResult);
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
             }
             try
             {
@@ -416,7 +428,10 @@ namespace Wombat.IndustrialProtocol.Modbus
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
@@ -448,17 +463,22 @@ namespace Wombat.IndustrialProtocol.Modbus
             {
                 if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 
         public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0x0F, bool isPlcAddress = false)
         {
+            _advancedHybirdLock.Enter();
             var result = new OperationResult();
             if (!_socket?.Connected ?? true)
             {
-                var conentResult = Connect();
-                if (!conentResult.IsSuccess)
-                    return result.SetInfo(conentResult);
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
             }
             try
             {
@@ -467,7 +487,10 @@ namespace Wombat.IndustrialProtocol.Modbus
                 result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
                 var sendResult = SendPackageReliable(command);
                 if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
                     return result.SetInfo(sendResult).EndTime();
+                }
                 var dataPackage = sendResult.Value;
                 result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
                 if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
@@ -499,6 +522,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             {
                 if (!IsUseLongConnect) Disconnect();
             }
+            _advancedHybirdLock.Leave();
             return result.EndTime();
         }
 

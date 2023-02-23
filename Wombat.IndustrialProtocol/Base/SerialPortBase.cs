@@ -65,7 +65,7 @@ namespace Wombat.IndustrialProtocol
             return SerialPort.GetPortNames();
         }
 
-        public override bool IsConnect => _serialPort.IsOpen;
+        public override bool IsConnect =>_serialPort==null?false:_serialPort.IsOpen;
 
 
 
@@ -212,9 +212,9 @@ namespace Wombat.IndustrialProtocol
                 {
                     WarningLog?.Invoke(result.Message, result.Exception);
                     //如果出现异常，则进行一次重试         
-                    var conentResult = Connect();
-                    if (!conentResult.IsSuccess)
-                        return new OperationResult<byte[]>(conentResult);
+                    var connectResult = Connect();
+                    if (!connectResult.IsSuccess)
+                        return new OperationResult<byte[]>(connectResult);
 
                     result = result.SetInfo(_sendPackage());
                 }

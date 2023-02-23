@@ -188,9 +188,9 @@ namespace Wombat.IndustrialProtocol.PLC
                 {
                     WarningLog?.Invoke(result.Message, result.Exception);
                     //如果出现异常，则进行一次重试         
-                    var conentResult = Connect();
-                    if (!conentResult.IsSuccess)
-                        return new OperationResult<byte[]>(conentResult);
+                    var connectResult = Connect();
+                    if (!connectResult.IsSuccess)
+                        return new OperationResult<byte[]>(connectResult);
 
                     return _sendPackage();
                 }
@@ -202,9 +202,9 @@ namespace Wombat.IndustrialProtocol.PLC
                 WarningLog?.Invoke(ex.Message, ex);
                 //如果出现异常，则进行一次重试
                 //重新打开连接
-                var conentResult = Connect();
-                if (!conentResult.IsSuccess)
-                    return new OperationResult<byte[]>(conentResult);
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                    return new OperationResult<byte[]>(connectResult);
 
                 return _sendPackage();
             }

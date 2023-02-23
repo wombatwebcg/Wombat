@@ -4,17 +4,23 @@ using System.Net;
 using System.Text;
 using Wombat.IndustrialProtocol.Modbus;
 using Wombat.IndustrialProtocol.Models;
+using Wombat.Infrastructure;
 
 namespace Wombat.IndustrialProtocol.PLC
 {
     public  abstract class PLCByModbusTcpBase : ModbusTcpClient
     {
+        private AdvancedHybirdLock _advancedHybirdLock;
+
         protected PLCByModbusTcpBase(IPEndPoint ipAndPoint) : base(ipAndPoint)
         {
+            _advancedHybirdLock = new AdvancedHybirdLock();
         }
 
         protected PLCByModbusTcpBase(string ip, int port) : base(ip, port)
         {
+            _advancedHybirdLock = new AdvancedHybirdLock();
+
         }
         #region  Read 读取
 
