@@ -244,9 +244,9 @@ namespace Wombat.IndustrialProtocol.PLC
             return base.Write(address, value, stationNumber, functionCode, isPlcAddress);   
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0xF, bool isPlcAddress = true)
         {
-            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);   
+            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);
         }
 
         public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)

@@ -311,8 +311,7 @@ namespace Wombat.IndustrialProtocol.PLC
                     case MitsubishiVersion.A_1E:
                         var lenght = command[10] + command[11] * 256;
                         if (isBit)
-                            sendResult = 
-                                SendPackage(command, (int)Math.Ceiling(lenght * 0.5) + 2);
+                            sendResult = SendPackage(command, (int)Math.Ceiling(lenght * 0.5) + 2);
                         else
                             sendResult = SendPackage(command, lenght * 2 + 2);
                         break;
@@ -565,17 +564,14 @@ namespace Wombat.IndustrialProtocol.PLC
         {
             int length = (value.Length + 1) / 2;
             byte[] buffer = new byte[length];
-            byte b1 = 0b00010000;
-            byte b2 = 0b00000001;
-            byte b3 = 0b00000000;
             for (ushort i = 0; i < value.Length; i++)
             {
                 var index = i / 2;
                 var isoffset = i % 2 == 0;
                 if (isoffset)
-                    buffer[index] += value[i] ? b1 : b3;
+                    buffer[index] += (byte)(value[i] ? 0b00010000 : 0b00000000);
                 else
-                    buffer[index] += value[i] ? b2 : b3;
+                    buffer[index] += (byte)(value[i] ? 0b00000001 : 0b00000000);
             }
             return buffer;
 

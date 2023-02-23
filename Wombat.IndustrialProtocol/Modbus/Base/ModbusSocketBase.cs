@@ -328,7 +328,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (_isAutoOpen) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
             return result.EndTime();
         }
@@ -389,7 +389,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (_isAutoOpen) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
             return result.EndTime();
         }
@@ -446,14 +446,60 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             finally
             {
-                if (_isAutoOpen) Dispose();
+                if (!IsUseLongConnect) Disconnect();
             }
             return result.EndTime();
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0x0F, bool isPlcAddress = false)
         {
-            return Write(address, value.TransByte(), stationNumber, functionCode, isPlcAddress);
+            var result = new OperationResult();
+            if (!_socket?.Connected ?? true)
+            {
+                var conentResult = Connect();
+                if (!conentResult.IsSuccess)
+                    return result.SetInfo(conentResult);
+            }
+            try
+            {
+                var chenkHead = GetCheckHead(functionCode);
+                var command = GetWriteCoilCommand(address, value, stationNumber, functionCode, chenkHead, isPlcAddress);
+                result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
+                var sendResult = SendPackageReliable(command);
+                if (!sendResult.IsSuccess)
+                    return result.SetInfo(sendResult).EndTime();
+                var dataPackage = sendResult.Value;
+                result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
+                if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果校验失败";
+                    _socket?.SafeClose();
+                }
+                else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
+                {
+                    result.IsSuccess = false;
+                    result.Message = ModbusHelper.ErrMsg(dataPackage[8]);
+                }
+            }
+            catch (SocketException ex)
+            {
+                result.IsSuccess = false;
+                if (ex.SocketErrorCode == SocketError.TimedOut)
+                {
+                    result.Message = "连接超时";
+                    _socket?.SafeClose();
+                }
+                else
+                {
+                    result.Message = ex.Message;
+                }
+            }
+            finally
+            {
+                if (!IsUseLongConnect) Disconnect();
+            }
+            return result.EndTime();
         }
 
         #endregion
@@ -560,6 +606,41 @@ namespace Wombat.IndustrialProtocol.Modbus
             buffer[11] = 0x00;
             return buffer;
         }
+
+
+
+        /// <summary>
+        /// 获取线圈写入命令
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <returns></returns>
+        public byte[] GetWriteCoilCommand(string address, bool[] values, byte stationNumber, byte functionCode, byte[] check = null, bool isPlcAddress = false)
+        {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
+            var writeAddress = ushort.Parse(address?.Trim());
+            int length = (values.Length + 1) / 2;
+            byte[] newValue = values.TransByte();
+
+            byte[] buffer = new byte[13 + newValue.Length];
+            buffer[0] = check?[0] ?? 0x19;
+            buffer[1] = check?[1] ?? 0xB2;//检验信息，用来验证response是否串数据了           
+            buffer[4] = BitConverter.GetBytes(7 + newValue.Length)[1];
+            buffer[5] = BitConverter.GetBytes(7 + newValue.Length)[0];//表示的是header handle后面还有多长的字节
+
+            buffer[6] = stationNumber; //站号
+            buffer[7] = functionCode;  //功能码
+            buffer[8] = BitConverter.GetBytes(writeAddress)[1];
+            buffer[9] = BitConverter.GetBytes(writeAddress)[0];//寄存器地址
+            buffer[10] = (byte)(values.Length  / 256);
+            buffer[11] = (byte)(values.Length  % 256);//写寄存器数量(除2是两个字节一个寄存器，寄存器16位。除以256是byte最大存储255。)              
+            buffer[12] = (byte)(newValue.Length);          //写字节的个数
+            newValue.CopyTo(buffer, 13);                   //把目标值附加到数组后面
+            return buffer;
+        }
+
 
         #endregion      
 

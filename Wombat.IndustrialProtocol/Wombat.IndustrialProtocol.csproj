@@ -28,14 +28,4 @@
     <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
   </ItemGroup>
 
-
-
-
-
-
-
-  <ItemGroup>
-    <Folder Include="OPCUA\" />
-  </ItemGroup>
-
 </Project>

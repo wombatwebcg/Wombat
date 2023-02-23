@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Wombat.IndustrialProtocol.PLC;
 using Xunit;
+using Wombat.Infrastructure;
 
 namespace Wombat.IndustrialProtocolTest.PLC_Tests
 {
@@ -23,29 +24,32 @@ namespace Wombat.IndustrialProtocolTest.PLC_Tests
         //[InlineData(MitsubishiVersion.A_1E, 6001)]
         public void 短连接自动开关()
         {
+
             client = new InovanceClient(ip,502);
-            client.UseLogger();
             client.IsUseLongConnect = false;
             ReadWrite();
         }
+        [Fact]
+
+        public void 长连接自动开关()
+        {
+
+            client = new InovanceClient(ip, 502);
+            client.IsUseLongConnect = true;
+            client.Connect();
+            ReadWrite();
+            client.Disconnect();
+
+        }
+
+
         private void ReadWrite()
         {
 
 
-            bool[] bool_values = { true, false, false, false, true, false, false, false, false, false
-                        , false, false, false,false,false,false,false,false,false, true };
-
-            var sss1 = client.Write("M900", bool_values);
-            var bool_values_result = client.ReadCoil("M900", bool_values.Length);
-            for (int j = 0; j < bool_values_result.Value.Length; j++)
-            {
-                Assert.True(bool_values_result.Value[j] == bool_values[j]);
-
-            }
-
 
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
                 int int_number = rnd.Next(int.MinValue, int.MaxValue);
@@ -65,7 +69,7 @@ namespace Wombat.IndustrialProtocolTest.PLC_Tests
                 Assert.True(client.ReadCoil("M903").Value == !bool_value);
                 client.Write("M904", bool_value);
                 Assert.True(client.ReadCoil("M904").Value == bool_value);
-                client.Write("L100", !bool_value);
+                //client.Write("L100", !bool_value);
                 //Assert.True(client.ReadBoolean("L100").Value == !bool_value);
                 //client.Write("F100", bool_value);
                 //Assert.True(client.ReadBoolean("F100").Value == bool_value);
@@ -101,6 +105,17 @@ namespace Wombat.IndustrialProtocolTest.PLC_Tests
                 //    Assert.True(bool_values_result.Value[j] == bool_values[j]);
 
                 //}
+
+                bool[] bool_values = { true, false, false, false, true, false, false, false, false, false
+                        , false, false, false,false,false,false,false,false,false, true };
+
+                var sss1 = client.Write("M900", bool_values);
+                var bool_values_result = client.ReadCoil("M900", bool_values.Length);
+                for (int j = 0; j < bool_values_result.Value.Length; j++)
+                {
+                    Assert.True(bool_values_result.Value[j] == bool_values[j]);
+
+                }
 
                 short[] short_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
                 client.Write("D300", short_values);

@@ -968,12 +968,10 @@ namespace Wombat.Infrastructure
 
             int length = array.Length % 8 == 0 ? array.Length / 8 : array.Length / 8 + 1;
             byte[] buffer = new byte[length];
-
             for (int i = 0; i < array.Length; i++)
             {
                 int index = i / 8;
                 int offect = i % 8;
-
                 byte temp = 0;
                 switch (offect)
                 {
@@ -987,7 +985,6 @@ namespace Wombat.Infrastructure
                     case 7: temp = 0x80; break;
                     default: break;
                 }
-
                 if (array[i]) buffer[index] += temp;
             }
 
