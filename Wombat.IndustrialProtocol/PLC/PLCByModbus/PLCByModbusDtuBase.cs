@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
+﻿using System.IO.Ports;
 using Wombat.IndustrialProtocol.Modbus;
-using Wombat.IndustrialProtocol.Models;
-using Wombat.Infrastructure;
 
 namespace Wombat.IndustrialProtocol.PLC
 {
-    public  abstract class PLCByModbusTcpBase : ModbusTcpClient
+    public abstract  class PLCByModbusDtuBase: ModbusRtuClient
     {
-
-        protected PLCByModbusTcpBase(IPEndPoint ipAndPoint) : base(ipAndPoint)
+        protected PLCByModbusDtuBase(string portName, int baudRate = 9600, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, Handshake handshake = Handshake.None) : base(portName, baudRate, dataBits, stopBits, parity, handshake)
         {
         }
 
-        protected PLCByModbusTcpBase(string ip, int port) : base(ip, port)
-        {
-
-        }
         #region  Read 读取
 
 
@@ -39,7 +29,7 @@ namespace Wombat.IndustrialProtocol.PLC
           => base.ReadInt16(address, stationNumber, functionCode, isPlcAddress);
 
         public new OperationResult<short[]> ReadInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-          => base.ReadInt16(address,readLength ,stationNumber, functionCode, isPlcAddress);
+          => base.ReadInt16(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -52,7 +42,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="left">按位取值从左边开始取</param>
         /// <returns></returns>
         public new OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
-          => base.ReadInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
+          => base.ReadInt16Bit(address, stationNumber, functionCode, left, isPlcAddress);
 
 
         public new OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
@@ -67,7 +57,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="left">按位取值从左边开始取</param>
         /// <returns></returns>
         public new OperationResult<ushort> ReadUInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
-            => base.ReadUInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
+            => base.ReadUInt16Bit(address, stationNumber, functionCode, left, isPlcAddress);
 
         /// <summary>
         /// 读取Int32
@@ -127,7 +117,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<long[]> ReadInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            => base.ReadInt64(address,readLength ,stationNumber, functionCode, isPlcAddress);
+            => base.ReadInt64(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -138,7 +128,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<ulong> ReadUInt64(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            =>base.ReadUInt64(address, stationNumber, functionCode, isPlcAddress);
+            => base.ReadUInt64(address, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取UInt64
@@ -148,7 +138,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<ulong[]> ReadUInt64(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            => base.ReadUInt64(address,readLength, stationNumber, functionCode, isPlcAddress);
+            => base.ReadUInt64(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
         /// 读取Float
@@ -168,7 +158,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<float[]> ReadFloat(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            => base.ReadFloat(address,readLength,stationNumber, functionCode, isPlcAddress);
+            => base.ReadFloat(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
@@ -189,7 +179,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<double[]> ReadDouble(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-            => base.ReadDouble(address,readLength ,stationNumber, functionCode, isPlcAddress);
+            => base.ReadDouble(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -212,7 +202,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
         public new OperationResult<bool[]> ReadCoil(string address, int readLength, byte stationNumber = 1, byte functionCode = 1, bool isPlcAddress = true)
-            => base.ReadCoil(address,readLength ,stationNumber, functionCode, isPlcAddress);
+            => base.ReadCoil(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -234,7 +224,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="functionCode"></param>
         /// <returns></returns>
         public new OperationResult<bool[]> ReadDiscrete(string address, int readLength, byte stationNumber = 1, byte functionCode = 2, bool isPlcAddress = true)
-            => base.ReadDiscrete(address,readLength ,stationNumber, functionCode, isPlcAddress);
+            => base.ReadDiscrete(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
 
@@ -244,7 +234,7 @@ namespace Wombat.IndustrialProtocol.PLC
 
         public override OperationResult Write(string address, bool value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = true)
         {
-            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);   
+            return base.Write(address, value, stationNumber, functionCode, isPlcAddress);
         }
 
         public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0xF, bool isPlcAddress = true)
@@ -254,7 +244,7 @@ namespace Wombat.IndustrialProtocol.PLC
 
         public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
         {
-            return base.Write(address, values, stationNumber, functionCode, isPlcAddress);  
+            return base.Write(address, values, stationNumber, functionCode, isPlcAddress);
         }
         /// <summary>
         /// 写入
@@ -423,7 +413,6 @@ namespace Wombat.IndustrialProtocol.PLC
 
 
         #endregion
-
 
     }
 }
