@@ -333,6 +333,73 @@ namespace Wombat.IndustrialProtocol.Modbus
             return result.EndTime();
         }
 
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address">写入地址</param>
+        /// <param name="values">写入字节数组</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <param name="byteFormatting">大小端设置</param>
+        /// <returns></returns>
+        public override OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
+        {
+            _advancedHybirdLock.Enter();
+            var result = new OperationResult();
+            if (!_socket?.Connected ?? true)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(connectResult);
+                }
+            }
+            try
+            {
+                var chenkHead = GetCheckHead(functionCode);
+                var command = GetWriteOneCommand(address, values, stationNumber, functionCode, chenkHead, isPlcAddress);
+                result.Requst = string.Join(" ", command.Select(t => t.ToString("X2")));
+                var sendResult = SendPackageReliable(command);
+                if (!sendResult.IsSuccess)
+                {
+                    _advancedHybirdLock.Leave();
+                    return result.SetInfo(sendResult).EndTime();
+                }
+                var dataPackage = sendResult.Value;
+                result.Response = string.Join(" ", dataPackage.Select(t => t.ToString("X2")));
+                if (chenkHead[0] != dataPackage[0] || chenkHead[1] != dataPackage[1])
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果校验失败";
+                    _socket?.SafeClose();
+                }
+                else if (ModbusHelper.VerifyFunctionCode(functionCode, dataPackage[7]))
+                {
+                    result.IsSuccess = false;
+                    result.Message = ModbusHelper.ErrMsg(dataPackage[8]);
+                }
+            }
+            catch (SocketException ex)
+            {
+                result.IsSuccess = false;
+                if (ex.SocketErrorCode == SocketError.TimedOut)
+                {
+                    result.Message = "连接超时";
+                    _socket?.SafeClose();
+                }
+                else
+                {
+                    result.Message = ex.Message;
+                }
+            }
+            finally
+            {
+                if (!IsUseLongConnect) Disconnect();
+            }
+            _advancedHybirdLock.Leave();
+            return result.EndTime();
+        }
 
         /// <summary>
         /// 写入
@@ -467,7 +534,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             return result.EndTime();
         }
 
-        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 0x0F, bool isPlcAddress = false)
+        public override OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 15, bool isPlcAddress = false)
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult();
@@ -573,6 +640,34 @@ namespace Wombat.IndustrialProtocol.Modbus
             buffer[11] = BitConverter.GetBytes(length)[0];//表示request 寄存器的长度(寄存器个数)
             return buffer;
         }
+
+        /// <summary>
+        /// 获取写入命令
+        /// </summary>
+        /// <param name="address">寄存器地址</param>
+        /// <param name="values">批量读取的值</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <returns></returns>
+        public byte[] GetWriteOneCommand(string address, byte[] values, byte stationNumber, byte functionCode, byte[] check = null, bool isPlcAddress = false)
+        {
+            if (isPlcAddress) { address = TranPLCAddress(address); }
+            var writeAddress = ushort.Parse(address?.Trim());
+            byte[] buffer = new byte[12];
+            buffer[0] = check?[0] ?? 0x19;
+            buffer[1] = check?[1] ?? 0xB2;//Client发出的检验信息     
+            buffer[4] = 0x00;
+            buffer[5] = 0x06;//表示的是该字节以后的字节长度
+
+            buffer[6] = stationNumber;//站号
+            buffer[7] = functionCode; //功能码
+            buffer[8] = BitConverter.GetBytes(writeAddress)[1];
+            buffer[9] = BitConverter.GetBytes(writeAddress)[0];//寄存器地址
+            buffer[10] = values[0];     //此处只可以是FF表示闭合00表示断开，其他数值非法
+            buffer[11] = values[1];
+            return buffer;
+        }
+
 
         /// <summary>
         /// 获取写入命令

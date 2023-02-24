@@ -967,7 +967,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value"></param>
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
-        public abstract OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 5, bool isPlcAddress = false);
+        public abstract OperationResult Write(string address, bool[] value, byte stationNumber = 1, byte functionCode = 15, bool isPlcAddress = false);
 
         /// <summary>
         /// 写入
@@ -978,6 +978,17 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="functionCode"></param>
         /// <returns></returns>
         public abstract OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false);
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber"></param>
+        /// <param name="functionCode"></param>
+        /// <returns></returns>
+        public abstract OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false);
+
 
 
         /// <summary>
@@ -990,7 +1001,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public virtual OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 06, bool isPlcAddress = false)
         {
-            return Write(address, new byte[1] { value }, stationNumber, functionCode, isPlcAddress);
+            return WriteOne(address, new byte[1] { value }, stationNumber, functionCode, isPlcAddress);
         }
 
         /// <summary>
@@ -1000,10 +1011,10 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
         {
             var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode,isPlcAddress);
+            return WriteOne(address, values, stationNumber, functionCode,isPlcAddress);
         }
         /// <summary>
         /// 写入
@@ -1026,10 +1037,10 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
         {
             var values = value.TransByte(IsReverse);
-            return Write(address, values, stationNumber, functionCode, isPlcAddress);
+            return WriteOne(address, values, stationNumber, functionCode, isPlcAddress);
         }
 
         /// <summary>

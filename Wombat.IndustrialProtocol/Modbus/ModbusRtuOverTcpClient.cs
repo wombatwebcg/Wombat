@@ -221,7 +221,60 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool byteFormatting = true)
+        public override OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool byteFormatting = true)
+        {
+            if (!IsConnect) Connect();
+
+            var result = new OperationResult();
+            try
+            {
+                var command = GetWriteCommand(address, values, stationNumber, functionCode);
+
+                var commandCRC16 = CRC16Helper.GetCRC16(command);
+                result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
+                //var responsePackage = SendPackage(commandCRC16, 8);
+                var sendResult = SendPackage(commandCRC16, 8);
+                if (!sendResult.IsSuccess)
+                    return sendResult;
+                var responsePackage = sendResult.Value;
+
+                if (!responsePackage.Any())
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果为空";
+                    return result.EndTime();
+                }
+                else if (!CRC16Helper.CheckCRC16(responsePackage))
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果CRC16Helper验证失败";
+                    //return result.EndTime();
+                }
+                byte[] resultBuffer = new byte[responsePackage.Length - 2];
+                Array.Copy(responsePackage, 0, resultBuffer, 0, resultBuffer.Length);
+                result.Response = string.Join(" ", responsePackage.Select(t => t.ToString("X2")));
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+            }
+            finally
+            {
+                if (IsConnect) Dispose();
+            }
+            return result.EndTime();
+        }
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber"></param>
+        /// <param name="functionCode"></param>
+        /// <returns></returns>
+        public override OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 6, bool byteFormatting = true)
         {
             if (!IsConnect) Connect();
 

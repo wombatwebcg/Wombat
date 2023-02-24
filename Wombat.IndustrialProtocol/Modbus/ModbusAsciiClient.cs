@@ -216,6 +216,67 @@ namespace Wombat.IndustrialProtocol.Modbus
         }
 
 
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber"></param>
+        /// <param name="functionCode"></param>
+        /// <returns></returns>
+        public override OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        {
+            if (!IsConnect) Connect();
+
+            var result = new OperationResult();
+            try
+            {
+                var command = GetWriteCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
+
+                var commandAscii = DataConvert.ByteArrayToAsciiArray(LRCHelper.GetLRC(command));
+                var finalCommand = new byte[commandAscii.Length + 3];
+                Buffer.BlockCopy(commandAscii, 0, finalCommand, 1, commandAscii.Length);
+                finalCommand[0] = 0x3A;
+                finalCommand[finalCommand.Length - 2] = 0x0D;
+                finalCommand[finalCommand.Length - 1] = 0x0A;
+
+                result.Requst = string.Join(" ", finalCommand.Select(t => t.ToString("X2")));
+                var sendResult = SendPackageReliable(finalCommand);
+                if (!sendResult.IsSuccess)
+                    return result.SetInfo(sendResult).EndTime();
+                var responsePackage = sendResult.Value;
+                if (!responsePackage.Any())
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果为空";
+                    return result.EndTime();
+                }
+
+                byte[] resultLRC = new byte[responsePackage.Length - 3];
+                Array.Copy(responsePackage, 1, resultLRC, 0, resultLRC.Length);
+                var resultByte = DataConvert.AsciiArrayToByteArray(resultLRC);
+                if (!LRCHelper.CheckLRC(resultByte))
+                {
+                    result.IsSuccess = false;
+                    result.Message = "响应结果LRC验证失败";
+                    //return result.EndTime();
+                }
+
+                result.Response = string.Join(" ", responsePackage.Select(t => t.ToString("X2")));
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+            }
+            finally
+            {
+                if (!IsConnect) Dispose();
+            }
+            return result.EndTime();
+        }
+
+
         #endregion
     }
 }

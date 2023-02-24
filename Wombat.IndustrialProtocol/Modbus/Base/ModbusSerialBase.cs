@@ -318,7 +318,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public override OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        public override OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
         {
             _advancedHybirdLock.Enter();
             var result = new OperationResult();
@@ -334,7 +334,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             }
             try
             {
-                var command = GetWriteCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
+                var command = GetWriteOneCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
 
                 var commandCRC16 = CRC16Helper.GetCRC16(command);
                 result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
@@ -507,7 +507,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public byte[] GetWriteCommand(string address, byte value, byte stationNumber, byte functionCode, bool isPlcAddress = false)
+        public byte[] GetWriteOneCommand(string address, byte[] values, byte stationNumber, byte functionCode, bool isPlcAddress = false)
         {
 
             if (isPlcAddress) { address = TranPLCAddress(address); }
@@ -517,8 +517,8 @@ namespace Wombat.IndustrialProtocol.Modbus
             buffer[1] = functionCode; //功能码
             buffer[2] = BitConverter.GetBytes(readAddress)[1];
             buffer[3] = BitConverter.GetBytes(readAddress)[0];//寄存器地址
-            buffer[4] = value;     //此处只可以是FF表示闭合00表示断开，其他数值非法
-            buffer[5] = 0x00;
+            buffer[4] = values[0];    
+            buffer[5] = values[1];
             return buffer;
         }
 
