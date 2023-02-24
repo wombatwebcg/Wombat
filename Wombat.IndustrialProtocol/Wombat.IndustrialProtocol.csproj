@@ -17,13 +17,6 @@
 	  <Version>1.1.2</Version>
   </PropertyGroup>
 
-
-
-
-
-
-
-
   <ItemGroup>
     <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
   </ItemGroup>

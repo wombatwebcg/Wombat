@@ -979,6 +979,20 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <returns></returns>
         public abstract OperationResult Write(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false);
 
+
+        /// <summary>
+        /// 写入
+        /// </summary>
+        /// <param name="address"></param>
+        /// <param name="values"></param>
+        /// <param name="stationNumber"></param>
+        /// <param name="functionCode"></param>
+        /// <returns></returns>
+        public virtual OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 06, bool isPlcAddress = false)
+        {
+            return Write(address, new byte[1] { value }, stationNumber, functionCode, isPlcAddress);
+        }
+
         /// <summary>
         /// 写入
         /// </summary>

@@ -97,6 +97,13 @@ namespace Wombat.IndustrialProtocol
             return this;
         }
 
+        public OperationResult CreatFailureEndTime()
+        {
+            IsSuccess = false;           
+            return EndTime();
+
+        }
+
         /// <summary>
         /// 开始时间
         /// </summary>
@@ -134,7 +141,11 @@ namespace Wombat.IndustrialProtocol
         public void AddMessage2List()
         {
             if (!MessageList.Contains(Message))
-                MessageList.Add(Message);
+            {
+                if (Message != null & Message != string.Empty)
+                    MessageList.Add(Message);
+
+            }
         }
 
         public static OperationResult Assignment(OperationResult orgin)
@@ -153,7 +164,8 @@ namespace Wombat.IndustrialProtocol
             };
             foreach (var message in orgin.MessageList)
             {
-                newOperationValue.MessageList.Add(message);
+                if (message != null & message != string.Empty)
+                    newOperationValue.MessageList.Add(message);
             }
             return newOperationValue;
         }
@@ -219,7 +231,8 @@ namespace Wombat.IndustrialProtocol
             this.Message = orgin.Message;
             foreach (var message in orgin.MessageList)
             {
-                this.MessageList.Add(message);
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
             }
             this.Requst = orgin.Requst;
             this.Requst2 = orgin.Requst2;
@@ -241,6 +254,7 @@ namespace Wombat.IndustrialProtocol
             this.Message = orgin.Message;
             foreach (var message in orgin.MessageList)
             {
+                if(message!=null&message!=string.Empty)
                 this.MessageList.Add(message);
             }
             this.Requst = orgin.Requst;
@@ -265,12 +279,21 @@ namespace Wombat.IndustrialProtocol
         /// <summary>
         /// 结束时间统计
         /// </summary>
-        internal new OperationResult<T> EndTime()
+        public new OperationResult<T> EndTime()
         {
             base.EndTime();
             return this;
 
         }
+
+        public new OperationResult<T> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
         #endregion
 
         /// <summary>
@@ -296,7 +319,6 @@ namespace Wombat.IndustrialProtocol
             return this;
         }
 
-
     }
     /// <summary>
     /// 操作结果的泛型类，允许带两个用户自定义的泛型对象，推荐使用这个类
@@ -320,7 +342,8 @@ namespace Wombat.IndustrialProtocol
             this.Message = orgin.Message;
             foreach (var message in orgin.MessageList)
             {
-                this.MessageList.Add(message);
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
             }
             this.Requst = orgin.Requst;
             this.Requst2 = orgin.Requst2;
@@ -343,7 +366,8 @@ namespace Wombat.IndustrialProtocol
             this.Message = orgin.Message;
             foreach (var message in orgin.MessageList)
             {
-                this.MessageList.Add(message);
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
             }
             this.Requst = orgin.Requst;
             this.Requst2 = orgin.Requst2;
@@ -370,19 +394,28 @@ namespace Wombat.IndustrialProtocol
         /// <summary>
         /// 结束时间统计
         /// </summary>
-        internal new OperationResult<T1, T2> EndTime()
+        public new OperationResult<T1, T2> EndTime()
         {
             base.EndTime();
             return this;
 
         }
 
+        public new OperationResult<T1, T2> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
+
         /// <summary>
         /// 设置异常信息和Succeed状态
         /// </summary>
         /// <param name="result"></param>
         /// <returns></returns>
-        public  OperationResult<T1,T2> SetInfo(OperationResult<T1,T2> result)
+        public OperationResult<T1,T2> SetInfo(OperationResult<T1,T2> result)
         {
             Value1 = result.Value1;
             Value2 = result.Value2;
