@@ -14,15 +14,14 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         byte stationNumber = 1;//站号
         public ModbusRtuClient_tests()
         {
-            //client = new ModbusRtuClient("COM3", 9600, 8, StopBits.One, Parity.None);
-            client = new ModbusRtuClient("COM23", 9600, 8, StopBits.One, Parity.Even);
+            client = new ModbusRtuClient("COM3", 9600, 8, StopBits.One, Parity.None);
+            //client = new ModbusRtuClient("COM23", 9600, 8, StopBits.One, Parity.Even);
 
         }
 
         [Fact]
         public void  短连接自动开关()
         {
-            var ssss = client.Write("32", (byte)3,stationNumber:0xFF,functionCode:6);
 
             short Number = 33;
             client.Write("4", Number, stationNumber);
