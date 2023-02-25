@@ -473,8 +473,9 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="addresses">地址集合</param>
         /// <param name="batchNumber">批量读取数量</param>
         /// <returns></returns>
-        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber = 19)
+        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses)
         {
+            int batchNumber = 19;
             var result = new OperationResult<Dictionary<string, object>>();
             result.Value = new Dictionary<string, object>();
 
@@ -482,7 +483,7 @@ namespace Wombat.IndustrialProtocol.PLC
             for (int i = 0; i < batchCount; i++)
             {
                 var tempAddresses = addresses.Skip(i * batchNumber).Take(batchNumber).ToDictionary(t => t.Key, t => t.Value);
-                var tempResult = BatchRead(tempAddresses);
+                var tempResult = BatchReadBase(tempAddresses);
                 if (!tempResult.IsSuccess)
                 {
                     result.IsSuccess = false;
@@ -510,7 +511,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         /// <param name="addresses"></param>
         /// <returns></returns>
-        private OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses)
+        private OperationResult<Dictionary<string, object>> BatchReadBase(Dictionary<string, DataTypeEnum> addresses)
         {
             if (!_socket?.Connected ?? true)
             {
@@ -653,7 +654,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         /// <param name="addresses"></param>
         /// <returns></returns>
-        private OperationResult BatchWrite(Dictionary<string, object> addresses)
+        private OperationResult BatchWriteBase(Dictionary<string, object> addresses)
         {
             if (!_socket?.Connected ?? true)
             {
@@ -780,14 +781,15 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="addresses">地址集合</param>
         /// <param name="batchNumber">批量读取数量</param>
         /// <returns></returns>
-        public override OperationResult BatchWrite(Dictionary<string, object> addresses, int batchNumber = 10)
+        public override OperationResult BatchWrite(Dictionary<string, object> addresses)
         {
+            int batchNumber = 10;
             var result = new OperationResult();
             var batchCount = Math.Ceiling((float)addresses.Count / batchNumber);
             for (int i = 0; i < batchCount; i++)
             {
                 var tempAddresses = addresses.Skip(i * batchNumber).Take(batchNumber).ToDictionary(t => t.Key, t => t.Value);
-                var tempResult = BatchWrite(tempAddresses);
+                var tempResult = BatchWriteBase(tempAddresses);
                 if (!tempResult.IsSuccess)
                 {
                     result.IsSuccess = tempResult.IsSuccess;

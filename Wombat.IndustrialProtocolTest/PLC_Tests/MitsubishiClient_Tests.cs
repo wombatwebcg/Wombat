@@ -255,7 +255,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
             //readAddresses.Add("V1651", DataTypeEnum.Byte);
             //readAddresses.Add("V1652", DataTypeEnum.Byte);
 
-            var result = client.BatchRead(readAddresses, 10);
+            var result = client.BatchRead(readAddresses);
         }
     }
 }

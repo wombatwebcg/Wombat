@@ -909,10 +909,10 @@ namespace Wombat.IndustrialProtocol.PLC
             return result;
         }
 
-        public abstract OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber);
+        public abstract OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses);
 
 
-        public abstract OperationResult BatchWrite(Dictionary<string, object> addresses, int batchNumber);
+        public abstract OperationResult BatchWrite(Dictionary<string, object> addresses);
 
 
         #endregion

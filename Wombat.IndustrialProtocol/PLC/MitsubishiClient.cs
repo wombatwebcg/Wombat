@@ -987,7 +987,7 @@ namespace Wombat.IndustrialProtocol.PLC
         #endregion
 
         #region TODO
-        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber)
+        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses)
         {
             var result = new OperationResult<Dictionary<string, object>>();
             result.Value = new Dictionary<string, object>();
@@ -1104,7 +1104,7 @@ namespace Wombat.IndustrialProtocol.PLC
             return result.EndTime();
         }
 
-        public override OperationResult BatchWrite(Dictionary<string, object> addresses, int batchNumber)
+        public override OperationResult BatchWrite(Dictionary<string, object> addresses)
         {
             throw new NotImplementedException();
         }

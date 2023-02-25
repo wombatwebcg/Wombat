@@ -7,7 +7,7 @@ namespace Wombat.IndustrialProtocol.PLC
     /// <summary>
     /// IIoTClient 接口
     /// </summary>
-    public interface IDeviceClient
+    public interface IDeviceClient: IBaseMessageModelSync
     {
         /// <summary>
         /// 版本
@@ -31,7 +31,19 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="addresses">地址集合</param>
         /// <param name="batchNumber">批量读取数量</param>
         /// <returns></returns>
-        OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber);
+        OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses);
+
+
+
+        /// <summary>
+        /// 分批写入 
+        /// </summary>
+        /// <param name="addresses">地址集合</param>
+        /// <param name="batchNumber">批量读取数量</param>
+        /// <returns></returns>
+
+        OperationResult BatchWrite(Dictionary<string, object> addresses);
+
 
         /// <summary>
         /// 读取Byte
@@ -193,13 +205,6 @@ namespace Wombat.IndustrialProtocol.PLC
 
         #region Write
 
-        /// <summary>
-        /// 分批写入 
-        /// </summary>
-        /// <param name="addresses">地址集合</param>
-        /// <param name="batchNumber">批量读取数量</param>
-        /// <returns></returns>
-        OperationResult BatchWrite(Dictionary<string, object> addresses, int batchNumber);
 
         /// <summary>
         /// 写入数据
@@ -396,5 +401,8 @@ namespace Wombat.IndustrialProtocol.PLC
 
 
         #endregion
+
+
+
     }
 }

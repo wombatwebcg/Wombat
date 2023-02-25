@@ -35,6 +35,7 @@ namespace Wombat.IndustrialProtocol
 
         bool IsBaseStreamFlush { get; set; }
 
+        bool IsUseLongConnect { get; set; }
 
         OperationResult Connect();
 

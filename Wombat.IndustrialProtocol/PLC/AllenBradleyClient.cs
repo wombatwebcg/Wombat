@@ -733,12 +733,12 @@ namespace Wombat.IndustrialProtocol.PLC
 
         }
 
-        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses, int batchNumber)
+        public override OperationResult<Dictionary<string, object>> BatchRead(Dictionary<string, DataTypeEnum> addresses)
         {
             throw new System.NotImplementedException();
         }
 
-        public override OperationResult BatchWrite(Dictionary<string, object> addresses, int batchNumber)
+        public override OperationResult BatchWrite(Dictionary<string, object> addresses)
         {
             throw new System.NotImplementedException();
         }

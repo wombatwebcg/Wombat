@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.IndustrialProtocol",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.IndustrialProtocolTest", "Wombat.IndustrialProtocolTest\Wombat.IndustrialProtocolTest.csproj", "{346E5B5F-5404-4403-88CD-EAC99EE323AD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Extensions.Adapter", "Wombat.Extensions.Adapter\Wombat.Extensions.Adapter.csproj", "{7400B62C-0530-44D2-94E8-EBDE46B253E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{346E5B5F-5404-4403-88CD-EAC99EE323AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{346E5B5F-5404-4403-88CD-EAC99EE323AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{346E5B5F-5404-4403-88CD-EAC99EE323AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7400B62C-0530-44D2-94E8-EBDE46B253E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7400B62C-0530-44D2-94E8-EBDE46B253E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7400B62C-0530-44D2-94E8-EBDE46B253E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7400B62C-0530-44D2-94E8-EBDE46B253E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

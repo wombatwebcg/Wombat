@@ -13,10 +13,9 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 {
     public class SiemensClient_Tests
     {
-        private SiemensClient client;
+        private IEthernetClient client;
         public SiemensClient_Tests()
         {
-
 
             //var ip = IPAddress.Parse("192.168.1.180");
             //var port = int.Parse("102");
@@ -186,10 +185,10 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
         {
           var sss =  client.Connect();
 
-            client.WarningLog = (msg, ex) =>
-            {
-                string aa = msg;
-            };
+            //client.WarningLog = (msg, ex) =>
+            //{
+            //    string aa = msg;
+            //};
 
             var re = new Random(DateTime.Now.Second);
 
