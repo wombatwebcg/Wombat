@@ -37,6 +37,8 @@ namespace Wombat.IndustrialProtocol
 
         bool IsUseLongConnect { get; set; }
 
+        bool IsConnect { get; }
+
         OperationResult Connect();
 
         OperationResult Disconnect();
