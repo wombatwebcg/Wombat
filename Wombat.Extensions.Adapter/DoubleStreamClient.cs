@@ -1,21 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Wombat.IndustrialProtocol;
 using Wombat.IndustrialProtocol.PLC;
 using Wombat.Infrastructure;
 
 namespace Wombat.Extensions.Adapter
 {
+
+    /// <summary>
+    ///         失败之作
+    /// </summary>
     public class DoubleStreamClient
     {
         IEthernetClient _readClient;
         IEthernetClient _writeClient;
+        private AdvancedHybirdLock _readLock;
+        private AdvancedHybirdLock _writeLock;
 
         public DoubleStreamClient(IEthernetClient readClient, IEthernetClient writeClient)
         {
             _readClient = readClient;
             _writeClient = writeClient;
+            _readLock = new AdvancedHybirdLock();
+            _writeLock = new AdvancedHybirdLock();
         }
 
         public string Version => $"读取客户端:{_readClient.Version}写入客户端:{_writeClient.Version}";
@@ -35,14 +44,14 @@ namespace Wombat.Extensions.Adapter
 
 
 
-        protected OperationResult Connect()
+        public OperationResult Connect()
         {
             var read = _readClient.Connect();
             var write = _writeClient.Connect();
             return new OperationResult() { IsSuccess = read.IsSuccess & write.IsSuccess};
         }
 
-        protected OperationResult Disconnect()
+        public OperationResult Disconnect()
         {
             var read = _readClient.Disconnect();
             var write = _writeClient.Disconnect();
@@ -58,23 +67,47 @@ namespace Wombat.Extensions.Adapter
         /// <param name="isBit"></param>
         /// <param name="setEndian">返回值是否设置大小端</param>
         /// <returns></returns>
-        public virtual OperationResult<byte[]> Read(string address, int length, bool isBit = false)
-            => _readClient.Read(address, length, isBit);
+        public virtual async Task<OperationResult<byte[]>> Read(string address, int length, bool isBit = false)
+        {
+            return await Task.Run(() =>
+            {
+                _readLock.Enter();
+                var result = _readClient.Read(address, length, isBit);
+                _readLock.Leave();
+                return result;
+            });
+        }
 
         /// <summary>
         /// 读取Boolean
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public virtual OperationResult<bool> ReadBoolean(string address)
-            => _readClient.ReadBoolean(address);
+        public virtual async Task<OperationResult<bool>> ReadBoolean(string address)
+        {
+            return await Task.Run(() =>
+            {
+                _readLock.Enter();
+                var result = _readClient.ReadBoolean(address);
+                _readLock.Leave();
+                return result;
+            });
+        }
         /// <summary>
         /// 读取Boolean
         /// </summary>
         /// <param name="address">地址</param>
         /// <returns></returns>
-        public virtual OperationResult<bool[]> ReadBoolean(string address, int length)
-            => _readClient.ReadBoolean(address,length);
+        public virtual async Task<OperationResult<bool[]>> ReadBoolean(string address, int length)
+        {
+            return await Task.Run(() =>
+            {
+                _readLock.Enter();
+                var result = _readClient.ReadBoolean(address, length);
+                _readLock.Leave();
+                return result;
+            });
+        }
 
 
 

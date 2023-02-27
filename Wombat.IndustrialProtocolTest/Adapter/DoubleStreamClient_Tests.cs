@@ -1,49 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Wombat.IndustrialProtocol.PLC;
-using Wombat.IndustrialProtocol.PLC.Enums;
-using Wombat.Infrastructure;
 using Xunit;
+using Wombat.Infrastructure;
+using Wombat.IndustrialProtocol;
+using Wombat.Extensions.Adapter;
+using Wombat.IndustrialProtocol.PLC.Enums;
 
 namespace Wombat.IndustrialProtocolTest.PLCTests
 {
-    public class MitsubishiClient_Tests
+   public class DoubleStreamClient_Tests
     {
-        private MitsubishiClient client;
+        private DoubleStreamClient client;
+        private IEthernetClient readClient;
+        private IEthernetClient writeClient;
+
         string ip = "159.75.78.22";
 
-        public MitsubishiClient_Tests()
+        public DoubleStreamClient_Tests()
         {
+
         }
 
-        [Theory]
-        [InlineData(MitsubishiVersion.Qna_3E, 8000)]
+        [Fact]
         //[InlineData(MitsubishiVersion.A_1E, 6001)]
-        public void 短连接自动开关(MitsubishiVersion version, int port)
+        public void 长连接测试()
         {
-            client = new MitsubishiClient(version, ip, port);
-            client.IsUseLongConnect = false;
-            ReadWrite();
-        }
+            readClient = new MitsubishiClient(MitsubishiVersion.Qna_3E, ip, 8000);
+            writeClient = new MitsubishiClient(MitsubishiVersion.Qna_3E, ip, 8001);
 
-        [Theory]
-        [InlineData(MitsubishiVersion.Qna_3E, 8001)]
-        //[InlineData(MitsubishiVersion.A_1E, 6001)]
-        public void 长连接主动开关(MitsubishiVersion version, int port)
-        {
-            client = new MitsubishiClient(version, ip, port);
-
+            client = new DoubleStreamClient(readClient, writeClient);
             client.Connect();
-            client.IsUseLongConnect = true;
 
             ReadWrite();
-
-            client?.Disconnect();
+            client.Disconnect();
         }
 
         private void ReadWrite()
         {
+            var t1 = TimeStampHelper.NowLong();
+            client.ReadBoolean("M900", 20).Wait();
+            client.ReadBoolean("M900", 20).Wait();
+             client.ReadBoolean("M900", 20).Wait();
+            var t2 = TimeStampHelper.NowLong();
+
+
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
             for (int i = 0; i < 10; i++)
             {
@@ -54,17 +59,23 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 //client.Write("Y100", true);
                 //Assert.True(client.ReadBoolean("Y100").Value == true);
-                client.Write("M900", true);
-                var sss = client.ReadBoolean("M900");
-                Assert.True(client.ReadBoolean("M900").Value == true);
+                Task.Run(() => { client.Write("M900", true); }).Wait();
+                var r1 = client.ReadBoolean("M900");
+
+                Assert.True(r1.Result.Value == true);
+
+                Assert.True(client.ReadBoolean("M900").Result.Value == true);
                 client.Write("M901", bool_value);
-                Assert.True(client.ReadBoolean("M901").Value == bool_value);
+                Assert.True(client.ReadBoolean("M901").Result.Value == bool_value);
                 client.Write("M902", bool_value);
-                Assert.True(client.ReadBoolean("M902").Value == bool_value);
+                Assert.True(client.ReadBoolean("M902").Result.Value == bool_value);
                 client.Write("M903", !bool_value);
-                Assert.True(client.ReadBoolean("M903").Value == !bool_value);
+                Assert.True(client.ReadBoolean("M903").Result.Value == !bool_value);
                 client.Write("M904", bool_value);
-                Assert.True(client.ReadBoolean("M904").Value == bool_value);
+                Assert.True(client.ReadBoolean("M904").Result.Value == bool_value);
+
+
+
                 //client.Write("L100", !bool_value);
                 //Assert.True(client.ReadBoolean("L100").Value == !bool_value);
                 //client.Write("F100", bool_value);
@@ -96,9 +107,9 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 var sss1 = client.Write("M900", bool_values);
                 var bool_values_result = client.ReadBoolean("M900", bool_values.Length);
-                for (int j = 0; j < bool_values_result.Value.Length; j++)
+                for (int j = 0; j < bool_values_result.Result.Value.Length; j++)
                 {
-                    Assert.True(bool_values_result.Value[j] == bool_values[j]);
+                    Assert.True(bool_values_result.Result.Value[j] == bool_values[j]);
 
                 }
 
@@ -175,87 +186,5 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
             }
         }
 
-        [Theory]
-        [InlineData(MitsubishiVersion.Qna_3E, 8000)]
-        [InlineData(MitsubishiVersion.Qna_3E, 8001)]
-        public void 批量读写(MitsubishiVersion version, int port)
-        {
-            client = new MitsubishiClient(version, ip, port);
-
-            client.Connect();
-
-            Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            short short_number1 = (short)rnd.Next(short.MinValue, short.MaxValue);
-            short short_number2 = (short)rnd.Next(short.MinValue, short.MaxValue);
-            short short_number3 = (short)rnd.Next(short.MinValue, short.MaxValue);
-            short short_number4 = (short)rnd.Next(short.MinValue, short.MaxValue);
-            short short_number5 = (short)rnd.Next(short.MinValue, short.MaxValue);
-            var bool_value = short_number1 % 2 == 1;
-
-            client.Write("M100", !bool_value);
-            client.Write("M101", !bool_value);
-            client.Write("M102", bool_value);
-            client.Write("M103", !bool_value);
-            client.Write("M104", bool_value);
-
-            var result = client.ReadBoolean("M100", 5);
-            //foreach (var item in result.Value)
-            //{
-            //    if (item.Key == "M100" || item.Key == "M101" || item.Key == "M103")
-            //    {
-            //        Assert.True(item.Value == !bool_value);
-            //    }
-            //    else
-            //    {
-            //        Assert.True(item.Value == bool_value);
-            //    }
-            //}
-
-            client.Write("D100", short_number1);
-            client.Write("D101", short_number2);
-            client.Write("D102", short_number3);
-            client.Write("D103", short_number4);
-            client.Write("D104", short_number5);
-
-            Assert.True(client.ReadInt16("D100").Value == short_number1);
-            Assert.True(client.ReadInt16("D101").Value == short_number2);
-            Assert.True(client.ReadInt16("D102").Value == short_number3);
-            Assert.True(client.ReadInt16("D103").Value == short_number4);
-            Assert.True(client.ReadInt16("D104").Value == short_number5);
-
-            client?.Disconnect();
-        }
-
-        [Theory]
-        [InlineData(MitsubishiVersion.Qna_3E, 8000)]
-        public void 批量读取(MitsubishiVersion version, int port)
-        {
-            client = new MitsubishiClient(version, ip, port);
-
-            Dictionary<string, DataTypeEnum> readAddresses = new Dictionary<string, DataTypeEnum>();
-            //readAddresses.Add("V2634.0", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.1", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.2", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.3", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.4", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.5", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.6", DataTypeEnum.Bool);
-            //readAddresses.Add("V2634.7", DataTypeEnum.Bool);
-            //readAddresses.Add("V2642", DataTypeEnum.Float);
-            //readAddresses.Add("V2646", DataTypeEnum.Float);
-            //readAddresses.Add("V2650", DataTypeEnum.Float);
-            readAddresses.Add("D100", DataTypeEnum.Float);
-            readAddresses.Add("D102", DataTypeEnum.Float);
-            readAddresses.Add("D104", DataTypeEnum.Float);
-            readAddresses.Add("D263", DataTypeEnum.Int16);
-            readAddresses.Add("D265", DataTypeEnum.Int16);
-            //readAddresses.Add("V2670", DataTypeEnum.Float);
-            //readAddresses.Add("V2674", DataTypeEnum.Float);
-            //readAddresses.Add("V1650", DataTypeEnum.Byte);
-            //readAddresses.Add("V1651", DataTypeEnum.Byte);
-            //readAddresses.Add("V1652", DataTypeEnum.Byte);
-
-            var result = client.BatchRead(readAddresses);
-        }
     }
 }

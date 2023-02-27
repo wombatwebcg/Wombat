@@ -32,6 +32,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\Wombat.Extensions.Adapter\Wombat.Extensions.Adapter.csproj" />
     <ProjectReference Include="..\Wombat.IndustrialProtocol\Wombat.IndustrialProtocol.csproj" />
     <ProjectReference Include="..\Wombat.Infrastructure\Wombat.Infrastructure.csproj" />
   </ItemGroup>
