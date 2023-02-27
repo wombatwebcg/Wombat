@@ -13,6 +13,8 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
    public class InovanceClient_Test
     {
         private InovanceClient client;
+        private InovanceClient client2;
+
         string ip = "192.168.1.180";
 
         public InovanceClient_Test()
@@ -33,12 +35,30 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
         public void 长连接自动开关()
         {
-
             client = new InovanceClient(ip, 502);
             client.IsUseLongConnect = true;
             client.Connect();
-            ReadWrite();
+            client.Timeout = TimeSpan.FromMilliseconds(500);
+
+            client2 = new InovanceClient(ip, 502);
+            client2.IsUseLongConnect = true;
+            client2.Connect();
+            client2.Timeout = TimeSpan.FromMilliseconds(500);
+
+            var t1 = Task.Run(() =>
+            {
+                ReadWrite();
+            });
+            var t2 = Task.Run(() =>
+            {
+                ReadWrite2();
+            });
+           while(!t1.IsCompleted|!t2.IsCompleted)
+            {
+
+            }
             client.Disconnect();
+            client2.Disconnect();
 
         }
 
@@ -49,7 +69,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
 
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
                 int int_number = rnd.Next(int.MinValue, int.MaxValue);
@@ -186,6 +206,156 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 double[] double_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
                 client.Write("D300", double_values);
                 var double_values_result = client.ReadDouble("D300", double_values.Length);
+                for (int j = 0; j < double_values_result.Value.Length; j++)
+                {
+                    Assert.True(double_values_result.Value[j] == double_values[j]);
+
+                }
+            }
+        }
+        private void ReadWrite2()
+        {
+
+
+
+            Random rnd = new Random((int)Stopwatch.GetTimestamp());
+            for (int i = 0; i < 100; i++)
+            {
+                short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
+                int int_number = rnd.Next(int.MinValue, int.MaxValue);
+                float float_number = int_number / 100;
+                var bool_value = short_number % 2 == 1;
+
+                //client2.Write("Y100", true);
+                //Assert.True(client2.ReadBoolean("Y100").Value == true);
+                client2.Write("M800", true);
+                var sss = client2.ReadCoil("M800");
+                Assert.True(client2.ReadCoil("M800").Value == true);
+                client2.Write("M801", bool_value);
+                Assert.True(client2.ReadCoil("M801").Value == bool_value);
+                client2.Write("M802", bool_value);
+                Assert.True(client2.ReadCoil("M802").Value == bool_value);
+                client2.Write("M803", !bool_value);
+                Assert.True(client2.ReadCoil("M803").Value == !bool_value);
+                client2.Write("M804", bool_value);
+                //Assert.True(client2.ReadCoil("M804").Value == bool_value);
+                //client2.Write("L100", !bool_value);
+                //Assert.True(client2.ReadBoolean("L100").Value == !bool_value);
+                //client2.Write("F100", bool_value);
+                //Assert.True(client2.ReadBoolean("F100").Value == bool_value);
+                //client2.Write("V100", !bool_value);
+                //Assert.True(client2.ReadBoolean("V100").Value == !bool_value);
+                //client2.Write("B100", bool_value);
+                //Assert.True(client2.ReadBoolean("B100").Value == bool_value);
+                //client2.Write("S100", bool_value);
+                //Assert.True(client2.ReadBoolean("S100").Value == bool_value);
+
+                var sss555 = client2.Write("D400", short_number);
+                Assert.True(client2.ReadInt16("D400").Value == short_number);
+                var sss5556 = client2.Write("D400", (ushort)Math.Abs(short_number));
+                var sssssssss2 = client2.ReadUInt16("D400");
+
+                Assert.True(client2.ReadUInt16("D400").Value == (ushort)Math.Abs(short_number));
+
+                client2.Write("D400", int_number);
+                Assert.True(client2.ReadInt32("D400").Value == int_number);
+
+                client2.Write("D400", Convert.ToInt64(int_number));
+                Assert.True(client2.ReadInt64("D400").Value == Convert.ToInt64(int_number));
+
+                client2.Write("D400", float_number);
+                Assert.True(client2.ReadFloat("D400").Value == float_number);
+
+                client2.Write("D400", Convert.ToDouble(float_number));
+                Assert.True(client2.ReadDouble("D400").Value == Convert.ToDouble(float_number));
+
+                //bool[] bool_values = { false, true, false, false, true, false, false, false, false, false
+                //        , false, false, false,false,false,false,false,false,false, true };
+
+                //var sss1 = client2.Write("M800", bool_values);
+                //var bool_values_result = client2.ReadCoil("M800", bool_values.Length);
+                //for (int j = 0; j < bool_values_result.Value.Length; j++)
+                //{
+                //    Assert.True(bool_values_result.Value[j] == bool_values[j]);
+
+                //}
+
+                bool[] bool_values = { true, false, false, false, true, false, false, false, false, false
+                        , false, false, false,false,false,false,false,false,false, true };
+
+                var sss1 = client2.Write("M800", bool_values);
+                var bool_values_result = client2.ReadCoil("M800", bool_values.Length);
+                for (int j = 0; j < bool_values_result.Value.Length; j++)
+                {
+                    Assert.True(bool_values_result.Value[j] == bool_values[j]);
+
+                }
+
+                short[] short_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", short_values);
+                var short_values_result = client2.ReadInt16("D400", short_values.Length);
+                for (int j = 0; j < short_values_result.Value.Length; j++)
+                {
+                    Assert.True(short_values_result.Value[j] == short_values[j]);
+
+                }
+
+                ushort[] ushort_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", ushort_values);
+                var ushort_values_result = client2.ReadInt16("D400", ushort_values.Length);
+                for (int j = 0; j < ushort_values_result.Value.Length; j++)
+                {
+                    Assert.True(ushort_values_result.Value[j] == ushort_values[j]);
+
+                }
+
+                int[] int_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", int_values);
+                var int_values_result = client2.ReadInt32("D400", int_values.Length);
+                for (int j = 0; j < int_values_result.Value.Length; j++)
+                {
+                    Assert.True(int_values_result.Value[j] == int_values[j]);
+
+                }
+
+                uint[] uint_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", uint_values);
+                var uint_values_result = client2.ReadUInt32("D400", uint_values.Length);
+                for (int j = 0; j < uint_values_result.Value.Length; j++)
+                {
+                    Assert.True(uint_values_result.Value[j] == uint_values[j]);
+
+                }
+
+                long[] long_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", long_values);
+                var long_values_result = client2.ReadInt64("D400", long_values.Length);
+                for (long j = 0; j < long_values_result.Value.Length; j++)
+                {
+                    Assert.True(long_values_result.Value[j] == long_values[j]);
+
+                }
+
+                ulong[] ulong_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", ulong_values);
+                var ulong_values_result = client2.ReadUInt64("D400", ulong_values.Length);
+                for (int j = 0; j < ulong_values_result.Value.Length; j++)
+                {
+                    Assert.True(ulong_values_result.Value[j] == ulong_values[j]);
+
+                }
+
+                float[] float_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", float_values);
+                var float_values_result = client2.ReadFloat("D400", float_values.Length);
+                for (int j = 0; j < float_values_result.Value.Length; j++)
+                {
+                    Assert.True(float_values_result.Value[j] == float_values[j]);
+
+                }
+                double[] double_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                client2.Write("D400", double_values);
+                var double_values_result = client2.ReadDouble("D400", double_values.Length);
                 for (int j = 0; j < double_values_result.Value.Length; j++)
                 {
                     Assert.True(double_values_result.Value[j] == double_values[j]);

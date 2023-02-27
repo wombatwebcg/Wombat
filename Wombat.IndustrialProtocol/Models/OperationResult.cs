@@ -435,6 +435,566 @@ namespace Wombat.IndustrialProtocol
         }
 
     }
+
+
+    /// <summary>
+    /// 操作结果的泛型类，允许带两个用户自定义的泛型对象，推荐使用这个类
+    /// </summary>
+    /// <typeparam name="T1">泛型类</typeparam>
+    /// <typeparam name="T2">泛型类</typeparam>
+    /// <typeparam name="T3">泛型类</typeparam>
+    public class OperationResult<T1, T2,T3> : OperationResult
+    {
+        #region Constructor
+
+        /// <summary>
+        /// 实例化一个默认的结果对象
+        /// </summary>
+        public OperationResult(OperationResult result) : base()
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+
+        }
+
+        /// <summary>
+        /// 使用指定的消息实例化一个默认的结果对象
+        /// </summary>
+        /// <param name="msg">错误消息</param>
+        public OperationResult(OperationResult result, T1 data1, T2 data2,T3 data3)
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+            Value1 = data1;
+            Value2 = data2;
+            Value3 = data3;
+
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// 用户自定义的泛型数据1
+        /// </summary>
+        public T1 Value1 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据2
+        /// </summary>
+        public T2 Value2 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据2
+        /// </summary>
+        public T3 Value3 { get; set; }
+
+
+        /// <summary>
+        /// 结束时间统计
+        /// </summary>
+        public new OperationResult<T1, T2,T3> EndTime()
+        {
+            base.EndTime();
+            return this;
+
+        }
+
+        public new OperationResult<T1, T2,T3> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public OperationResult<T1, T2,T3> SetInfo(OperationResult<T1, T2,T3> result)
+        {
+            Value1 = result.Value1;
+            Value2 = result.Value2;
+            Value3 = result.Value3;
+            base.SetInfo(result);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public new OperationResult<T1, T2,T3> SetInfo(OperationResult result)
+        {
+            base.SetInfo(result);
+            return this;
+        }
+
+    }
+
+
+
+    /// <summary>
+    /// 操作结果的泛型类，允许带两个用户自定义的泛型对象，推荐使用这个类
+    /// </summary>
+    /// <typeparam name="T1">泛型类</typeparam>
+    /// <typeparam name="T2">泛型类</typeparam>
+    /// <typeparam name="T3">泛型类</typeparam>
+    /// <typeparam name="T4">泛型类</typeparam>
+    public class OperationResult<T1, T2, T3,T4> : OperationResult
+    {
+        #region Constructor
+
+        /// <summary>
+        /// 实例化一个默认的结果对象
+        /// </summary>
+        public OperationResult(OperationResult result) : base()
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+
+        }
+
+        /// <summary>
+        /// 使用指定的消息实例化一个默认的结果对象
+        /// </summary>
+        /// <param name="msg">错误消息</param>
+        public OperationResult(OperationResult result, T1 data1, T2 data2, T3 data3, T4 data4)
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+            Value1 = data1;
+            Value2 = data2;
+            Value3 = data3;
+            Value4 = data4;
+
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// 用户自定义的泛型数据1
+        /// </summary>
+        public T1 Value1 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据2
+        /// </summary>
+        public T2 Value2 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据3
+        /// </summary>
+        public T3 Value3 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据4
+        /// </summary>
+        public T4 Value4 { get; set; }
+
+        /// <summary>
+        /// 结束时间统计
+        /// </summary>
+        public new OperationResult<T1, T2, T3,T4> EndTime()
+        {
+            base.EndTime();
+            return this;
+
+        }
+
+        public new OperationResult<T1, T2, T3, T4> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public OperationResult<T1, T2, T3, T4> SetInfo(OperationResult<T1, T2, T3, T4> result)
+        {
+            Value1 = result.Value1;
+            Value2 = result.Value2;
+            Value3 = result.Value3;
+            Value4 = result.Value4;
+            base.SetInfo(result);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public new OperationResult<T1, T2, T3, T4> SetInfo(OperationResult result)
+        {
+            base.SetInfo(result);
+            return this;
+        }
+
+    }
+
+
+    /// <summary>
+    /// 操作结果的泛型类，允许带两个用户自定义的泛型对象，推荐使用这个类
+    /// </summary>
+    /// <typeparam name="T1">泛型类</typeparam>
+    /// <typeparam name="T2">泛型类</typeparam>
+    /// <typeparam name="T3">泛型类</typeparam>
+    /// <typeparam name="T4">泛型类</typeparam>
+    /// <typeparam name="T5">泛型类</typeparam>
+    public class OperationResult<T1, T2, T3, T4,T5> : OperationResult
+    {
+        #region Constructor
+
+        /// <summary>
+        /// 实例化一个默认的结果对象
+        /// </summary>
+        public OperationResult(OperationResult result) : base()
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+
+        }
+
+        /// <summary>
+        /// 使用指定的消息实例化一个默认的结果对象
+        /// </summary>
+        /// <param name="msg">错误消息</param>
+        public OperationResult(OperationResult result, T1 data1, T2 data2, T3 data3, T4 data4, T5 data5)
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+            Value1 = data1;
+            Value2 = data2;
+            Value3 = data3;
+            Value4 = data4;
+            Value5 = data5;
+
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// 用户自定义的泛型数据1
+        /// </summary>
+        public T1 Value1 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据2
+        /// </summary>
+        public T2 Value2 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据3
+        /// </summary>
+        public T3 Value3 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据4
+        /// </summary>
+        public T4 Value4 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据4
+        /// </summary>
+        public T5 Value5 { get; set; }
+
+
+        /// <summary>
+        /// 结束时间统计
+        /// </summary>
+        public new OperationResult<T1, T2, T3, T4,T5> EndTime()
+        {
+            base.EndTime();
+            return this;
+
+        }
+
+        public new OperationResult<T1, T2, T3, T4, T5> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public OperationResult<T1, T2, T3, T4, T5> SetInfo(OperationResult<T1, T2, T3, T4, T5> result)
+        {
+            Value1 = result.Value1;
+            Value2 = result.Value2;
+            Value3 = result.Value3;
+            Value4 = result.Value4;
+            Value5 = result.Value5;
+            base.SetInfo(result);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public new OperationResult<T1, T2, T3, T4, T5> SetInfo(OperationResult result)
+        {
+            base.SetInfo(result);
+            return this;
+        }
+
+    }
+
+
+    /// <summary>
+    /// 操作结果的泛型类，允许带两个用户自定义的泛型对象，推荐使用这个类
+    /// </summary>
+    /// <typeparam name="T1">泛型类</typeparam>
+    /// <typeparam name="T2">泛型类</typeparam>
+    /// <typeparam name="T3">泛型类</typeparam>
+    /// <typeparam name="T4">泛型类</typeparam>
+    /// <typeparam name="T5">泛型类</typeparam>
+    /// <typeparam name="T6">泛型类</typeparam>
+    public class OperationResult<T1, T2, T3, T4, T5,T6> : OperationResult
+    {
+        #region Constructor
+
+        /// <summary>
+        /// 实例化一个默认的结果对象
+        /// </summary>
+        public OperationResult(OperationResult result) : base()
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+
+        }
+
+        /// <summary>
+        /// 使用指定的消息实例化一个默认的结果对象
+        /// </summary>
+        /// <param name="msg">错误消息</param>
+        public OperationResult(OperationResult result, T1 data1, T2 data2, T3 data3, T4 data4, T5 data5,T6 data6)
+        {
+            var orgin = Assignment(result);
+            this.ErrorCode = orgin.ErrorCode;
+            this.Exception = orgin.Exception;
+            this.InitialTime = orgin.InitialTime;
+            this.IsSuccess = orgin.IsSuccess;
+            this.Message = orgin.Message;
+            foreach (var message in orgin.MessageList)
+            {
+                if (message != null & message != string.Empty)
+                    this.MessageList.Add(message);
+            }
+            this.Requst = orgin.Requst;
+            this.Requst2 = orgin.Requst2;
+            this.Response = orgin.Response;
+            this.Response2 = orgin.Response2;
+            Value1 = data1;
+            Value2 = data2;
+            Value3 = data3;
+            Value4 = data4;
+            Value5 = data5;
+            Value6 = data6;
+
+        }
+
+
+        #endregion
+
+        /// <summary>
+        /// 用户自定义的泛型数据1
+        /// </summary>
+        public T1 Value1 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据2
+        /// </summary>
+        public T2 Value2 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据3
+        /// </summary>
+        public T3 Value3 { get; set; }
+
+
+        /// <summary>
+        /// 用户自定义的泛型数据4
+        /// </summary>
+        public T4 Value4 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据5
+        /// </summary>
+        public T5 Value5 { get; set; }
+
+        /// <summary>
+        /// 用户自定义的泛型数据6
+        /// </summary>
+        public T6 Value6 { get; set; }
+
+
+        /// <summary>
+        /// 结束时间统计
+        /// </summary>
+        public new OperationResult<T1, T2, T3, T4, T5, T6> EndTime()
+        {
+            base.EndTime();
+            return this;
+
+        }
+
+        public new OperationResult<T1, T2, T3, T4, T5, T6> CreatFailureEndTime()
+        {
+            IsSuccess = false;
+            base.EndTime();
+            return this;
+
+        }
+
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public OperationResult<T1, T2, T3, T4, T5, T6> SetInfo(OperationResult<T1, T2, T3, T4, T5, T6> result)
+        {
+            Value1 = result.Value1;
+            Value2 = result.Value2;
+            Value3 = result.Value3;
+            Value4 = result.Value4;
+            Value5 = result.Value5;
+            Value6 = result.Value6;
+            base.SetInfo(result);
+            return this;
+        }
+
+        /// <summary>
+        /// 设置异常信息和Succeed状态
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public new OperationResult<T1, T2, T3, T4, T5, T6> SetInfo(OperationResult result)
+        {
+            base.SetInfo(result);
+            return this;
+        }
+
+    }
+
     #endregion
 
 }
