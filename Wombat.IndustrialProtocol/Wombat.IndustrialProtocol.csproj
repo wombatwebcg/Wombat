@@ -5,7 +5,7 @@
 	  <Authors>wombatwebcg</Authors>
 	  <Company></Company>
 	  <Product></Product>
-	  <Description>基于网络开源项目整理的工业通讯库</Description>
+	  <Description>工业设备通讯库</Description>
 	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	  <NeutralLanguage></NeutralLanguage>
@@ -14,7 +14,7 @@
 	  <Copyright>wombatwebcg</Copyright>
 	  <RepositoryUrl>https://github.com/wombatwebcg/Wombat.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
-	  <Version>1.1.5</Version>
+	  <Version>1.1.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
