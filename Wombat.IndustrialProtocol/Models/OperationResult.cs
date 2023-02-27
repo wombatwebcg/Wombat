@@ -97,12 +97,6 @@ namespace Wombat.IndustrialProtocol
             return this;
         }
 
-        public OperationResult CreatFailureEndTime()
-        {
-            IsSuccess = false;           
-            return EndTime();
-
-        }
 
         /// <summary>
         /// 开始时间
@@ -175,11 +169,324 @@ namespace Wombat.IndustrialProtocol
 
         #region Static Method
 
+        #region Static Method
+
         /*****************************************************************************************************
          * 
          *    主要是方便获取到一些特殊状态的结果对象
          * 
          ******************************************************************************************************/
+
+        public static OperationResult CreateFailedResult()
+        {
+            return new OperationResult()
+            {
+                IsSuccess = false,
+                ErrorCode = -1,
+                Message = StringResources.Language.ExceptionMessage,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有一个参数对象
+        /// </summary>
+        /// <typeparam name="T">参数类型</typeparam>
+        /// <param name="value">类型的值对象</param>
+        /// <returns>成功的结果对象</returns>
+        public static OperationResult<T> CreateFailedResult<T>(T value)
+        {
+            return new OperationResult<T>()
+            {
+                IsSuccess = false,
+                ErrorCode = -1,
+                Message = StringResources.Language.ExceptionMessage,
+                Value = value
+            };
+        }
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T">目标数据类型</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T> CreateFailedResult<T>(OperationResult result)
+        {
+            return new OperationResult<T>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T1">目标数据类型一</typeparam>
+        /// <typeparam name="T2">目标数据类型二</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T1, T2> CreateFailedResult<T1, T2>(OperationResult result)
+        {
+            return new OperationResult<T1, T2>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T1">目标数据类型一</typeparam>
+        /// <typeparam name="T2">目标数据类型二</typeparam>
+        /// <typeparam name="T3">目标数据类型三</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T1, T2, T3> CreateFailedResult<T1, T2, T3>(OperationResult result)
+        {
+            return new OperationResult<T1, T2, T3>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T1">目标数据类型一</typeparam>
+        /// <typeparam name="T2">目标数据类型二</typeparam>
+        /// <typeparam name="T3">目标数据类型三</typeparam>
+        /// <typeparam name="T4">目标数据类型四</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T1, T2, T3, T4> CreateFailedResult<T1, T2, T3, T4>(OperationResult result)
+        {
+            return new OperationResult<T1, T2, T3, T4>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T1">目标数据类型一</typeparam>
+        /// <typeparam name="T2">目标数据类型二</typeparam>
+        /// <typeparam name="T3">目标数据类型三</typeparam>
+        /// <typeparam name="T4">目标数据类型四</typeparam>
+        /// <typeparam name="T5">目标数据类型五</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T1, T2, T3, T4, T5> CreateFailedResult<T1, T2, T3, T4, T5>(OperationResult result)
+        {
+            return new OperationResult<T1, T2, T3, T4, T5>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个失败的结果对象，该对象复制另一个结果对象的错误信息
+        /// </summary>
+        /// <typeparam name="T1">目标数据类型一</typeparam>
+        /// <typeparam name="T2">目标数据类型二</typeparam>
+        /// <typeparam name="T3">目标数据类型三</typeparam>
+        /// <typeparam name="T4">目标数据类型四</typeparam>
+        /// <typeparam name="T5">目标数据类型五</typeparam>
+        /// <typeparam name="T6">目标数据类型六</typeparam>
+        /// <param name="result">之前的结果对象</param>
+        /// <returns>带默认泛型对象的失败结果类</returns>
+        public static OperationResult<T1, T2, T3, T4, T5, T6> CreateFailedResult<T1, T2, T3, T4, T5, T6>(OperationResult result)
+        {
+            return new OperationResult<T1, T2, T3, T4, T5, T6>()
+            {
+                ErrorCode = result.ErrorCode,
+                Message = result.Message,
+            };
+        }
+
+
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象
+        /// </summary>
+        /// <returns>成功的结果对象</returns>
+        public static OperationResult CreateSuccessResult()
+        {
+            return new OperationResult()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+            };
+        }
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有一个参数对象
+        /// </summary>
+        /// <typeparam name="T">参数类型</typeparam>
+        /// <param name="value">类型的值对象</param>
+        /// <returns>成功的结果对象</returns>
+        public static OperationResult<T> CreateSuccessResult<T>(T value)
+        {
+            return new OperationResult<T>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value = value
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有两个参数对象
+        /// </summary>
+        /// <typeparam name="T1">第一个参数类型</typeparam>
+        /// <typeparam name="T2">第二个参数类型</typeparam>
+        /// <param name="value1">类型一对象</param>
+        /// <param name="value2">类型二对象</param>
+        /// <returns>成的结果对象</returns>
+        public static OperationResult<T1, T2> CreateSuccessResult<T1, T2>(T1 value1, T2 value2)
+        {
+            return new OperationResult<T1, T2>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value1 = value1,
+                Value2 = value2,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有三个参数对象
+        /// </summary>
+        /// <typeparam name="T1">第一个参数类型</typeparam>
+        /// <typeparam name="T2">第二个参数类型</typeparam>
+        /// <typeparam name="T3">第三个参数类型</typeparam>
+        /// <param name="value1">类型一对象</param>
+        /// <param name="value2">类型二对象</param>
+        /// <param name="value3">类型三对象</param>
+        /// <returns>成的结果对象</returns>
+        public static OperationResult<T1, T2, T3> CreateSuccessResult<T1, T2, T3>(T1 value1, T2 value2, T3 value3)
+        {
+            return new OperationResult<T1, T2, T3>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value1 = value1,
+                Value2 = value2,
+                Value3 = value3,
+            };
+        }
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有四个参数对象
+        /// </summary>
+        /// <typeparam name="T1">第一个参数类型</typeparam>
+        /// <typeparam name="T2">第二个参数类型</typeparam>
+        /// <typeparam name="T3">第三个参数类型</typeparam>
+        /// <typeparam name="T4">第四个参数类型</typeparam>
+        /// <param name="value1">类型一对象</param>
+        /// <param name="value2">类型二对象</param>
+        /// <param name="value3">类型三对象</param>
+        /// <param name="value4">类型四对象</param>
+        /// <returns>成的结果对象</returns>
+        public static OperationResult<T1, T2, T3, T4> CreateSuccessResult<T1, T2, T3, T4>(T1 value1, T2 value2, T3 value3, T4 value4)
+        {
+            return new OperationResult<T1, T2, T3, T4>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value1 = value1,
+                Value2 = value2,
+                Value3 = value3,
+                Value4 = value4,
+            };
+        }
+
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有五个参数对象
+        /// </summary>
+        /// <typeparam name="T1">第一个参数类型</typeparam>
+        /// <typeparam name="T2">第二个参数类型</typeparam>
+        /// <typeparam name="T3">第三个参数类型</typeparam>
+        /// <typeparam name="T4">第四个参数类型</typeparam>
+        /// <typeparam name="T5">第五个参数类型</typeparam>
+        /// <param name="value1">类型一对象</param>
+        /// <param name="value2">类型二对象</param>
+        /// <param name="value3">类型三对象</param>
+        /// <param name="value4">类型四对象</param>
+        /// <param name="value5">类型五对象</param>
+        /// <returns>成的结果对象</returns>
+        public static OperationResult<T1, T2, T3, T4, T5> CreateSuccessResult<T1, T2, T3, T4, T5>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5)
+        {
+            return new OperationResult<T1, T2, T3, T4, T5>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value1 = value1,
+                Value2 = value2,
+                Value3 = value3,
+                Value4 = value4,
+                Value5 = value5,
+            };
+        }
+
+        /// <summary>
+        /// 创建并返回一个成功的结果对象，并带有六个参数对象
+        /// </summary>
+        /// <typeparam name="T1">第一个参数类型</typeparam>
+        /// <typeparam name="T2">第二个参数类型</typeparam>
+        /// <typeparam name="T3">第三个参数类型</typeparam>
+        /// <typeparam name="T4">第四个参数类型</typeparam>
+        /// <typeparam name="T5">第五个参数类型</typeparam>
+        /// <typeparam name="T6">第六个参数类型</typeparam>
+        /// <param name="value1">类型一对象</param>
+        /// <param name="value2">类型二对象</param>
+        /// <param name="value3">类型三对象</param>
+        /// <param name="value4">类型四对象</param>
+        /// <param name="value5">类型五对象</param>
+        /// <param name="value6">类型六对象</param>
+        /// <returns>成的结果对象</returns>
+        public static OperationResult<T1, T2, T3, T4, T5, T6> CreateSuccessResult<T1, T2, T3, T4, T5, T6>(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6)
+        {
+            return new OperationResult<T1, T2, T3, T4, T5, T6>()
+            {
+                IsSuccess = true,
+                ErrorCode = 0,
+                Message = StringResources.Language.SuccessText,
+                Value1 = value1,
+                Value2 = value2,
+                Value3 = value3,
+                Value4 = value4,
+                Value5 = value5,
+                Value6 = value6,
+            };
+        }
+
+
+
+
+
+
+
+        #endregion
 
 
 
@@ -286,13 +593,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
 
         #endregion
 
@@ -328,6 +628,17 @@ namespace Wombat.IndustrialProtocol
     public class OperationResult<T1, T2> : OperationResult
     {
         #region Constructor
+
+
+        public OperationResult()
+        {
+
+        }
+
+
+
+
+
 
         /// <summary>
         /// 实例化一个默认的结果对象
@@ -401,13 +712,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T1, T2> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
 
 
         /// <summary>
@@ -446,6 +750,21 @@ namespace Wombat.IndustrialProtocol
     public class OperationResult<T1, T2,T3> : OperationResult
     {
         #region Constructor
+
+
+
+
+        public OperationResult()
+        {
+
+        }
+
+
+
+
+
+
+
 
         /// <summary>
         /// 实例化一个默认的结果对象
@@ -527,13 +846,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T1, T2,T3> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
 
 
         /// <summary>
@@ -575,6 +887,17 @@ namespace Wombat.IndustrialProtocol
     public class OperationResult<T1, T2, T3,T4> : OperationResult
     {
         #region Constructor
+
+
+        public OperationResult()
+        {
+
+        }
+
+
+
+
+
 
         /// <summary>
         /// 实例化一个默认的结果对象
@@ -662,14 +985,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T1, T2, T3, T4> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
-
 
         /// <summary>
         /// 设置异常信息和Succeed状态
@@ -711,6 +1026,13 @@ namespace Wombat.IndustrialProtocol
     public class OperationResult<T1, T2, T3, T4,T5> : OperationResult
     {
         #region Constructor
+
+
+        public OperationResult()
+        {
+
+        }
+
 
         /// <summary>
         /// 实例化一个默认的结果对象
@@ -805,13 +1127,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T1, T2, T3, T4, T5> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
 
 
         /// <summary>
@@ -856,6 +1171,12 @@ namespace Wombat.IndustrialProtocol
     public class OperationResult<T1, T2, T3, T4, T5,T6> : OperationResult
     {
         #region Constructor
+
+        public OperationResult()
+        {
+
+        }
+
 
         /// <summary>
         /// 实例化一个默认的结果对象
@@ -956,13 +1277,6 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public new OperationResult<T1, T2, T3, T4, T5, T6> CreatFailureEndTime()
-        {
-            IsSuccess = false;
-            base.EndTime();
-            return this;
-
-        }
 
 
         /// <summary>
