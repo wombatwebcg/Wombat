@@ -318,67 +318,67 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public override OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
-        {
-            _advancedHybirdLock.Enter();
-            var result = new OperationResult();
-            if (!_serialPortBase?.IsConnect ?? true)
-            {
-                var connectResult = Connect();
-                if (!connectResult.IsSuccess)
-                {
-                    connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
-                    _advancedHybirdLock.Leave();
-                    return result.SetInfo(connectResult);
-                }
-            }
-            try
-            {
-                var command = GetWriteOneCommand(address, values, stationNumber, functionCode, isPlcAddress: isPlcAddress);
+        //public override OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = false)
+        //{
+        //    _advancedHybirdLock.Enter();
+        //    var result = new OperationResult();
+        //    if (!_serialPortBase?.IsConnect ?? true)
+        //    {
+        //        var connectResult = Connect();
+        //        if (!connectResult.IsSuccess)
+        //        {
+        //            connectResult.Message = $"读取 地址:{address} 站号:{stationNumber} 功能码:{functionCode} 失败。{ connectResult.Message}";
+        //            _advancedHybirdLock.Leave();
+        //            return result.SetInfo(connectResult);
+        //        }
+        //    }
+        //    try
+        //    {
+        //        var command = GetWriteCommand(address, value, stationNumber, functionCode, isPlcAddress: isPlcAddress);
 
-                var commandCRC16 = CRC16Helper.GetCRC16(command);
-                result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
-                var sendResult = SendPackageReliable(commandCRC16);
-                if (!sendResult.IsSuccess)
-                {
-                    _advancedHybirdLock.Leave();
-                    return result.SetInfo(sendResult).EndTime();
-                }
-                var responsePackage = sendResult.Value;
-                if (!responsePackage.Any())
-                {
-                    result.IsSuccess = false;
-                    result.Message = "响应结果为空";
-                    _advancedHybirdLock.Leave();
-                    return result.EndTime();
-                }
-                else if (!CRC16Helper.CheckCRC16(responsePackage))
-                {
-                    result.IsSuccess = false;
-                    result.Message = "响应结果CRC16Helper验证失败";
-                    //return result.EndTime();
-                }
-                else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
-                {
-                    result.IsSuccess = false;
-                    result.Message = ModbusHelper.ErrMsg(responsePackage[2]);
-                }
-                byte[] resultBuffer = new byte[responsePackage.Length - 2];
-                Array.Copy(responsePackage, 0, resultBuffer, 0, resultBuffer.Length);
-                result.Response = string.Join(" ", responsePackage.Select(t => t.ToString("X2")));
-            }
-            catch (Exception ex)
-            {
-                result.IsSuccess = false;
-                result.Message = ex.Message;
-            }
-            finally
-            {
-                if (!IsUseLongConnect) Disconnect();
-            }
-            _advancedHybirdLock.Leave();
-            return result.EndTime();
-        }
+        //        var commandCRC16 = CRC16Helper.GetCRC16(command);
+        //        result.Requst = string.Join(" ", commandCRC16.Select(t => t.ToString("X2")));
+        //        var sendResult = SendPackageReliable(commandCRC16);
+        //        if (!sendResult.IsSuccess)
+        //        {
+        //            _advancedHybirdLock.Leave();
+        //            return result.SetInfo(sendResult).EndTime();
+        //        }
+        //        var responsePackage = sendResult.Value;
+        //        if (!responsePackage.Any())
+        //        {
+        //            result.IsSuccess = false;
+        //            result.Message = "响应结果为空";
+        //            _advancedHybirdLock.Leave();
+        //            return result.EndTime();
+        //        }
+        //        else if (!CRC16Helper.CheckCRC16(responsePackage))
+        //        {
+        //            result.IsSuccess = false;
+        //            result.Message = "响应结果CRC16Helper验证失败";
+        //            //return result.EndTime();
+        //        }
+        //        else if (ModbusHelper.VerifyFunctionCode(functionCode, responsePackage[1]))
+        //        {
+        //            result.IsSuccess = false;
+        //            result.Message = ModbusHelper.ErrMsg(responsePackage[2]);
+        //        }
+        //        byte[] resultBuffer = new byte[responsePackage.Length - 2];
+        //        Array.Copy(responsePackage, 0, resultBuffer, 0, resultBuffer.Length);
+        //        result.Response = string.Join(" ", responsePackage.Select(t => t.ToString("X2")));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.IsSuccess = false;
+        //        result.Message = ex.Message;
+        //    }
+        //    finally
+        //    {
+        //        if (!IsUseLongConnect) Disconnect();
+        //    }
+        //    _advancedHybirdLock.Leave();
+        //    return result.EndTime();
+        //}
 
 
 
@@ -507,7 +507,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        public byte[] GetWriteOneCommand(string address, byte[] values, byte stationNumber, byte functionCode, bool isPlcAddress = false)
+        public byte[] GetWriteCommand(string address, byte value, byte stationNumber, byte functionCode, bool isPlcAddress = false)
         {
 
             if (isPlcAddress) { address = TranPLCAddress(address); }
@@ -517,8 +517,8 @@ namespace Wombat.IndustrialProtocol.Modbus
             buffer[1] = functionCode; //功能码
             buffer[2] = BitConverter.GetBytes(readAddress)[1];
             buffer[3] = BitConverter.GetBytes(readAddress)[0];//寄存器地址
-            buffer[4] = values[0];    
-            buffer[5] = values[1];
+            buffer[4] = value;    
+            buffer[5] = 0;
             return buffer;
         }
 
@@ -537,16 +537,32 @@ namespace Wombat.IndustrialProtocol.Modbus
         {
             if (isPlcAddress) { address = TranPLCAddress(address); }
             var readAddress = ushort.Parse(address?.Trim());
-            byte[] buffer = new byte[7 + values.Length];
-            buffer[0] = stationNumber; //站号
-            buffer[1] = functionCode;  //功能码
-            buffer[2] = BitConverter.GetBytes(readAddress)[1];
-            buffer[3] = BitConverter.GetBytes(readAddress)[0];//寄存器地址
-            buffer[4] = (byte)(values.Length / 2 / 256);
-            buffer[5] = (byte)(values.Length / 2 % 256);//写寄存器数量(除2是两个字节一个寄存器，寄存器16位。除以256是byte最大存储255。)              
-            buffer[6] = (byte)(values.Length);          //写字节的个数
-            values.CopyTo(buffer, 7);                   //把目标值附加到数组后面
-            return buffer;
+            if (values.Length > 2)
+            {
+                byte[] buffer = new byte[7 + values.Length];
+                buffer[0] = stationNumber; //站号
+                buffer[1] = functionCode;  //功能码
+                buffer[2] = BitConverter.GetBytes(readAddress)[1];
+                buffer[3] = BitConverter.GetBytes(readAddress)[0];//寄存器地址
+                buffer[4] = (byte)(values.Length / 2 / 256);
+                buffer[5] = (byte)(values.Length / 2 % 256);//写寄存器数量(除2是两个字节一个寄存器，寄存器16位。除以256是byte最大存储255。)              
+                buffer[6] = (byte)(values.Length);          //写字节的个数
+                values.CopyTo(buffer, 7);                   //把目标值附加到数组后面
+                return buffer;
+            }
+            else
+            {
+
+                byte[] buffer = new byte[6];
+                buffer[0] = stationNumber;//站号
+                buffer[1] = functionCode; //功能码
+                buffer[2] = BitConverter.GetBytes(readAddress)[1];
+                buffer[3] = BitConverter.GetBytes(readAddress)[0];//寄存器地址
+                buffer[4] = values[0];
+                buffer[5] = values[1];
+                return buffer;
+
+            }
         }
 
         /// <summary>

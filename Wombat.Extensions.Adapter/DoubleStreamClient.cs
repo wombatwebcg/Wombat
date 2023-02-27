@@ -18,7 +18,7 @@ namespace Wombat.Extensions.Adapter
             _writeClient = writeClient;
         }
 
-        public string Version => _readClient.Version;
+        public string Version => $"读取客户端:{_readClient.Version}写入客户端:{_writeClient.Version}";
 
         public bool IsConnect => _readClient.IsConnect & _writeClient.IsConnect;
 

@@ -38,24 +38,34 @@ namespace Wombat.IndustrialProtocol.PLC
         public new OperationResult<short> ReadInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
           => base.ReadInt16(address, stationNumber, functionCode, isPlcAddress);
 
+        /// <summary>
+        /// 读取Int16
+        /// </summary>
+        /// <param name="address">寄存器起始地址</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <returns></returns>
         public new OperationResult<short[]> ReadInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
-          => base.ReadInt16(address,readLength ,stationNumber, functionCode, isPlcAddress);
-
+          => base.ReadInt16(address, readLength, stationNumber, functionCode, isPlcAddress);
 
 
         /// <summary>
-        /// 按位的方式读取
+        /// 读取UInt16
         /// </summary>
-        /// <param name="address">寄存器地址:如1.00 ... 1.14、1.15</param>
+        /// <param name="address">寄存器起始地址</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        /// <param name="left">按位取值从左边开始取</param>
         /// <returns></returns>
-        public new OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
-          => base.ReadInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
+
+        public new OperationResult<ushort> ReadUInt16(string address, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+          => base.ReadUInt16(address,stationNumber, functionCode, isPlcAddress);
 
 
-        public new OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
+
+
+
+
+        public new OperationResult<ushort[]> ReadUInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = true)
           => base.ReadUInt16(address, readLength, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
@@ -68,6 +78,20 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <returns></returns>
         public new OperationResult<ushort> ReadUInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
             => base.ReadUInt16Bit(address,stationNumber,functionCode,left,isPlcAddress);
+
+
+
+        /// <summary>
+        /// 按位的方式读取
+        /// </summary>
+        /// <param name="address">寄存器地址:如1.00 ... 1.14、1.15</param>
+        /// <param name="stationNumber">站号</param>
+        /// <param name="functionCode">功能码</param>
+        /// <param name="left">按位取值从左边开始取</param>
+        /// <returns></returns>
+        public new OperationResult<short> ReadInt16Bit(string address, byte stationNumber = 1, byte functionCode = 3, bool left = true, bool isPlcAddress = true)
+          => base.ReadInt16Bit(address, stationNumber, functionCode, left, isPlcAddress);
+
 
         /// <summary>
         /// 读取Int32
@@ -263,7 +287,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public new OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        public new OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = true)
             => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>
@@ -284,7 +308,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// <param name="value">写入的值</param>
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
-        public new OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 16, bool isPlcAddress = true)
+        public new OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = true)
             => base.Write(address, value, stationNumber, functionCode, isPlcAddress);
 
         /// <summary>

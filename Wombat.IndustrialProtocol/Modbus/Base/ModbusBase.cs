@@ -99,7 +99,7 @@ namespace Wombat.IndustrialProtocol.Modbus
                 return new OperationResult<ushort>(result).EndTime();
         }
 
-        public OperationResult<ushort[]> ReadUInt16(string address, ushort readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
+        public OperationResult<ushort[]> ReadUInt16(string address, int readLength, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false)
         {
             var readResult = Read(address: address, readLength: readLength, stationNumber: stationNumber, functionCode: functionCode, isPlcAddress: isPlcAddress);
             var result = new OperationResult<ushort[]>(readResult);
@@ -987,7 +987,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public abstract OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false);
+        //public abstract OperationResult Write(string address, byte values, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false);
 
 
 
@@ -999,10 +999,12 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        public virtual OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 06, bool isPlcAddress = false)
+        public virtual OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
         {
-            return WriteOne(address, new byte[1] { value }, stationNumber, functionCode, isPlcAddress);
+            return Write(address,new byte[1] { value }, stationNumber, functionCode, isPlcAddress);
         }
+
+
 
         /// <summary>
         /// 写入
@@ -1014,7 +1016,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public OperationResult Write(string address, short value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
         {
             var values = value.TransByte(IsReverse);
-            return WriteOne(address, values, stationNumber, functionCode,isPlcAddress);
+            return Write(address, values, stationNumber, functionCode,isPlcAddress);
         }
         /// <summary>
         /// 写入
@@ -1040,7 +1042,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         public OperationResult Write(string address, ushort value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false)
         {
             var values = value.TransByte(IsReverse);
-            return WriteOne(address, values, stationNumber, functionCode, isPlcAddress);
+            return Write(address, values, stationNumber, functionCode, isPlcAddress);
         }
 
         /// <summary>

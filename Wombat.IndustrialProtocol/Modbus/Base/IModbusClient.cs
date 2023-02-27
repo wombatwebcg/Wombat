@@ -69,7 +69,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber">站号</param>
         /// <param name="functionCode">功能码</param>
         /// <returns></returns>
-        OperationResult<ushort[]> ReadUInt16(string address, ushort length, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false);
+        OperationResult<ushort[]> ReadUInt16(string address, int length, byte stationNumber = 1, byte functionCode = 3, bool isPlcAddress = false);
 
         /// <summary>
         /// 读取UInt16
@@ -374,7 +374,7 @@ namespace Wombat.IndustrialProtocol.Modbus
         /// <param name="stationNumber"></param>
         /// <param name="functionCode"></param>
         /// <returns></returns>
-        OperationResult WriteOne(string address, byte[] values, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false);
+        //OperationResult Write(string address, byte value, byte stationNumber = 1, byte functionCode = 6, bool isPlcAddress = false);
 
 
 

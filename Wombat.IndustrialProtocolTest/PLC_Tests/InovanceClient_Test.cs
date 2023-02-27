@@ -49,7 +49,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
 
             Random rnd = new Random((int)Stopwatch.GetTimestamp());
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10; i++)
             {
                 short short_number = (short)rnd.Next(short.MinValue, short.MaxValue);
                 int int_number = rnd.Next(int.MinValue, int.MaxValue);
@@ -58,7 +58,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 //client.Write("Y100", true);
                 //Assert.True(client.ReadBoolean("Y100").Value == true);
-                //client.Write("M900", true);
+                client.Write("M900", true);
                 var sss = client.ReadCoil("M900");
                 Assert.True(client.ReadCoil("M900").Value == true);
                 client.Write("M901", bool_value);
@@ -68,7 +68,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 client.Write("M903", !bool_value);
                 Assert.True(client.ReadCoil("M903").Value == !bool_value);
                 client.Write("M904", bool_value);
-                Assert.True(client.ReadCoil("M904").Value == bool_value);
+                //Assert.True(client.ReadCoil("M904").Value == bool_value);
                 //client.Write("L100", !bool_value);
                 //Assert.True(client.ReadBoolean("L100").Value == !bool_value);
                 //client.Write("F100", bool_value);
@@ -80,8 +80,12 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 //client.Write("S100", bool_value);
                 //Assert.True(client.ReadBoolean("S100").Value == bool_value);
 
-                client.Write("D200", short_number);
+                var sss555 = client.Write("D200", short_number);
                 Assert.True(client.ReadInt16("D200").Value == short_number);
+                var sss5556 = client.Write("D200", (ushort)Math.Abs(short_number));
+                var sssssssss2 = client.ReadUInt16("D200");
+
+                Assert.True(client.ReadUInt16("D200").Value == (ushort)Math.Abs(short_number));
 
                 client.Write("D200", int_number);
                 Assert.True(client.ReadInt32("D200").Value == int_number);

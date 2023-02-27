@@ -16,7 +16,8 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         {
             //client = new ModbusRtuClient("COM3", 9600, 8, StopBits.One, Parity.None);
             client = new ModbusRtuClient("COM23", 9600, 8, StopBits.One, Parity.Even);
-
+            client.DataFormat = EndianFormat.DCBA;
+            client.IsReverse = true;
         }
 
         [Fact]
@@ -24,7 +25,7 @@ namespace Wombat.IndustrialProtocolTest.Modbus
         {
             client.Disconnect();
             client.Connect();
-            var ssss = client.Write("32", (ushort)3, stationNumber: 0xFF);
+            var ssss = client.Write("32", (ushort)4, stationNumber: 0xFF);
             var ggg = client.ReadInt16("14",stationNumber:0xFF);
 
             short Number = 33;
