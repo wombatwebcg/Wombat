@@ -1168,7 +1168,7 @@ namespace Wombat.IndustrialProtocol
     /// <typeparam name="T4">泛型类</typeparam>
     /// <typeparam name="T5">泛型类</typeparam>
     /// <typeparam name="T6">泛型类</typeparam>
-    public class OperationResult<T1, T2, T3, T4, T5,T6> : OperationResult
+    public class OperationResult<T1, T2, T3, T4, T5, T6> : OperationResult
     {
         #region Constructor
 
@@ -1205,7 +1205,7 @@ namespace Wombat.IndustrialProtocol
         /// 使用指定的消息实例化一个默认的结果对象
         /// </summary>
         /// <param name="msg">错误消息</param>
-        public OperationResult(OperationResult result, T1 data1, T2 data2, T3 data3, T4 data4, T5 data5,T6 data6)
+        public OperationResult(OperationResult result, T1 data1, T2 data2, T3 data3, T4 data4, T5 data5, T6 data6)
         {
             var orgin = Assignment(result);
             this.ErrorCode = orgin.ErrorCode;

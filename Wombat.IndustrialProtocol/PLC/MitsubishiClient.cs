@@ -47,6 +47,8 @@ namespace Wombat.IndustrialProtocol.PLC
                 address = Dns.GetHostEntry(ip).AddressList?.FirstOrDefault();
             IpEndPoint = new IPEndPoint(address, port);
             _advancedHybirdLock = new AdvancedHybirdLock();
+            IsReverse = false;
+            DataFormat = EndianFormat.DCBA;
         }
 
         /// <summary>
@@ -59,6 +61,9 @@ namespace Wombat.IndustrialProtocol.PLC
             this._version = version;
             IpEndPoint = ipAndPoint;
             _advancedHybirdLock = new AdvancedHybirdLock();
+            IsReverse = false;
+            DataFormat = EndianFormat.DCBA;
+
         }
 
         /// <summary>

@@ -11,7 +11,8 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
     public class MitsubishiClient_Tests
     {
         private MitsubishiClient client;
-        string ip = "159.75.78.22";
+        //string ip = "159.75.78.22";
+        string ip = "192.168.1.180";
 
         public MitsubishiClient_Tests()
         {
@@ -91,8 +92,8 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 client.Write("D200", Convert.ToDouble(float_number));
                 Assert.True(client.ReadDouble("D200").Value == Convert.ToDouble(float_number));
 
-                bool[] bool_values = { false, true, false, false, true, false, false, false, false, false
-                        , false, false, false,false,false,false,false,false,false, true };
+                bool[] bool_values = { true, false,true, true, true, false, false, false, false, false
+                        , false, false, false,false,false,false,false,false,false,false };
 
                 var sss1 = client.Write("M900", bool_values);
                 var bool_values_result = client.ReadBoolean("M900", bool_values.Length);
@@ -102,7 +103,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                short[] short_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                short[] short_values = { 10000, 20000, 30003, 30004, 30005, 30006, 30007, 30008, 30009, 30010 };
                 client.Write("D300", short_values);
                 var short_values_result = client.ReadInt16("D300", short_values.Length);
                 for (int j = 0; j < short_values_result.Value.Length; j++)
@@ -111,7 +112,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                ushort[] ushort_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                ushort[] ushort_values = { 10000, 20000, 30003, 30004, 30005, 30006, 30007, 30008, 30009, 30010 };
                 client.Write("D300", ushort_values);
                 var ushort_values_result = client.ReadInt16("D300", ushort_values.Length);
                 for (int j = 0; j < ushort_values_result.Value.Length; j++)
@@ -120,7 +121,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                int[] int_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                int[] int_values = { 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000 };
                 client.Write("D300", int_values);
                 var int_values_result = client.ReadInt32("D300", int_values.Length);
                 for (int j = 0; j < int_values_result.Value.Length; j++)
@@ -129,7 +130,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                uint[] uint_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                uint[] uint_values = { 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000 };
                 client.Write("D300", uint_values);
                 var uint_values_result = client.ReadUInt32("D300", uint_values.Length);
                 for (int j = 0; j < uint_values_result.Value.Length; j++)
@@ -138,7 +139,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                long[] long_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                long[] long_values = { 100000000, 200000000, 300000000, 400000000, 500000000, 600000000, 7000000, 80000000, 900000000, 1000000000 };
                 client.Write("D300", long_values);
                 var long_values_result = client.ReadInt64("D300", long_values.Length);
                 for (long j = 0; j < long_values_result.Value.Length; j++)
@@ -147,7 +148,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                ulong[] ulong_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                ulong[] ulong_values = { 100000000, 200000000, 300000000, 400000000, 500000000, 600000000, 7000000, 80000000, 900000000, 1000000000 };
                 client.Write("D300", ulong_values);
                 var ulong_values_result = client.ReadUInt64("D300", ulong_values.Length);
                 for (int j = 0; j < ulong_values_result.Value.Length; j++)
@@ -164,7 +165,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                     Assert.True(float_values_result.Value[j] == float_values[j]);
 
                 }
-                double[] double_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                double[] double_values = { 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1 };
                 client.Write("D300", double_values);
                 var double_values_result = client.ReadDouble("D300", double_values.Length);
                 for (int j = 0; j < double_values_result.Value.Length; j++)
@@ -177,7 +178,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
         [Theory]
         [InlineData(MitsubishiVersion.Qna_3E, 8000)]
-        [InlineData(MitsubishiVersion.Qna_3E, 8001)]
+        //[InlineData(MitsubishiVersion.Qna_3E, 8001)]
         public void 批量读写(MitsubishiVersion version, int port)
         {
             client = new MitsubishiClient(version, ip, port);
@@ -211,17 +212,17 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
             //    }
             //}
 
-            client.Write("D100", short_number1);
-            client.Write("D101", short_number2);
-            client.Write("D102", short_number3);
-            client.Write("D103", short_number4);
-            client.Write("D104", short_number5);
-
-            Assert.True(client.ReadInt16("D100").Value == short_number1);
-            Assert.True(client.ReadInt16("D101").Value == short_number2);
-            Assert.True(client.ReadInt16("D102").Value == short_number3);
-            Assert.True(client.ReadInt16("D103").Value == short_number4);
-            Assert.True(client.ReadInt16("D104").Value == short_number5);
+            client.Write("D300", short_number1);
+            client.Write("D301", short_number2);
+            client.Write("D302", short_number3);
+            client.Write("D303", short_number4);
+            client.Write("D304", short_number5);
+            //var tt2t = client.ReadInt16("D300");
+            Assert.True(client.ReadInt16("D300").Value == short_number1);
+            Assert.True(client.ReadInt16("D301").Value == short_number2);
+            Assert.True(client.ReadInt16("D302").Value == short_number3);
+            Assert.True(client.ReadInt16("D303").Value == short_number4);
+            Assert.True(client.ReadInt16("D304").Value == short_number5);
 
             client?.Disconnect();
         }
