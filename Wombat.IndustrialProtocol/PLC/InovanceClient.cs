@@ -10,11 +10,12 @@ namespace Wombat.IndustrialProtocol.PLC
     {
         public InovanceClient(IPEndPoint ipAndPoint) : base(ipAndPoint)
         {
-
+            DataFormat = Infrastructure.EndianFormat.BADC;
         }
 
         public InovanceClient(string ip, int port) : base(ip, port)
         {
+            DataFormat = Infrastructure.EndianFormat.BADC;
 
         }
 

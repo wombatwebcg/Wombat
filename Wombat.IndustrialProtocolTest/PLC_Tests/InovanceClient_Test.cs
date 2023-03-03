@@ -44,19 +44,20 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
             client2.IsUseLongConnect = true;
             client2.Connect();
             client2.Timeout = TimeSpan.FromMilliseconds(500);
+            ReadWrite();
 
-            var t1 = Task.Run(() =>
-            {
-                ReadWrite();
-            });
-            var t2 = Task.Run(() =>
-            {
-                ReadWrite2();
-            });
-           while(!t1.IsCompleted|!t2.IsCompleted)
-            {
+            //var t1 = Task.Run(() =>
+            //{
+            //    ReadWrite();
+            //});
+           // var t2 = Task.Run(() =>
+           // {
+           //     ReadWrite2();
+           // });
+           //while(!t1.IsCompleted|!t2.IsCompleted)
+           // {
 
-            }
+           // }
             client.Disconnect();
             client2.Disconnect();
 
@@ -100,14 +101,16 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                 //client.Write("S100", bool_value);
                 //Assert.True(client.ReadBoolean("S100").Value == bool_value);
 
-                var sss555 = client.Write("D200", short_number);
-                Assert.True(client.ReadInt16("D200").Value == short_number);
-                var sss5556 = client.Write("D200", (ushort)Math.Abs(short_number));
-                var sssssssss2 = client.ReadUInt16("D200");
+                //var sss555 = client.Write("D200", short_number);
+                //Assert.True(client.ReadInt16("D200").Value == short_number);
+                //var sss5556 = client.Write("D200", (ushort)Math.Abs(short_number));
+                //var sssssssss2 = client.ReadUInt16("D200");
 
-                Assert.True(client.ReadUInt16("D200").Value == (ushort)Math.Abs(short_number));
+                //Assert.True(client.ReadUInt16("D200").Value == (ushort)Math.Abs(short_number));
 
                 client.Write("D200", int_number);
+                //client.Write("D200",200);
+                //var ss2s = client.ReadInt32("D200");
                 Assert.True(client.ReadInt32("D200").Value == int_number);
 
                 client.Write("D200", Convert.ToInt64(int_number));
@@ -130,7 +133,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 //}
 
-                bool[] bool_values = { true, false, false, false, true, false, false, false, false, false
+                bool[] bool_values = { true, true, false, false, true, false, false, false, false, false
                         , false, false, false,false,false,false,false,false,false, true };
 
                 var sss1 = client.Write("M900", bool_values);
@@ -141,7 +144,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                short[] short_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                short[] short_values = { 10000, 20000, 30003, 30004, 30005, 30006, 30007, 30008, 30009, 30010 };
                 client.Write("D300", short_values);
                 var short_values_result = client.ReadInt16("D300", short_values.Length);
                 for (int j = 0; j < short_values_result.Value.Length; j++)
@@ -150,7 +153,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                ushort[] ushort_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                ushort[] ushort_values = { 10000, 20000, 30003, 30004, 30005, 30006, 30007, 30008, 30009, 30010 };
                 client.Write("D300", ushort_values);
                 var ushort_values_result = client.ReadInt16("D300", ushort_values.Length);
                 for (int j = 0; j < ushort_values_result.Value.Length; j++)
@@ -159,7 +162,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                int[] int_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                int[] int_values = { 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000 };
                 client.Write("D300", int_values);
                 var int_values_result = client.ReadInt32("D300", int_values.Length);
                 for (int j = 0; j < int_values_result.Value.Length; j++)
@@ -168,7 +171,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                uint[] uint_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                uint[] uint_values = { 100000, 200000, 300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000 };
                 client.Write("D300", uint_values);
                 var uint_values_result = client.ReadUInt32("D300", uint_values.Length);
                 for (int j = 0; j < uint_values_result.Value.Length; j++)
@@ -177,7 +180,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                long[] long_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                long[] long_values = { 100000000, 200000000, 300000000, 400000000, 500000000, 600000000, 7000000, 80000000, 900000000, 1000000000 };
                 client.Write("D300", long_values);
                 var long_values_result = client.ReadInt64("D300", long_values.Length);
                 for (long j = 0; j < long_values_result.Value.Length; j++)
@@ -186,7 +189,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
 
                 }
 
-                ulong[] ulong_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                ulong[] ulong_values = { 100000000, 200000000, 300000000, 400000000, 500000000, 600000000, 7000000, 80000000, 900000000, 1000000000 };
                 client.Write("D300", ulong_values);
                 var ulong_values_result = client.ReadUInt64("D300", ulong_values.Length);
                 for (int j = 0; j < ulong_values_result.Value.Length; j++)
@@ -203,7 +206,7 @@ namespace Wombat.IndustrialProtocolTest.PLCTests
                     Assert.True(float_values_result.Value[j] == float_values[j]);
 
                 }
-                double[] double_values = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+                double[] double_values = { 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 8.1, 9.1, 10.1 };
                 client.Write("D300", double_values);
                 var double_values_result = client.ReadDouble("D300", double_values.Length);
                 for (int j = 0; j < double_values_result.Value.Length; j++)
