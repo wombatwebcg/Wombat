@@ -5,7 +5,8 @@
 	  <Authors>wombatwebcg</Authors>
 	  <Company></Company>
 	  <Product></Product>
-	  <Description>工业设备通讯库</Description>
+	  <Description>工业设备通讯库
+通过三菱3E、西门子S7、汇川PLC实体与单元测试</Description>
 	  <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	  <NeutralLanguage></NeutralLanguage>
@@ -14,7 +15,7 @@
 	  <Copyright>wombatwebcg</Copyright>
 	  <RepositoryUrl>https://github.com/wombatwebcg/Wombat.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
-	  <Version>1.1.8</Version>
+	  <Version>1.1.9</Version>
   </PropertyGroup>
 
   <ItemGroup>
