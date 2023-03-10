@@ -12,6 +12,7 @@ namespace Wombat.Infrastructure
 
         public static bool CheckSerialPort(string portName)
         {
+            if (portName == null) return false;
             var ports = SerialPort.GetPortNames();
             foreach (var p in ports)
             {
@@ -27,6 +28,8 @@ namespace Wombat.Infrastructure
 
         public static bool PingIp(string strIP)
         {
+            if (strIP == null) return false;
+
             bool bRet = false;
             try
             {
@@ -49,6 +52,8 @@ namespace Wombat.Infrastructure
         /// <returns></returns>
         public static bool PingIpOrDomainName(string strIpOrDName)
         {
+            if (strIpOrDName == null) return false;
+
             try
             {
                 Ping objPingSender = new Ping();

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
+using Wombat.Infrastructure;
 
 namespace Wombat.IndustrialProtocol
 {
@@ -29,7 +30,6 @@ namespace Wombat.IndustrialProtocol
 
         public SerialPortBase()
         {
-            _serialPort = new SerialPort();
 
         }
 
@@ -45,7 +45,7 @@ namespace Wombat.IndustrialProtocol
         /// <param name="timeout">超时时间（毫秒）</param>
         /// <param name="DataFormat">大小端设置</param>
         /// <param name="plcAddresses">PLC地址</param>
-        public SerialPortBase(string portName, int baudRate = 9600, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, Handshake handshake = Handshake.None):base()
+        public SerialPortBase(string portName, int baudRate = 9600, int dataBits = 8, StopBits stopBits = StopBits.One, Parity parity = Parity.None, Handshake handshake = Handshake.None)
         {
             PortName = portName;
             BaudRate = baudRate;
@@ -53,6 +53,7 @@ namespace Wombat.IndustrialProtocol
             Handshake = handshake;
             Parity = parity;
             StopBits = stopBits;
+
         }
 
 
@@ -75,6 +76,11 @@ namespace Wombat.IndustrialProtocol
         /// <returns></returns>
         protected override OperationResult DoConnect()
         {
+            if (DeviceInterfaceHelper.CheckSerialPort(PortName))
+            {
+                _serialPort?.Close();
+            }
+            _serialPort = new SerialPort();
             _serialPort.PortName = PortName ?? throw new ArgumentNullException(nameof(PortName));
             _serialPort.BaudRate = BaudRate;
             _serialPort.Parity = Parity;
@@ -87,7 +93,6 @@ namespace Wombat.IndustrialProtocol
 
 
             var result = new OperationResult();
-            _serialPort?.Close();
             try
             {
                 _serialPort.Open();

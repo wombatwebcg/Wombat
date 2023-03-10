@@ -56,7 +56,7 @@ namespace Wombat.IndustrialProtocol.Modbus
             Handshake = handshake;
             Parity = parity;
             StopBits = stopBits;
-            _advancedHybirdLock = new AdvancedHybirdLock();
+
         }
 
 

@@ -15,6 +15,10 @@
 		<Version>1.1.2</Version>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <Compile Remove="Converters.cs" />
 	</ItemGroup>
