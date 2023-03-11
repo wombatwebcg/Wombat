@@ -14,13 +14,11 @@ namespace Wombat.IndustrialProtocol
     abstract public class BaseMessageModel : IBaseMessageModelSync, IDisposable 
     {
 
-        private SimpleHybirdLock _hybirdLock;
 
 
 
         public BaseMessageModel()
         {
-            _hybirdLock = new SimpleHybirdLock();
 
         }
 
@@ -109,7 +107,7 @@ namespace Wombat.IndustrialProtocol
         /// </summary>
         /// <param name="command">发送命令</param>
         /// <returns></returns>
-        public abstract OperationResult<byte[]> SendPackageSingle(byte[] command);
+       public abstract OperationResult<byte[]> SendPackageSingle(byte[] command);
 
 
 

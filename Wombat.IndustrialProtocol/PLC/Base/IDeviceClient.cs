@@ -21,7 +21,7 @@ namespace Wombat.IndustrialProtocol.PLC
         /// </summary>
         /// <param name="command">发送命令</param>
         /// <returns></returns>
-        OperationResult<byte[]> SendPackageSingle(byte[] command);
+         OperationResult<byte[]> SendPackageSingle(byte[] command);
 
         #region Read 
 

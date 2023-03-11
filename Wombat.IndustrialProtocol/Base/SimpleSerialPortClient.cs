@@ -24,20 +24,41 @@ namespace Wombat.IndustrialProtocol
 
         }
 
-        public override OperationResult<byte[]> SendPackageSingle(byte[] command)
+        public override OperationResult<byte[]> SendPackageReliable(byte[] command)
         {
             _advancedHybirdLock.Enter();
-            var result = base.SendPackageSingle(command);
-           _advancedHybirdLock.Leave();
-            return result;
-        }
+            OperationResult<byte[]> result = new OperationResult<byte[]>();
 
-        public override OperationResult<string> SendPackageReliable(string command, Encoding encoding)
-        {
-            _advancedHybirdLock.Enter();
-            var result = base.SendPackageReliable(command, encoding);
+            if (IsConnect != true)
+            {
+                var connectResult = Connect();
+                if (!connectResult.IsSuccess)
+                {
+                    connectResult.Message = $"自动连接失败";
+                    _advancedHybirdLock.Leave();
+                    return new OperationResult<byte[]>(connectResult);
+                }
+            }
+            try
+            {
+                 result = base.SendPackageReliable(command);
+
+            }
+            catch (Exception ex)
+            {
+                result.IsSuccess = false;
+                result.Message = ex.Message;
+                _advancedHybirdLock.Leave();
+            }
+            finally
+            {
+                if (!IsUseLongConnect) Disconnect();
+            }
+
             _advancedHybirdLock.Leave();
             return result;
+
         }
+
     }
 }

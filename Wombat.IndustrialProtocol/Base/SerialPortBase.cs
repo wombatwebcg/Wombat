@@ -184,7 +184,7 @@ namespace Wombat.IndustrialProtocol
         /// </summary>
         /// <param name="command">发送命令</param>
         /// <returns></returns>
-        public override OperationResult<byte[]> SendPackageSingle(byte[] command)
+       public override OperationResult<byte[]> SendPackageSingle(byte[] command)
         {
             OperationResult<byte[]> _sendPackage()
             {
@@ -283,7 +283,7 @@ namespace Wombat.IndustrialProtocol
                     if (_OperationReTryTimes < OperationReTryTimes)
                     {
                         _OperationReTryTimes++;
-                        SendPackageReliable(command);
+                         SendPackageReliable(command);
                     }
                     else
                     {
