@@ -161,7 +161,7 @@ namespace Wombat.Infrastructure
         /// <param name="buffer">缓存数据</param>
         /// <param name="index">位的索引</param>
         /// <returns>bool对象</returns>
-        public static bool TransBool(this byte[] buffer, int index=0)
+        public static bool TransBool(this byte[] buffer, int index = 0)
         {
             return ((buffer[index] & 0x01) == 0x01);
         }
@@ -174,23 +174,17 @@ namespace Wombat.Infrastructure
         /// <param name="index">位的索引</param>
         /// <param name="length">bool长度</param>
         /// <returns>bool数组</returns>
-        public static bool[] TransBool(this byte[] buffer, int index, int length, bool reverse = false, bool is8Bit = true)
+        public static bool[] TransBool(this byte[] buffer, int index, int length, bool reverse = false)
         {
-            byte[] temp = new byte[length];
-            if (is8Bit)
+            int realLength = (int)Math.Ceiling((length) * 1.0 / 8);
+            byte[] temp = new byte[realLength];
+            int bufferLength = buffer.Length - index;
+            if (bufferLength <= realLength)
             {
-                int bufferLength = (int)Math.Ceiling((buffer.Length - index) * 1.0 / 8);
-                int realLength = (int)Math.Ceiling((length) * 1.0 / 8);
-                if (bufferLength > realLength)
-                {
-                    realLength = bufferLength;
-                }
-                Array.Copy(buffer, index, temp, 0, realLength);
+                realLength = bufferLength;
             }
-            else
-            {
-                Array.Copy(buffer, index, temp, 0, length);
-            }
+            Array.Copy(buffer, index, temp, 0, realLength);
+            if (reverse) { temp = temp.Reverse().ToArray(); }
             return ByteToBoolArray(temp, length);
         }
 
