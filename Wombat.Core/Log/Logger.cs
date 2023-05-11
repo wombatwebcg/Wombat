@@ -13,6 +13,7 @@ namespace Wombat.Core
         LogFileTypes _logFileType = LogFileTypes.Single;
         RollingInterval _logRollingInterval = RollingInterval.Infinite;
         int _logFileSize = int.MaxValue;
+
         public Logger(LogEventLevel minimumLevel= LogEventLevel.None)
         {
             _minimumLevel = minimumLevel;

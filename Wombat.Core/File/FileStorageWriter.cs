@@ -26,7 +26,7 @@ namespace Wombat.Core
         /// <inheritdoc/>
         /// </summary>
         /// <param name="buffer"></param>
-        public  void Write(byte[] buffer)
+        public void Write(byte[] buffer)
         {
             Write(buffer, 0, buffer.Length);
         }
