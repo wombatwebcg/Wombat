@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Wombat.Network.Buffer;
 
-namespace Wombat.Network.Socket
+namespace Wombat.Network.Sockets
 {
    public class SocketConfiguration
     {
@@ -62,40 +62,7 @@ namespace Wombat.Network.Socket
         /// </summary>
         public bool ReuseAddress { get; set; }
 
-        /// <summary>
-        /// 获取或设置一个值，该值指示是否启用 SSL/TLS 加密
-        /// </summary>
-        public bool SslEnabled { get; set; }
 
-        /// <summary>
-        /// 获取或设置 SSL/TLS 目标主机名
-        /// </summary>
-        public string SslTargetHost { get; set; }
-
-        /// <summary>
-        /// 获取或设置 SSL/TLS 客户端证书集合
-        /// </summary>
-        public X509CertificateCollection SslClientCertificates { get; set; }
-
-        /// <summary>
-        /// 获取或设置 SSL/TLS 加密策略
-        /// </summary>
-        public EncryptionPolicy SslEncryptionPolicy { get; set; }
-
-        /// <summary>
-        /// 获取或设置 SSL/TLS 启用的协议版本
-        /// </summary>
-        public SslProtocols SslEnabledProtocols { get; set; }
-
-        /// <summary>
-        /// 获取或设置一个值，该值指示是否检查证书吊销
-        /// </summary>
-        public bool SslCheckCertificateRevocation { get; set; }
-
-        /// <summary>
-        /// 获取或设置一个值，该值指示是否绕过 SSL/TLS 策略错误
-        /// </summary>
-        public bool SslPolicyErrorsBypassed { get; set; }
 
         /// <summary>
         /// 获取或设置连接操作的超时时间

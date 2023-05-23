@@ -77,7 +77,7 @@ namespace Wombat.Core
 
         public bool IsEnabled(LogEventLevel level)
         {
-            return level>_minimumLevel;
+            return level>=_minimumLevel;
         }
 
 

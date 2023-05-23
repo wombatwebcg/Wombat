@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Wombat.Network.Buffer;
 
-namespace Wombat.Network.Socket
+namespace Wombat.Network.Sockets
 {
     public sealed class TcpSocketServerConfiguration : SocketConfiguration
     {
@@ -30,25 +30,9 @@ namespace Wombat.Network.Socket
             KeepAliveInterval = TimeSpan.FromSeconds(5);
             ReuseAddress = false;
 
-            PendingConnectionBacklog = 200;
-            AllowNatTraversal = true;
-
-            SslEnabled = false;
-            SslServerCertificate = null;
-            SslEncryptionPolicy = EncryptionPolicy.RequireEncryption;
-            SslEnabledProtocols = SslProtocols.Ssl3 | SslProtocols.Tls;
-            SslClientCertificateRequired = true;
-            SslCheckCertificateRevocation = false;
-            SslPolicyErrorsBypassed = false;
-
             ConnectTimeout = TimeSpan.FromSeconds(15);
         }
 
-
-        public X509Certificate2 SslServerCertificate { get; set; }
-
-
-        public bool SslClientCertificateRequired { get; set; }
 
         /// <summary>
         /// 待处理连接队列

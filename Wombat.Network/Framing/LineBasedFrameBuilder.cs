@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 
-namespace Wombat.Network
+namespace Wombat.Network.Sockets
 {
     public class LineDelimiter : IEquatable<LineDelimiter>
     {

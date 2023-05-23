@@ -5,15 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Socket\Tcp\Client\TcpSocketBaseClient.cs" />
+    <Compile Remove="Sockets\Tcp\Client\TcpSocketBaseClient.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Wombat.Core\Wombat.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Socket\Tcp\Server\" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Wombat.Network
+namespace Wombat.Network.Sockets
 {    public sealed class ModbusTcpFrameBuilder : FrameBuilder
     {
          public static int Number { get; set; }

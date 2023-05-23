@@ -7,7 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Wombat.Network.Buffer;
 
-namespace Wombat.Network.Socket
+namespace Wombat.Network.Sockets
 {
     public sealed class TcpSocketClientConfiguration : SocketConfiguration
     {
@@ -29,15 +29,6 @@ namespace Wombat.Network.Socket
             KeepAlive = false;                          // Use keep-alives.
             KeepAliveInterval = TimeSpan.FromSeconds(5);// https://msdn.microsoft.com/en-us/library/system.net.sockets.socketoptionname(v=vs.110).aspx
             ReuseAddress = false;                       // Allows the socket to be bound to an address that is already in use.
-
-            SslEnabled = false;
-            SslTargetHost = null;
-            SslClientCertificates = new X509CertificateCollection();
-            SslEncryptionPolicy = EncryptionPolicy.RequireEncryption;
-            SslEnabledProtocols = SslProtocols.Ssl3 | SslProtocols.Tls;
-            SslCheckCertificateRevocation = false;
-            SslPolicyErrorsBypassed = false;
-
             ConnectTimeout = TimeSpan.FromSeconds(15);
         }
 

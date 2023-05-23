@@ -9,9 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.SerialPorts", "Womba
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat_Test", "Wombat_Test\Wombat_Test.csproj", "{03AA41F7-EE8D-4213-96B2-DE9374A7F812}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{C246A238-BFD9-4108-85E0-8BA0937C309F}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Network", "Wombat.Network\Wombat.Network.csproj", "{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketServer", "Tests\Wombat.Socket.TestTcpSocketServer\Wombat.Socket.TestTcpSocketServer.csproj", "{3BD082EF-9CF4-4130-A603-20250FDDF90D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketClient", "Tests\Wombat.Socket.TestTcpSocketClient\Wombat.Socket.TestTcpSocketClient.csproj", "{347B3B58-7633-4F4B-B301-7D6997474CEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,17 +35,25 @@ Global
 		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C246A238-BFD9-4108-85E0-8BA0937C309F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C246A238-BFD9-4108-85E0-8BA0937C309F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C246A238-BFD9-4108-85E0-8BA0937C309F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C246A238-BFD9-4108-85E0-8BA0937C309F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3BD082EF-9CF4-4130-A603-20250FDDF90D} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{347B3B58-7633-4F4B-B301-7D6997474CEF} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DBA95CD-10E5-4DDD-8D56-1C8EF6FA4D09}

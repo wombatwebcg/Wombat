@@ -1,11 +1,10 @@
-﻿namespace Wombat.Network.Socket
+﻿namespace Wombat.Network.Sockets
 {
     public enum SocketConnectionState
     {
         None = 0,
         Connecting = 1,
         Connected = 2,
-        Closeing = 5,
-        Closed = 6,
+        Closed = 5,
     }
 }

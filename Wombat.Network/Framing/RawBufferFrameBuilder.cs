@@ -1,4 +1,4 @@
-﻿namespace Wombat.Network
+﻿namespace Wombat.Network.Sockets
 {
     public sealed class RawBufferFrameBuilder : FrameBuilder
     {
