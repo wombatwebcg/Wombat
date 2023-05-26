@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Wombat.Network.Buffer
+namespace Wombat.Network
 {
     /// <summary>
     /// 分段缓冲管理器

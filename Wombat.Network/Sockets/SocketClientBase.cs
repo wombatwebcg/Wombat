@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Wombat.Core;
-using Wombat.Network.Buffer;
+using Wombat.Network;
 
 namespace Wombat.Network.Sockets
 {

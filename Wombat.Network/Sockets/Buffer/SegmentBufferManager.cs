@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Wombat.Network.Buffer
+namespace Wombat.Network
 {
     /// <summary>
     /// A manager to handle buffers for the socket connections.

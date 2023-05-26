@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Wombat.Network.Buffer
+namespace Wombat.Network
 {
     /// <summary>
     /// 缓冲验证器

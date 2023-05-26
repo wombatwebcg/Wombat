@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Wombat.Network.Buffer
+namespace Wombat.Network
 {
     [Serializable]
     public class UnableToAllocateBufferException : Exception

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Wombat.Network.Buffer
+namespace Wombat.Network
 {
     public class SegmentBufferDeflector
     {
