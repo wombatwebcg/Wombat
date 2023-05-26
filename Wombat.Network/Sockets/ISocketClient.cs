@@ -14,7 +14,7 @@ namespace Wombat.Network.Sockets
 
         #region Properties
 
-        TcpSocketClientConfiguration SocketConfiguration { get; set; }
+        TcpSocketClientConfiguration SocketConfiguration { get; }
 
         bool Connected { get; }
 
@@ -24,7 +24,7 @@ namespace Wombat.Network.Sockets
 
         IPEndPoint LocalEndPoint { get; set; }
 
-        ClientSecurityOptions Security { get; set; }
+        ClientSecurityOptions SecurityOptions { get; }
 
 
 

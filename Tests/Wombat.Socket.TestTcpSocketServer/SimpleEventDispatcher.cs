@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Wombat.Network.Socket;
+using Wombat.Network.Sockets;
 
 namespace Wombat.Socket.TestTcpSocketServer
 {

@@ -69,6 +69,7 @@ namespace Wombat.Network.Sockets
             _server = server;
             _frameBuilder = frameBuilder;
             _sessionKey = Guid.NewGuid().ToString();
+            Security = Security ?? new ServerSecurityOptions();
             this.StartTime = DateTime.UtcNow;
 
             SetSocketOptions();

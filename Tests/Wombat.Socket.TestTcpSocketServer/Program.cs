@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Wombat.Core;
-using Wombat.Network.Socket;
+using Wombat.Network.Sockets;
 
 namespace Wombat.Socket.TestTcpSocketServer
 {
@@ -44,7 +44,7 @@ namespace Wombat.Socket.TestTcpSocketServer
                             if (text == "many")
                             {
                                 text = new string('x', 8192);
-                                for (int i = 0; i < 1000000; i++)
+                                for (int i = 0; i < 100; i++)
                                 {
                                     await _server.BroadcastAsync(Encoding.UTF8.GetBytes(text));
                                     Console.WriteLine("Server [{0}] broadcasts text -> [{1}].", _server.ListenedEndPoint, text);

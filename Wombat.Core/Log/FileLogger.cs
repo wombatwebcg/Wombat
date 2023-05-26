@@ -92,15 +92,13 @@ namespace Wombat.Core
                     _writer.Write(Encoding.UTF8.GetBytes(logString));
                     if (_writer.FileStorage.Length > 1024 * 1024)
                     {
-                        _writer.Dispose();
-                        _writer = null;
+                        _writer?.Dispose();
                     }
                 }
             }
             catch
             {
-                _writer.Dispose();
-                _writer = null;
+                _writer?.Dispose();
             }
         }
     }

@@ -17,32 +17,45 @@ namespace Wombat.Network.Sockets
     {
         #region Fields
 
-        private ILog _logger;
+        protected internal ILog _logger;
         private Socket _socket;
 
-        private TcpSocketClientConfiguration _configuration;
-        private IPEndPoint _remoteEndPoint;
-        private IPEndPoint _localEndPoint;
-        private Stream _stream;
-        private ArraySegment<byte> _receiveBuffer = default(ArraySegment<byte>);
-        private int _receiveBufferOffset = 0;
+        protected internal TcpSocketClientConfiguration _configuration;
+        protected internal ClientSecurityOptions _securityOptions;
+        protected internal IPEndPoint _remoteEndPoint;
+        protected internal IPEndPoint _localEndPoint;
+        protected internal Stream _stream;
+        protected internal ArraySegment<byte> _receiveBuffer = default(ArraySegment<byte>);
+        protected internal int _receiveBufferOffset = 0;
 
-        private int _state;
-        private const int _none = 0;
-        private const int _connecting = 1;
-        private const int _connected = 2;
-        private const int _closed = 5;
+        protected internal int _state;
+        protected internal const int _none = 0;
+        protected internal const int _connecting = 1;
+        protected internal const int _connected = 2;
+        protected internal const int _closed = 5;
         #endregion
 
         public SocketClientBase()
         {
-            SocketConfiguration = SocketConfiguration ?? new TcpSocketClientConfiguration();
-            Security = Security ?? new ClientSecurityOptions();
+            _configuration = _configuration ?? new TcpSocketClientConfiguration();
+            _securityOptions = _securityOptions ?? new ClientSecurityOptions();
+        }
+
+        public SocketClientBase(IPEndPoint localEndPoint, TcpSocketClientConfiguration configuration,ClientSecurityOptions securityOptions)
+        {
+            _localEndPoint = localEndPoint;
+            _configuration = configuration??new TcpSocketClientConfiguration();
+            _securityOptions = securityOptions??new ClientSecurityOptions();
+            if (_configuration.BufferManager == null)
+                throw new InvalidProgramException("The buffer manager in configuration cannot be null.");
+            if (_securityOptions == null)
+                throw new InvalidProgramException("The securitOptions handler in configuration cannot be null.");
+
         }
 
         #region Properties
 
-        public TcpSocketClientConfiguration SocketConfiguration { get; set; }
+        public TcpSocketClientConfiguration SocketConfiguration => _configuration;
 
         public bool Connected => _socket == null ? false: _socket.Connected;
 
@@ -70,7 +83,7 @@ namespace Wombat.Network.Sockets
 
         public IPEndPoint LocalEndPoint { get; set; }
 
-        public ClientSecurityOptions Security { get; set; }
+        public ClientSecurityOptions SecurityOptions => _securityOptions;
 
         #endregion
 
@@ -78,6 +91,12 @@ namespace Wombat.Network.Sockets
         {
             _logger = log;
         }
+
+        bool _isUdp;
+        //public virtual void AsUdp()
+        //{
+        //    _isUdp = true;
+        //}
 
         #region Connect
 
@@ -97,11 +116,17 @@ namespace Wombat.Network.Sockets
 
             try
             {
-                //_tcpClient = _localEndPoint != null ?
-                //    new TcpClient(_localEndPoint) :
-                //    new TcpClient(_remoteEndPoint.Address.AddressFamily);
 
-                _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                if(_isUdp)
+                {
+                    _socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+
+                }
+                else
+                {
+                    _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                }
                 if (_localEndPoint != null) _socket.Bind(_localEndPoint);
                 SetSocketOptions();
 
@@ -165,7 +190,7 @@ namespace Wombat.Network.Sockets
 
         private async Task<Stream> NegotiateStream(Stream stream)
         {
-            if (!Security.SslEnabled)
+            if (!SecurityOptions.SslEnabled)
                 return stream;
 
             var validateRemoteCertificate = new RemoteCertificateValidationCallback(
@@ -178,7 +203,7 @@ namespace Wombat.Network.Sockets
                     if (sslPolicyErrors == SslPolicyErrors.None)
                         return true;
 
-                    if (Security.SslPolicyErrorsBypassed)
+                    if (SecurityOptions.SslPolicyErrorsBypassed)
                         return true;
                     else
                         _logger?.Error($"Error occurred when validating remote certificate: [{ this.RemoteEndPoint}], [{sslPolicyErrors}]");
@@ -190,20 +215,20 @@ namespace Wombat.Network.Sockets
                 false,
                 validateRemoteCertificate,
                 null,
-                Security.SslEncryptionPolicy);
+                SecurityOptions.SslEncryptionPolicy);
 
-            if (Security.SslClientCertificates == null || Security.SslClientCertificates.Count == 0)
+            if (SecurityOptions.SslClientCertificates == null || SecurityOptions.SslClientCertificates.Count == 0)
             {
                 await sslStream.AuthenticateAsClientAsync( // No client certificates are used in the authentication. The certificate revocation list is not checked during authentication.
-                    Security.SslTargetHost); // The name of the server that will share this SslStream. The value specified for targetHost must match the name on the server's certificate.
+                    SecurityOptions.SslTargetHost); // The name of the server that will share this SslStream. The value specified for targetHost must match the name on the server's certificate.
             }
             else
             {
                 await sslStream.AuthenticateAsClientAsync(
-                    Security.SslTargetHost, // The name of the server that will share this SslStream. The value specified for targetHost must match the name on the server's certificate.
-                    Security.SslClientCertificates, // The X509CertificateCollection that contains client certificates.
-                    Security.SslEnabledProtocols, // The SslProtocols value that represents the protocol used for authentication.
-                    Security.SslCheckCertificateRevocation); // A Boolean value that specifies whether the certificate revocation list is checked during authentication.
+                    SecurityOptions.SslTargetHost, // The name of the server that will share this SslStream. The value specified for targetHost must match the name on the server's certificate.
+                    SecurityOptions.SslClientCertificates, // The X509CertificateCollection that contains client certificates.
+                    SecurityOptions.SslEnabledProtocols, // The SslProtocols value that represents the protocol used for authentication.
+                    SecurityOptions.SslCheckCertificateRevocation); // A Boolean value that specifies whether the certificate revocation list is checked during authentication.
             }
 
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
@@ -273,7 +298,7 @@ namespace Wombat.Network.Sockets
             }
         }
 
-        private void Clean()
+        internal void Clean()
         {
             try
             {

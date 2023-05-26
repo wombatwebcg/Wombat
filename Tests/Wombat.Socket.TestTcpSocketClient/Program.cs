@@ -3,7 +3,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Wombat.Core;
-using Wombat.Network.Socket;
+using Wombat.Network.Sockets;
 
 namespace Wombat.Socket.TestTcpSocketClient 
 { 
@@ -31,12 +31,14 @@ namespace Wombat.Socket.TestTcpSocketClient
                 //config.FrameBuilder = new LengthFieldBasedFrameBuilder();
 
                 IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22222);
-                _client1 = new TcpSocketClient(remoteEP,dispatcher: new SimpleEventDispatcher(),configuration: new TcpSocketClientConfiguration(),frameBuilder:new LengthPrefixedFrameBuilder());
-                _client2 = new TcpSocketClient(remoteEP,dispatcher: new SimpleEventDispatcher(),configuration: new TcpSocketClientConfiguration(), frameBuilder: new LengthPrefixedFrameBuilder());
+                _client1 = new TcpSocketClient(dispatcher: new SimpleEventDispatcher(),configuration: new TcpSocketClientConfiguration(),frameBuilder:new LengthPrefixedFrameBuilder());
+                _client2 = new TcpSocketClient(dispatcher: new SimpleEventDispatcher(),configuration: new TcpSocketClientConfiguration(), frameBuilder: new LengthPrefixedFrameBuilder());
                 _client2.UsgLogger(logger);
                 _client1.UsgLogger(logger);
-                _client1.ConnectAsync().Wait();
-                _client2.ConnectAsync().Wait();
+                //_client1.UseSubscribe();
+                //_client2.UseSubscribe();
+                _client1.ConnectAsync(remoteEP).Wait();
+                _client2.ConnectAsync(remoteEP).Wait();
                 Console.WriteLine("TCP client has connected to server [{0}].", remoteEP);
                 Console.WriteLine("Type something to send to server...");
                 while (true)
@@ -51,19 +53,24 @@ namespace Wombat.Socket.TestTcpSocketClient
                             if (text == "many")
                             {
                                 text = "";
-                                for (int i = 0; i < 100000; i++)
+                                for (int i = 0; i < 100; i++)
                                 {
                                     text += $"{i},";
                                 }
 
                                 //text = new string('123456789', 10);
-                                for (int i = 0; i < 1000; i++)
+                                for (int i = 0; i < 100; i++)
                                 {
+                                    byte[] buff1 = new byte[200] ;
                                     await _client1.SendAsync(Encoding.UTF8.GetBytes(text));
-                                    await _client2.SendAsync(Encoding.UTF8.GetBytes(text));
+                                    var c1 = _client1.ReceiveAsync(buff1,0, buff1.Length).Result;
+                                    byte[] buff2 = new byte[200];
 
-                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client1.LocalEndPoint, text);
-                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client2.LocalEndPoint, text);
+                                    await _client2.SendAsync(Encoding.UTF8.GetBytes(text));
+                                    var c2 =  _client2.ReceiveAsync(buff2, 0, buff2.Length).Result;
+
+                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client1.LocalEndPoint, Encoding.ASCII.GetString(buff1).Trim());
+                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client2.LocalEndPoint, Encoding.ASCII.GetString(buff2).Trim());
 
                                 }
                             }
