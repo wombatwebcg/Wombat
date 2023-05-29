@@ -13,7 +13,7 @@ using Wombat.Network;
 
 namespace Wombat.Network.Sockets
 {
-    public  class SocketClientBase : ISocketClient
+    public  class SocketClientBase : ISocketClient,IDisposable
     {
         #region Fields
 
@@ -87,12 +87,14 @@ namespace Wombat.Network.Sockets
 
         #endregion
 
-        public virtual void UsgLogger(Logger log)
+        public virtual void UsgLogger(ILog log)
         {
             _logger = log;
         }
 
         bool _isUdp;
+        private bool disposedValue;
+
         //public virtual void AsUdp()
         //{
         //    _isUdp = true;
@@ -489,8 +491,45 @@ namespace Wombat.Network.Sockets
 
 
 
+
         #endregion
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    try
+                    {
+                        CloseAsync(false).Wait();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.Exception(ex.Message, ex);
+                    }
+                    // TODO: 释放托管状态(托管对象)
+                }
+
+                // TODO: 释放未托管的资源(未托管的对象)并重写终结器
+                // TODO: 将大型字段设置为 null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
+        // ~SocketClientBase()
+        // {
+        //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
     }
 }

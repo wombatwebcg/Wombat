@@ -13,7 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{24F48D5F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketServer", "Tests\Wombat.Socket.TestTcpSocketServer\Wombat.Socket.TestTcpSocketServer.csproj", "{3BD082EF-9CF4-4130-A603-20250FDDF90D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketClient", "Tests\Wombat.Socket.TestTcpSocketClient\Wombat.Socket.TestTcpSocketClient.csproj", "{347B3B58-7633-4F4B-B301-7D6997474CEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSocketServer", "Tests\Wombat.WebSockets.TestWebSocketServer\Wombat.WebSockets.TestWebSocketServer.csproj", "{47222D41-D767-40AD-936E-4464C8274A4F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketClient", "Tests\Wombat.Socket.TestTcpSocketClient\Wombat.Socket.TestTcpSocketClient.csproj", "{4186718C-9D41-4EC8-980B-66D62BC8F172}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.WebSockets.TestWebSocketClient", "Wombat.WebSockets.TestWebSocketClient\Wombat.WebSockets.TestWebSocketClient.csproj", "{4E374FA0-0283-4C57-BFFF-B879D641BF98}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,17 +41,27 @@ Global
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{347B3B58-7633-4F4B-B301-7D6997474CEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47222D41-D767-40AD-936E-4464C8274A4F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47222D41-D767-40AD-936E-4464C8274A4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47222D41-D767-40AD-936E-4464C8274A4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47222D41-D767-40AD-936E-4464C8274A4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4186718C-9D41-4EC8-980B-66D62BC8F172}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4186718C-9D41-4EC8-980B-66D62BC8F172}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4186718C-9D41-4EC8-980B-66D62BC8F172}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4186718C-9D41-4EC8-980B-66D62BC8F172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
-		{347B3B58-7633-4F4B-B301-7D6997474CEF} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{47222D41-D767-40AD-936E-4464C8274A4F} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{4186718C-9D41-4EC8-980B-66D62BC8F172} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{4E374FA0-0283-4C57-BFFF-B879D641BF98} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DBA95CD-10E5-4DDD-8D56-1C8EF6FA4D09}

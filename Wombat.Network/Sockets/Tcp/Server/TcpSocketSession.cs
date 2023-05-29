@@ -15,7 +15,7 @@ namespace Wombat.Network.Sockets
     {
         #region Fields
 
-        private static Logger _logger;
+        private static ILog _logger;
         private TcpClient _tcpClient;
         private readonly TcpSocketServerConfiguration _configuration;
         private readonly ISegmentBufferManager _bufferManager;
@@ -45,7 +45,7 @@ namespace Wombat.Network.Sockets
             ISegmentBufferManager bufferManager,
             ITcpSocketServerEventDispatcher dispatcher,
             IFrameBuilder frameBuilder,
-            Logger logger,
+            ILog logger,
             TcpSocketServer server)
         {
             if (tcpClient == null)

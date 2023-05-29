@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -7,18 +8,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wombat.Core;
 
-namespace Wombat.Network.Sockets
+namespace Wombat.Network.WebSockets
 {
-    public class TcpSocketServer
+    public sealed class AsyncWebSocketServer
     {
         #region Fields
 
-        private ILog _logger;
+        private static  ILog _logger;
         private TcpListener _listener;
-        private readonly ConcurrentDictionary<string, TcpSocketSession> _sessions = new ConcurrentDictionary<string, TcpSocketSession>();
-        private readonly ITcpSocketServerEventDispatcher _dispatcher;
-        private static IFrameBuilder _frameBuilder;
-        private readonly TcpSocketServerConfiguration _configuration;
+        private readonly ConcurrentDictionary<string, AsyncWebSocketSession> _sessions = new ConcurrentDictionary<string, AsyncWebSocketSession>();
+        private readonly AsyncWebSocketServerModuleCatalog _catalog;
+        private readonly AsyncWebSocketServerConfiguration _configuration;
+        private AsyncWebSocketRouteResolver _routeResolver;
 
         private int _state;
         private const int _none = 0;
@@ -29,78 +30,60 @@ namespace Wombat.Network.Sockets
 
         #region Constructors
 
-        public TcpSocketServer(int listenedPort, ITcpSocketServerEventDispatcher dispatcher, TcpSocketServerConfiguration configuration = null, IFrameBuilder frameBuilder = null)
-            : this(IPAddress.Any, listenedPort, dispatcher, configuration, frameBuilder)
+        public AsyncWebSocketServer(int listenedPort, AsyncWebSocketServerModuleCatalog catalog, AsyncWebSocketServerConfiguration configuration = null)
+            : this(IPAddress.Any, listenedPort, catalog, configuration)
         {
         }
 
-        public TcpSocketServer(IPAddress listenedAddress, int listenedPort, ITcpSocketServerEventDispatcher dispatcher, TcpSocketServerConfiguration configuration = null, IFrameBuilder frameBuilder = null)
-            : this(new IPEndPoint(listenedAddress, listenedPort), dispatcher, configuration, frameBuilder)
+        public AsyncWebSocketServer(IPAddress listenedAddress, int listenedPort, AsyncWebSocketServerModuleCatalog catalog, AsyncWebSocketServerConfiguration configuration = null)
+            : this(new IPEndPoint(listenedAddress, listenedPort), catalog, configuration)
         {
         }
 
-        public TcpSocketServer(IPEndPoint listenedEndPoint, ITcpSocketServerEventDispatcher dispatcher,  TcpSocketServerConfiguration configuration = null, IFrameBuilder frameBuilder = null)
+        public AsyncWebSocketServer(IPEndPoint listenedEndPoint, AsyncWebSocketServerModuleCatalog catalog, AsyncWebSocketServerConfiguration configuration = null)
         {
             if (listenedEndPoint == null)
                 throw new ArgumentNullException("listenedEndPoint");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
+            if (catalog == null)
+                throw new ArgumentNullException("catalog");
 
             this.ListenedEndPoint = listenedEndPoint;
-            _dispatcher = dispatcher;
-            _configuration = configuration ?? new TcpSocketServerConfiguration();
-            _frameBuilder = frameBuilder ?? new RawBufferFrameBuilder();
+            _catalog = catalog;
+            _configuration = configuration ?? new AsyncWebSocketServerConfiguration();
+
             if (_configuration.BufferManager == null)
                 throw new InvalidProgramException("The buffer manager in configuration cannot be null.");
-            if (_frameBuilder == null)
-                throw new InvalidProgramException("The frame handler in configuration cannot be null.");
+
+            Initialize();
         }
 
-        public TcpSocketServer(
-            int listenedPort,
-            Func<TcpSocketSession, byte[], int, int, Task> onSessionDataReceived = null,
-            Func<TcpSocketSession, Task> onSessionStarted = null,
-            Func<TcpSocketSession, Task> onSessionClosed = null,
-            TcpSocketServerConfiguration configuration = null)
-            : this(IPAddress.Any, listenedPort, onSessionDataReceived, onSessionStarted, onSessionClosed, configuration)
+        private void Initialize()
         {
+            _routeResolver = new AsyncWebSocketRouteResolver(_catalog);
         }
 
-        public TcpSocketServer(
-            IPAddress listenedAddress, int listenedPort,
-            Func<TcpSocketSession, byte[], int, int, Task> onSessionDataReceived = null,
-            Func<TcpSocketSession, Task> onSessionStarted = null,
-            Func<TcpSocketSession, Task> onSessionClosed = null,
-            TcpSocketServerConfiguration configuration = null)
-            : this(new IPEndPoint(listenedAddress, listenedPort), onSessionDataReceived, onSessionStarted, onSessionClosed, configuration)
-        {
-        }
+        #endregion
 
-        public TcpSocketServer(
-            IPEndPoint listenedEndPoint,
-            Func<TcpSocketSession, byte[], int, int, Task> onSessionDataReceived = null,
-            Func<TcpSocketSession, Task> onSessionStarted = null,
-            Func<TcpSocketSession, Task> onSessionClosed = null,
-            TcpSocketServerConfiguration configuration = null)
-            : this(listenedEndPoint,
-                  new DefaultTcpServerSockeEventDispatcher(onSessionDataReceived, onSessionStarted, onSessionClosed),
-                  configuration)
-        {
-        }
-
-        public void UsgLogger(ILog log)
+        public  void UsgLogger(ILog log)
         {
             _logger = log;
         }
 
-
-        #endregion
 
         #region Properties
 
         public IPEndPoint ListenedEndPoint { get; private set; }
         public bool IsListening { get { return _state == _listening; } }
         public int SessionCount { get { return _sessions.Count; } }
+
+        public IEnumerable<string> EnabledExtensions
+        {
+            get { return _configuration.EnabledExtensions != null ? _configuration.EnabledExtensions.Keys : null; }
+        }
+        public IEnumerable<string> EnabledSubProtocols
+        {
+            get { return _configuration.EnabledSubProtocols != null ? _configuration.EnabledSubProtocols.Keys : null; }
+        }
 
         #endregion
 
@@ -115,13 +98,13 @@ namespace Wombat.Network.Sockets
             }
             else if (origin != _none)
             {
-                throw new InvalidOperationException("This tcp server has already started.");
+                throw new InvalidOperationException("This websocket server has already started.");
             }
 
             try
             {
                 _listener = new TcpListener(this.ListenedEndPoint);
-                SetSocketOptions();
+                ConfigureListener();
 
                 _listener.Start(_configuration.PendingConnectionBacklog);
 
@@ -153,7 +136,7 @@ namespace Wombat.Network.Sockets
                     {
                         foreach (var session in _sessions.Values)
                         {
-                            await session.Close(); // parent server close session when shutdown
+                            await session.Close(WebSocketCloseCode.NormalClosure);
                         }
                     }
                     catch (Exception ex) when (!ShouldThrow(ex)) { }
@@ -164,16 +147,15 @@ namespace Wombat.Network.Sockets
             catch (Exception ex) when (!ShouldThrow(ex)) { }
         }
 
-        private void SetSocketOptions()
+        private void ConfigureListener()
         {
             _listener.AllowNatTraversal(_configuration.AllowNatTraversal);
-            _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, _configuration.ReuseAddress);
         }
 
         public bool Pending()
         {
             if (!IsListening)
-                throw new InvalidOperationException("The tcp server is not active.");
+                throw new InvalidOperationException("The websocket server is not active.");
 
             // determine if there are pending connection requests.
             return _listener.Pending();
@@ -190,7 +172,7 @@ namespace Wombat.Network.Sockets
                     {
                         await Process(tcpClient);
                     },
-                    TaskCreationOptions.None)
+                    TaskCreationOptions.PreferFairness)
                     .Forget();
                 }
             }
@@ -203,25 +185,26 @@ namespace Wombat.Network.Sockets
 
         private async Task Process(TcpClient acceptedTcpClient)
         {
-            var session = new TcpSocketSession(acceptedTcpClient, _configuration, _configuration.BufferManager, _dispatcher,_frameBuilder,_logger ,this);
-
+            var session = new AsyncWebSocketSession(acceptedTcpClient, _configuration, _configuration.BufferManager, _routeResolver, this);
+            if (_logger != null) session.UsgLogger(_logger);
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _logger?.Debug($"New session [{session}]." );
+                _logger?.DebugFormat("New session [{0}].", session);
                 try
                 {
                     await session.Start();
                 }
-                catch (TimeoutException ex)
+                catch (Exception ex)
+                when (ex is TimeoutException || ex is WebSocketException)
                 {
                     _logger?.Exception(ex.Message, ex);
                 }
                 finally
                 {
-                    TcpSocketSession throwAway;
+                    AsyncWebSocketSession throwAway;
                     if (_sessions.TryRemove(session.SessionKey, out throwAway))
                     {
-                        _logger?.Debug($"Close session [{throwAway}].");
+                        _logger?.DebugFormat("Close session [{0}].", throwAway);
                     }
                 }
             }
@@ -243,52 +226,86 @@ namespace Wombat.Network.Sockets
 
         #region Send
 
-        public async Task SendToAsync(string sessionKey, byte[] data)
+        public async Task SendTextToAsync(string sessionKey, string text)
         {
-            await SendToAsync(sessionKey, data, 0, data.Length);
-        }
-
-        public async Task SendToAsync(string sessionKey, byte[] data, int offset, int count)
-        {
-            TcpSocketSession sessionFound;
+            AsyncWebSocketSession sessionFound;
             if (_sessions.TryGetValue(sessionKey, out sessionFound))
             {
-                await sessionFound.SendAsync(data, offset, count);
+                await sessionFound.SendTextAsync(text);
             }
             else
             {
-                _logger?.Warning($"Cannot find session [{sessionKey}].");
+                _logger?.WarningFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
-        public async Task SendToAsync(TcpSocketSession session, byte[] data)
+        public async Task SendTextToAsync(AsyncWebSocketSession session, string text)
         {
-            await SendToAsync(session, data, 0, data.Length);
-        }
-
-        public async Task SendToAsync(TcpSocketSession session, byte[] data, int offset, int count)
-        {
-            TcpSocketSession sessionFound;
+            AsyncWebSocketSession sessionFound;
             if (_sessions.TryGetValue(session.SessionKey, out sessionFound))
             {
-                await sessionFound.SendAsync(data, offset, count);
+                await sessionFound.SendTextAsync(text);
             }
             else
             {
-                _logger?.Warning($"Cannot find session [{session}].");
+                _logger?.WarningFormat("Send text data but cannot find session [{0}].", session);
             }
         }
 
-        public async Task BroadcastAsync(byte[] data)
+        public async Task SendBinaryToAsync(string sessionKey, byte[] data)
         {
-            await BroadcastAsync(data, 0, data.Length);
+            await SendBinaryToAsync(sessionKey, data, 0, data.Length);
         }
 
-        public async Task BroadcastAsync(byte[] data, int offset, int count)
+        public async Task SendBinaryToAsync(string sessionKey, byte[] data, int offset, int count)
+        {
+            AsyncWebSocketSession sessionFound;
+            if (_sessions.TryGetValue(sessionKey, out sessionFound))
+            {
+                await sessionFound.SendBinaryAsync(data, offset, count);
+            }
+            else
+            {
+                _logger?.WarningFormat("Cannot find session [{0}].", sessionKey);
+            }
+        }
+
+        public async Task SendBinaryToAsync(AsyncWebSocketSession session, byte[] data)
+        {
+            await SendBinaryToAsync(session, data, 0, data.Length);
+        }
+
+        public async Task SendBinaryToAsync(AsyncWebSocketSession session, byte[] data, int offset, int count)
+        {
+            AsyncWebSocketSession sessionFound;
+            if (_sessions.TryGetValue(session.SessionKey, out sessionFound))
+            {
+                await sessionFound.SendBinaryAsync(data, offset, count);
+            }
+            else
+            {
+                _logger?.WarningFormat("Send binary data but cannot find session [{0}].", session);
+            }
+        }
+
+        public async Task BroadcastTextAsync(string text)
         {
             foreach (var session in _sessions.Values)
             {
-                await session.SendAsync(data, offset, count);
+                await session.SendTextAsync(text);
+            }
+        }
+
+        public async Task BroadcastBinaryAsync(byte[] data)
+        {
+            await BroadcastBinaryAsync(data, 0, data.Length);
+        }
+
+        public async Task BroadcastBinaryAsync(byte[] data, int offset, int count)
+        {
+            foreach (var session in _sessions.Values)
+            {
+                await session.SendBinaryAsync(data, offset, count);
             }
         }
 
@@ -301,19 +318,19 @@ namespace Wombat.Network.Sockets
             return _sessions.ContainsKey(sessionKey);
         }
 
-        public TcpSocketSession GetSession(string sessionKey)
+        public AsyncWebSocketSession GetSession(string sessionKey)
         {
-            TcpSocketSession session = null;
+            AsyncWebSocketSession session = null;
             _sessions.TryGetValue(sessionKey, out session);
             return session;
         }
 
         public async Task CloseSession(string sessionKey)
         {
-            TcpSocketSession session = null;
+            AsyncWebSocketSession session = null;
             if (_sessions.TryGetValue(sessionKey, out session))
             {
-                await session.Close(); // parent server close session by session-key
+                await session.Close(WebSocketCloseCode.NormalClosure);
             }
         }
 

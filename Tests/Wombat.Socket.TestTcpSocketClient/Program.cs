@@ -11,7 +11,7 @@ namespace Wombat.Socket.TestTcpSocketClient
     {
         static TcpSocketClient _client1;
         static TcpSocketClient _client2;
-        static Logger logger;
+        static ILog logger;
         static void Main(string[] args)
         {
               logger = new LoggerBuilder().LogEventLevel(LogEventLevel.Debug).UseConsoleLogger().UseFileLogger().CreateLogger();

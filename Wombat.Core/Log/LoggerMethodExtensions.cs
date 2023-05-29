@@ -1,5 +1,6 @@
 
 using System;
+using System.Globalization;
 
 namespace Wombat.Core
 {
@@ -8,42 +9,43 @@ namespace Wombat.Core
 
         public static void Debug<TLog>(this ILog logger, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Debug, null, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Debug, null, msg, null);
         }
 
         public static void Error<TLog>(this ILog logger, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Error, null, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Error, null, msg, null);
         }
+
 
         public static void Error<TLog>(this ILog logger, object source, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Error, source, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Error, source, msg, null);
         }
 
         public static void Exception<TLog>(this ILog logger, Exception ex) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Error, null, ex.Message, ex);
+            logger?.Log<TLog>(LogEventLevel.Error, null, ex.Message, ex);
         }
 
         public static void Exception<TLog>(this ILog logger, object source, Exception ex) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Error, source, ex.Message, ex);
+            logger?.Log<TLog>(LogEventLevel.Error, source, ex.Message, ex);
         }
 
         public static void Info<TLog>(this ILog logger, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Info, null, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Info, null, msg, null);
         }
 
         public static void Info<TLog>(this ILog logger, object source, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Info, source, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Info, source, msg, null);
         }
 
         public static void Log<TLog>(this ILog logger, LogEventLevel logType, object source, string message, Exception exception) where TLog : ILog
         {
-            logger.Log<TLog>(logType, source, message, exception);
+            logger?.Log<TLog>(logType, source, message, exception);
         }
 
         /// <summary>
@@ -53,7 +55,7 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Trace<TLog>(this ILog logger, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Trace, null, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Trace, null, msg, null);
         }
 
         /// <summary>
@@ -63,7 +65,7 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Warning<TLog>(this ILog logger, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Warning, null, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Warning, null, msg, null);
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Warning<TLog>(this ILog logger, object source, string msg) where TLog : ILog
         {
-            logger.Log<TLog>(LogEventLevel.Warning, source, msg, null);
+            logger?.Log<TLog>(LogEventLevel.Warning, source, msg, null);
         }
 
 
@@ -87,8 +89,15 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Debug(this ILog logger, string msg)
         {
-            logger.Log(LogEventLevel.Debug, null, msg, null);
+            logger?.Log(LogEventLevel.Debug, null, msg, null);
         }
+
+        public static void DebugFormat(this ILog logger, string format, params object[] args)
+        {
+            logger?.Log(LogEventLevel.Debug, null, string.Format(CultureInfo.CurrentCulture, format, args), null);
+        }
+
+
 
         /// <summary>
         /// 输出错误日志
@@ -97,7 +106,18 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Error(this ILog logger, string msg)
         {
-            logger.Log(LogEventLevel.Error, null, msg, null);
+            logger?.Log(LogEventLevel.Error, null, msg, null);
+        }
+
+        /// <summary>
+        /// 输出错误日志
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="source"></param>
+        /// <param name="msg"></param>
+        public static void ErrorFormat(this ILog logger, string format, params object[] args)
+        {
+            logger?.Log(LogEventLevel.Error, null, string.Format(CultureInfo.CurrentCulture, format, args), null);
         }
 
         /// <summary>
@@ -108,8 +128,10 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Error(this ILog logger, object source, string msg)
         {
-            logger.Log(LogEventLevel.Error, source, msg, null);
+            logger?.Log(LogEventLevel.Error, source, msg, null);
         }
+
+
 
         /// <summary>
         /// 输出异常日志
@@ -118,7 +140,7 @@ namespace Wombat.Core
         /// <param name="ex"></param>
         public static void Exception(this ILog logger, Exception ex)
         {
-            logger.Log(LogEventLevel.Error, null, ex.Message, ex);
+            logger?.Log(LogEventLevel.Error, null, ex.Message, ex);
         }
 
         /// <summary>
@@ -129,7 +151,7 @@ namespace Wombat.Core
         /// <param name="ex"></param>
         public static void Exception(this ILog logger, object source, Exception ex)
         {
-            logger.Log(LogEventLevel.Error, source, ex.Message, ex);
+            logger?.Log(LogEventLevel.Error, source, ex.Message, ex);
         }
 
         /// <summary>
@@ -139,7 +161,7 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Info(this ILog logger, string msg)
         {
-            logger.Log(LogEventLevel.Info, null, msg, null);
+            logger?.Log(LogEventLevel.Info, null, msg, null);
         }
 
         /// <summary>
@@ -150,8 +172,22 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Info(this ILog logger, object source, string msg)
         {
-            logger.Log(LogEventLevel.Info, source, msg, null);
+            logger?.Log(LogEventLevel.Info, source, msg, null);
         }
+
+        /// <summary>
+        /// 输出消息日志
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="source"></param>
+        /// <param name="msg"></param>
+        public static void InfoFormat(this ILog logger, string format, params object[] args)
+        {
+            logger?.Log(LogEventLevel.Info, null, string.Format(CultureInfo.CurrentCulture, format, args), null);
+        }
+
+
+
 
         /// <summary>
         /// 输出详细日志
@@ -160,8 +196,20 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Trace(this ILog logger, string msg)
         {
-            logger.Log(LogEventLevel.Trace, null, msg, null);
+            logger?.Log(LogEventLevel.Trace, null, msg, null);
         }
+
+
+        /// <summary>
+        /// 输出详细日志
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="msg"></param>
+        public static void TraceFormat(this ILog logger, string format, params object[] args)
+        {
+            logger?.Log(LogEventLevel.Trace, null, string.Format(CultureInfo.CurrentCulture, format, args), null);
+        }
+
 
         /// <summary>
         /// 输出警示日志
@@ -170,7 +218,7 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Warning(this ILog logger, string msg)
         {
-            logger.Log(LogEventLevel.Warning, null, msg, null);
+            logger?.Log(LogEventLevel.Warning, null, msg, null);
         }
 
         /// <summary>
@@ -181,8 +229,21 @@ namespace Wombat.Core
         /// <param name="msg"></param>
         public static void Warning(this ILog logger, object source, string msg)
         {
-            logger.Log(LogEventLevel.Warning, source, msg, null);
+            logger?.Log(LogEventLevel.Warning, source, msg, null);
         }
+
+        /// <summary>
+        /// 输出警示日志
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="source"></param>
+        /// <param name="msg"></param>
+        public static void WarningFormat(this ILog logger, string format, params object[] args)
+        {
+            logger?.Log(LogEventLevel.Warning, null, string.Format(CultureInfo.CurrentCulture, format, args), null);
+        }
+
+
 
         #endregion 日志
     }

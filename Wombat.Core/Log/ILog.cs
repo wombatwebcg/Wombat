@@ -23,6 +23,9 @@ namespace Wombat.Core
         void Log(LogEventLevel logType, object source, string message, Exception exception);
 
 
+        void UseConsoleLogger(bool isUseConsoleLogger = true);
+
+        void UseFileLogger(bool isUseFileLogger);
 
 
     }

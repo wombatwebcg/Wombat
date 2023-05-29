@@ -9,31 +9,25 @@ namespace Wombat.Core
         bool _isUseConsoleLogger = false;
         bool _isUseFileLogger = false;
         LogEventLevel _minimumLevel;
-       static Logger _logger;
+        static ILog _logger;
         public LoggerBuilder LogEventLevel(LogEventLevel minimumLevel)
         {
             _minimumLevel = minimumLevel;
             return this;
         }
-
-
         public LoggerBuilder UseConsoleLogger(bool isUseConsoleLogger = true)
         {
             _isUseConsoleLogger = isUseConsoleLogger;
 
             return this;
         }
-
-
         public LoggerBuilder UseFileLogger(bool isUseFileLogger = true)
         {
             _isUseFileLogger = isUseFileLogger;
             return this;
 
         }
-
-
-        public Logger CreateLogger()
+        public ILog CreateLogger()
         {
             lock(this)
             if (_logger == null)

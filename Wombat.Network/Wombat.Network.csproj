@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Wombat.Core\Wombat.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="WebSockets\" />
-  </ItemGroup>
-
 </Project>

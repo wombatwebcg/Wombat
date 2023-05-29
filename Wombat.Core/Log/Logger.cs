@@ -13,6 +13,12 @@ namespace Wombat.Core
         LogFileTypes _logFileType = LogFileTypes.Single;
         RollingInterval _logRollingInterval = RollingInterval.Infinite;
         int _logFileSize = int.MaxValue;
+        private static ILog _logger;
+
+        public static ILog Current
+        {
+            get { return _logger ?? (_logger = new Logger()); }
+        }
 
         public Logger(LogEventLevel minimumLevel= LogEventLevel.None)
         {
