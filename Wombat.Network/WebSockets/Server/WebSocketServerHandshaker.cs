@@ -11,10 +11,10 @@ namespace Wombat.Network.WebSockets
 {
     internal sealed class WebSocketServerHandshaker
     {
-        private static readonly ILog _logger;
+        private static readonly ILog _logger = Logger.Get();
         private static readonly char[] _headerLineSplitter = new char[] { '\r', '\n' };
 
-        internal static bool HandleOpenningHandshakeRequest(AsyncWebSocketSession session, byte[] buffer, int offset, int count,
+        internal static bool HandleOpenningHandshakeRequest(WebSocketSession session, byte[] buffer, int offset, int count,
             out string secWebSocketKey,
             out string path,
             out string query)
@@ -195,7 +195,7 @@ namespace Wombat.Network.WebSockets
             return true;
         }
 
-        internal static byte[] CreateOpenningHandshakeResponse(AsyncWebSocketSession session, string secWebSocketKey)
+        internal static byte[] CreateOpenningHandshakeResponse(WebSocketSession session, string secWebSocketKey)
         {
             var sb = new StringBuilder();
 
@@ -285,7 +285,7 @@ namespace Wombat.Network.WebSockets
             return Encoding.UTF8.GetBytes(response);
         }
 
-        internal static byte[] CreateOpenningHandshakeBadRequestResponse(AsyncWebSocketSession session)
+        internal static byte[] CreateOpenningHandshakeBadRequestResponse(WebSocketSession session)
         {
             var sb = new StringBuilder();
 

@@ -32,6 +32,7 @@ namespace Wombat.Network.Sockets
         protected internal const int _none = 0;
         protected internal const int _connecting = 1;
         protected internal const int _connected = 2;
+        protected internal const int _closing = 3;
         protected internal const int _closed = 5;
         #endregion
 
@@ -61,22 +62,22 @@ namespace Wombat.Network.Sockets
 
         public IPEndPoint RemoteEndPoint => _remoteEndPoint;
 
-        public  SocketConnectionState State
+        public  ConnectionState State
         {
             get
             {
                 switch (_state)
                 {
                     case _none:
-                        return SocketConnectionState.None;
+                        return ConnectionState.None;
                     case _connecting:
-                        return SocketConnectionState.Connecting;
+                        return ConnectionState.Connecting;
                     case _connected:
-                        return SocketConnectionState.Connected;
+                        return ConnectionState.Connected;
                     case _closed:
-                        return SocketConnectionState.Closed;
+                        return ConnectionState.Closed;
                     default:
-                        return SocketConnectionState.Closed;
+                        return ConnectionState.Closed;
                 }
             }
         }
@@ -84,6 +85,11 @@ namespace Wombat.Network.Sockets
         public IPEndPoint LocalEndPoint { get; set; }
 
         public ClientSecurityOptions SecurityOptions => _securityOptions;
+
+        public TimeSpan ConnectTimeout => _configuration.ConnectTimeout;
+
+        public TimeSpan KeepAliveInterval => _configuration.KeepAliveInterval;
+
 
         #endregion
 
@@ -393,7 +399,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }
@@ -418,7 +424,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }
@@ -446,7 +452,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }
@@ -473,7 +479,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }

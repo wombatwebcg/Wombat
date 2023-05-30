@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <Compile Remove="Sockets\Tcp\Client\TcpSocketBaseClient.cs" />
+    <Compile Remove="WebSockets\Client\WebSocketClientBase.cs" />
   </ItemGroup>
 
   <ItemGroup>

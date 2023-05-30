@@ -99,22 +99,22 @@ namespace Wombat.Network.Sockets
         public ServerSecurityOptions Security { get; set; }
 
 
-        public SocketConnectionState State
+        public ConnectionState State
         {
             get
             {
                 switch (_state)
                 {
                     case _none:
-                        return SocketConnectionState.None;
+                        return ConnectionState.None;
                     case _connecting:
-                        return SocketConnectionState.Connecting;
+                        return ConnectionState.Connecting;
                     case _connected:
-                        return SocketConnectionState.Connected;
+                        return ConnectionState.Connected;
                     case _disposed:
-                        return SocketConnectionState.Closed;
+                        return ConnectionState.Closed;
                     default:
-                        return SocketConnectionState.Closed;
+                        return ConnectionState.Closed;
                 }
             }
         }
@@ -203,7 +203,7 @@ namespace Wombat.Network.Sockets
                 int payloadCount;
                 int consumedLength = 0;
 
-                while (State == SocketConnectionState.Connected)
+                while (State == ConnectionState.Connected)
                 {
                     int receiveCount = await _stream.ReadAsync(
                         _receiveBuffer.Array,
@@ -509,7 +509,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }
@@ -534,7 +534,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This session has not connected.");
             }

@@ -8,12 +8,12 @@ using Wombat.Core;
 
 namespace Wombat.Network.WebSockets
 {
-    internal sealed class WebSocketClientHandshaker
+    internal static  class WebSocketClientHandshaker
     {
-        private static readonly ILog _logger;
+        private static readonly ILog _logger = Logger.Get();
         private static readonly char[] _headerLineSplitter = new char[] { '\r', '\n' };
 
-        internal static byte[] CreateOpenningHandshakeRequest(AsyncWebSocketClient client, out string secWebSocketKey)
+        internal static byte[] CreateOpenningHandshakeRequest(WebSocketClient client, out string secWebSocketKey)
         {
             var sb = new StringBuilder();
 
@@ -111,7 +111,7 @@ namespace Wombat.Network.WebSockets
             return Encoding.UTF8.GetBytes(request);
         }
 
-        internal static bool VerifyOpenningHandshakeResponse(AsyncWebSocketClient client, byte[] buffer, int offset, int count, string secWebSocketKey)
+        internal static bool VerifyOpenningHandshakeResponse(WebSocketClient client, byte[] buffer, int offset, int count, string secWebSocketKey)
         {
             BufferValidator.ValidateBuffer(buffer, offset, count, "buffer");
             if (string.IsNullOrEmpty(secWebSocketKey))

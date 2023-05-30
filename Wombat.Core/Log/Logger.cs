@@ -62,7 +62,6 @@ namespace Wombat.Core
         }
 
 
-
         public void Log(LogEventLevel logType, object source, string message, Exception exception)
         {
             if (IsEnabled(logType))
@@ -99,6 +98,10 @@ namespace Wombat.Core
             }
         }
 
+        public static ILog Get()
+        {
+            return LoggerBuilder._logger;
+        }
 
 
     }

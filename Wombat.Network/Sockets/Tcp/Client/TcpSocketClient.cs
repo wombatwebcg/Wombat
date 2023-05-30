@@ -108,7 +108,7 @@ namespace Wombat.Network.Sockets
                 int consumedLength = 0;
                 while (true)
                 {
-                    while (State == SocketConnectionState.Connected & _isSubscribe)
+                    while (State == ConnectionState.Connected & _isSubscribe)
                     {
                         int receiveCount = await _stream.ReadAsync(
                             _receiveBuffer.Array,
@@ -291,7 +291,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }
@@ -321,7 +321,7 @@ namespace Wombat.Network.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (State != SocketConnectionState.Connected)
+            if (State != ConnectionState.Connected)
             {
                 throw new InvalidOperationException("This client has not connected to server.");
             }

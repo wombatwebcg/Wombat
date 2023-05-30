@@ -4,13 +4,13 @@ namespace Wombat.Network.WebSockets
 {
     public interface IAsyncWebSocketServerMessageDispatcher
     {
-        Task OnSessionStarted(AsyncWebSocketSession session);
-        Task OnSessionTextReceived(AsyncWebSocketSession session, string text);
-        Task OnSessionBinaryReceived(AsyncWebSocketSession session, byte[] data, int offset, int count);
-        Task OnSessionClosed(AsyncWebSocketSession session);
+        Task OnSessionStarted(WebSocketSession session);
+        Task OnSessionTextReceived(WebSocketSession session, string text);
+        Task OnSessionBinaryReceived(WebSocketSession session, byte[] data, int offset, int count);
+        Task OnSessionClosed(WebSocketSession session);
 
-        Task OnSessionFragmentationStreamOpened(AsyncWebSocketSession session, byte[] data, int offset, int count);
-        Task OnSessionFragmentationStreamContinued(AsyncWebSocketSession session, byte[] data, int offset, int count);
-        Task OnSessionFragmentationStreamClosed(AsyncWebSocketSession session, byte[] data, int offset, int count);
+        Task OnSessionFragmentationStreamOpened(WebSocketSession session, byte[] data, int offset, int count);
+        Task OnSessionFragmentationStreamContinued(WebSocketSession session, byte[] data, int offset, int count);
+        Task OnSessionFragmentationStreamClosed(WebSocketSession session, byte[] data, int offset, int count);
     }
 }

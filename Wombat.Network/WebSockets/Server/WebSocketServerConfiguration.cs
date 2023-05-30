@@ -9,11 +9,11 @@ using Wombat.Network.WebSockets.SubProtocols;
 
 namespace Wombat.Network.WebSockets
 {
-    public sealed class AsyncWebSocketClientConfiguration
+    public sealed class WebSocketServerConfiguration
     {
-        public AsyncWebSocketClientConfiguration()
+        public WebSocketServerConfiguration()
         {
-            BufferManager = new SegmentBufferManager(100, 8192, 1, true);
+            BufferManager = new SegmentBufferManager(1024, 8192, 1, true);
             ReceiveBufferSize = 8192;
             SendBufferSize = 8192;
             ReceiveTimeout = TimeSpan.Zero;
@@ -21,17 +21,21 @@ namespace Wombat.Network.WebSockets
             NoDelay = true;
             LingerState = new LingerOption(false, 0); // The socket will linger for x seconds after Socket.Close is called.
 
-            SslTargetHost = null;
-            SslClientCertificates = new X509CertificateCollection();
+            PendingConnectionBacklog = 200;
+            AllowNatTraversal = true;
+
+            SslEnabled = false;
+            SslServerCertificate = null;
             SslEncryptionPolicy = EncryptionPolicy.RequireEncryption;
             SslEnabledProtocols = SslProtocols.Ssl3 | SslProtocols.Tls;
+            SslClientCertificateRequired = true;
             SslCheckCertificateRevocation = false;
             SslPolicyErrorsBypassed = false;
 
             ConnectTimeout = TimeSpan.FromSeconds(10);
             CloseTimeout = TimeSpan.FromSeconds(5);
-            KeepAliveInterval = TimeSpan.FromSeconds(30);
-            KeepAliveTimeout = TimeSpan.FromSeconds(5);
+            KeepAliveInterval = TimeSpan.FromSeconds(60);
+            KeepAliveTimeout = TimeSpan.FromSeconds(15);
             ReasonableFragmentSize = 4096;
 
             EnabledExtensions = new Dictionary<string, IWebSocketExtensionNegotiator>()
@@ -39,12 +43,6 @@ namespace Wombat.Network.WebSockets
                 { PerMessageCompressionExtension.RegisteredToken, new PerMessageCompressionExtensionNegotiator() },
             };
             EnabledSubProtocols = new Dictionary<string, IWebSocketSubProtocolNegotiator>();
-
-            OfferedExtensions = new List<WebSocketExtensionOfferDescription>()
-            {
-                new WebSocketExtensionOfferDescription(PerMessageCompressionExtension.RegisteredToken),
-            };
-            RequestedSubProtocols = new List<WebSocketSubProtocolRequestDescription>();
         }
 
         public ISegmentBufferManager BufferManager { get; set; }
@@ -55,10 +53,14 @@ namespace Wombat.Network.WebSockets
         public bool NoDelay { get; set; }
         public LingerOption LingerState { get; set; }
 
-        public string SslTargetHost { get; set; }
-        public X509CertificateCollection SslClientCertificates { get; set; }
+        public int PendingConnectionBacklog { get; set; }
+        public bool AllowNatTraversal { get; set; }
+
+        public bool SslEnabled { get; set; }
+        public X509Certificate2 SslServerCertificate { get; set; }
         public EncryptionPolicy SslEncryptionPolicy { get; set; }
         public SslProtocols SslEnabledProtocols { get; set; }
+        public bool SslClientCertificateRequired { get; set; }
         public bool SslCheckCertificateRevocation { get; set; }
         public bool SslPolicyErrorsBypassed { get; set; }
 
@@ -70,8 +72,5 @@ namespace Wombat.Network.WebSockets
 
         public Dictionary<string, IWebSocketExtensionNegotiator> EnabledExtensions { get; set; }
         public Dictionary<string, IWebSocketSubProtocolNegotiator> EnabledSubProtocols { get; set; }
-
-        public List<WebSocketExtensionOfferDescription> OfferedExtensions { get; set; }
-        public List<WebSocketSubProtocolRequestDescription> RequestedSubProtocols { get; set; }
     }
 }

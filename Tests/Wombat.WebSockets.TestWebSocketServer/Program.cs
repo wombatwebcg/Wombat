@@ -8,7 +8,7 @@ namespace Wombat.WebSockets.TestWebSocketServer
 {
     class Program
     {
-        static AsyncWebSocketServer _server;
+        static WebSocketServer _server;
         static ILog logger;
 
         static void Main(string[] args)
@@ -20,12 +20,12 @@ namespace Wombat.WebSockets.TestWebSocketServer
                 var catalog = new AsyncWebSocketServerModuleCatalog();
                 catalog.RegisterModule(new TestWebSocketModule());
 
-                var config = new AsyncWebSocketServerConfiguration();
+                var config = new WebSocketServerConfiguration();
                 //config.SslEnabled = true;
                 //config.SslServerCertificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(@"D:\\Cowboy.pfx", "Cowboy");
                 //config.SslPolicyErrorsBypassed = true;
 
-                _server = new AsyncWebSocketServer(22222, catalog, config);
+                _server = new WebSocketServer(22222, catalog, config);
                 _server.UsgLogger(logger);
                 _server.Listen();
 

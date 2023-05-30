@@ -11,7 +11,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
 {
     class Program
     {
-        static AsyncWebSocketClient _client;
+        static WebSocketClient _client;
         static ILog logger;
 
         static void Main(string[] args)
@@ -22,7 +22,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
             {
                 try
                 {
-                    var config = new AsyncWebSocketClientConfiguration();
+                    var config = new WebSocketClientConfiguration();
 
                     //config.SslTargetHost = "Cowboy";
                     //config.SslClientCertificates.Add(new System.Security.Cryptography.X509Certificates.X509Certificate2(@"D:\\Cowboy.cer"));
@@ -31,7 +31,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
                     //var uri = new Uri("ws://echo.websocket.org/");   // connect to websocket.org website
                     //var uri = new Uri("wss://127.0.0.1:22222/test"); // use wss with ssl
                     var uri = new Uri("ws://127.0.0.1:22222/test");    // connect to localhost
-                    _client = new AsyncWebSocketClient(uri,
+                    _client = new WebSocketClient(uri,
                         OnServerTextReceived,
                         OnServerBinaryReceived,
                         OnServerConnected,
@@ -42,7 +42,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
 
                     Console.WriteLine("WebSocket client has connected to server [{0}].", uri);
                     Console.WriteLine("Type something to send to server...");
-                    while (_client.State == WebSocketState.Open)
+                    while (_client.State == ConnectionState.Connected)
                     {
                         try
                         {
@@ -58,7 +58,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
                                     int count = 10000;
                                     for (int i = 1; i <= count; i++)
                                     {
-                                        await _client.SendBinaryAsync(Encoding.UTF8.GetBytes(text));
+                                         _client.SendBinary(Encoding.UTF8.GetBytes(text));
                                         Console.WriteLine("Client [{0}] send binary -> Sequence[{1}] -> TextLength[{2}].",
                                             _client.LocalEndPoint, i, text.Length);
                                     }
@@ -118,13 +118,13 @@ namespace Wombat.WebSockets.TestWebSocketClient
             Console.ReadKey();
         }
 
-        private static async Task OnServerConnected(AsyncWebSocketClient client)
+        private static async Task OnServerConnected(WebSocketClient client)
         {
             Console.WriteLine(string.Format("WebSocket server [{0}] has connected.", client.RemoteEndPoint));
             await Task.CompletedTask;
         }
 
-        private static async Task OnServerTextReceived(AsyncWebSocketClient client, string text)
+        private static async Task OnServerTextReceived(WebSocketClient client, string text)
         {
             Console.Write(string.Format("WebSocket server [{0}] received Text --> ", client.RemoteEndPoint));
             Console.WriteLine(string.Format("{0}", text));
@@ -132,7 +132,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
             await Task.CompletedTask;
         }
 
-        private static async Task OnServerBinaryReceived(AsyncWebSocketClient client, byte[] data, int offset, int count)
+        private static async Task OnServerBinaryReceived(WebSocketClient client, byte[] data, int offset, int count)
         {
             var text = Encoding.UTF8.GetString(data, offset, count);
             Console.Write(string.Format("WebSocket server [{0}] received Binary --> ", client.RemoteEndPoint));
@@ -148,7 +148,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
             await Task.CompletedTask;
         }
 
-        private static async Task OnServerDisconnected(AsyncWebSocketClient client)
+        private static async Task OnServerDisconnected(WebSocketClient client)
         {
             Console.WriteLine(string.Format("WebSocket server [{0}] has disconnected.", client.RemoteEndPoint));
             await Task.CompletedTask;

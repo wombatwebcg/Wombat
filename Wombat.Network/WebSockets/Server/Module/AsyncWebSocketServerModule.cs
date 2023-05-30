@@ -10,7 +10,7 @@ namespace Wombat.Network.WebSockets
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private static readonly Regex ModuleNameExpression = new Regex(@"(?<name>[\w]+)Module$", RegexOptions.Compiled);
 
-        private ConcurrentDictionary<string, AsyncWebSocketSession> _sessions = new ConcurrentDictionary<string, AsyncWebSocketSession>();
+        private ConcurrentDictionary<string, WebSocketSession> _sessions = new ConcurrentDictionary<string, WebSocketSession>();
 
         protected AsyncWebSocketServerModule()
             : this(string.Empty)
@@ -44,25 +44,25 @@ namespace Wombat.Network.WebSockets
 
         #region Dispatcher
 
-        public virtual async Task OnSessionStarted(AsyncWebSocketSession session)
+        public virtual async Task OnSessionStarted(WebSocketSession session)
         {
             _sessions.TryAdd(session.SessionKey, session);
             await Task.CompletedTask;
         }
 
-        public virtual async Task OnSessionTextReceived(AsyncWebSocketSession session, string text)
+        public virtual async Task OnSessionTextReceived(WebSocketSession session, string text)
         {
             await Task.CompletedTask;
         }
 
-        public virtual async Task OnSessionBinaryReceived(AsyncWebSocketSession session, byte[] data, int offset, int count)
+        public virtual async Task OnSessionBinaryReceived(WebSocketSession session, byte[] data, int offset, int count)
         {
             await Task.CompletedTask;
         }
 
-        public virtual async Task OnSessionClosed(AsyncWebSocketSession session)
+        public virtual async Task OnSessionClosed(WebSocketSession session)
         {
-            AsyncWebSocketSession throwAway;
+            WebSocketSession throwAway;
             _sessions.TryRemove(session.SessionKey, out throwAway);
             await Task.CompletedTask;
         }
@@ -71,17 +71,17 @@ namespace Wombat.Network.WebSockets
 
         #region Fragmentation
 
-        public virtual async Task OnSessionFragmentationStreamOpened(AsyncWebSocketSession session, byte[] data, int offset, int count)
+        public virtual async Task OnSessionFragmentationStreamOpened(WebSocketSession session, byte[] data, int offset, int count)
         {
             await Task.CompletedTask;
         }
 
-        public virtual async Task OnSessionFragmentationStreamContinued(AsyncWebSocketSession session, byte[] data, int offset, int count)
+        public virtual async Task OnSessionFragmentationStreamContinued(WebSocketSession session, byte[] data, int offset, int count)
         {
             await Task.CompletedTask;
         }
 
-        public virtual async Task OnSessionFragmentationStreamClosed(AsyncWebSocketSession session, byte[] data, int offset, int count)
+        public virtual async Task OnSessionFragmentationStreamClosed(WebSocketSession session, byte[] data, int offset, int count)
         {
             await Task.CompletedTask;
         }

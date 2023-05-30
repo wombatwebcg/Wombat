@@ -14,19 +14,18 @@ namespace Wombat.Network.Sockets
 
         #region Properties
 
-        TcpSocketClientConfiguration SocketConfiguration { get; }
 
         bool Connected { get; }
 
-        IPEndPoint RemoteEndPoint { get; }
 
-        SocketConnectionState State { get;}
+        ConnectionState State { get;}
 
         IPEndPoint LocalEndPoint { get; set; }
-
+        IPEndPoint RemoteEndPoint { get; }
+        TcpSocketClientConfiguration SocketConfiguration { get; }
         ClientSecurityOptions SecurityOptions { get; }
-
-
+        TimeSpan ConnectTimeout { get; }
+        TimeSpan KeepAliveInterval { get; }
 
         #endregion
 

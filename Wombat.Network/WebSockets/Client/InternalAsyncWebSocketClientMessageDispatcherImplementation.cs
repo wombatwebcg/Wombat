@@ -3,26 +3,26 @@ using System.Threading.Tasks;
 
 namespace Wombat.Network.WebSockets
 {
-    internal class InternalAsyncWebSocketClientMessageDispatcherImplementation : IAsyncWebSocketClientMessageDispatcher
+    internal class InternalAsyncWebSocketClientMessageDispatcherImplementation : IWebSocketClientMessageDispatcher
     {
-        private Func<AsyncWebSocketClient, string, Task> _onServerTextReceived;
-        private Func<AsyncWebSocketClient, byte[], int, int, Task> _onServerBinaryReceived;
-        private Func<AsyncWebSocketClient, Task> _onServerConnected;
-        private Func<AsyncWebSocketClient, Task> _onServerDisconnected;
+        private Func<WebSocketClient, string, Task> _onServerTextReceived;
+        private Func<WebSocketClient, byte[], int, int, Task> _onServerBinaryReceived;
+        private Func<WebSocketClient, Task> _onServerConnected;
+        private Func<WebSocketClient, Task> _onServerDisconnected;
 
-        private Func<AsyncWebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamOpened;
-        private Func<AsyncWebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamContinued;
-        private Func<AsyncWebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamClosed;
+        private Func<WebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamOpened;
+        private Func<WebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamContinued;
+        private Func<WebSocketClient, byte[], int, int, Task> _onServerFragmentationStreamClosed;
 
         public InternalAsyncWebSocketClientMessageDispatcherImplementation()
         {
         }
 
         public InternalAsyncWebSocketClientMessageDispatcherImplementation(
-            Func<AsyncWebSocketClient, string, Task> onServerTextReceived,
-            Func<AsyncWebSocketClient, byte[], int, int, Task> onServerDataReceived,
-            Func<AsyncWebSocketClient, Task> onServerConnected,
-            Func<AsyncWebSocketClient, Task> onServerDisconnected)
+            Func<WebSocketClient, string, Task> onServerTextReceived,
+            Func<WebSocketClient, byte[], int, int, Task> onServerDataReceived,
+            Func<WebSocketClient, Task> onServerConnected,
+            Func<WebSocketClient, Task> onServerDisconnected)
             : this()
         {
             _onServerTextReceived = onServerTextReceived;
@@ -32,13 +32,13 @@ namespace Wombat.Network.WebSockets
         }
 
         public InternalAsyncWebSocketClientMessageDispatcherImplementation(
-            Func<AsyncWebSocketClient, string, Task> onServerTextReceived,
-            Func<AsyncWebSocketClient, byte[], int, int, Task> onServerDataReceived,
-            Func<AsyncWebSocketClient, Task> onServerConnected,
-            Func<AsyncWebSocketClient, Task> onServerDisconnected,
-            Func<AsyncWebSocketClient, byte[], int, int, Task> onServerFragmentationStreamOpened,
-            Func<AsyncWebSocketClient, byte[], int, int, Task> onServerFragmentationStreamContinued,
-            Func<AsyncWebSocketClient, byte[], int, int, Task> onServerFragmentationStreamClosed)
+            Func<WebSocketClient, string, Task> onServerTextReceived,
+            Func<WebSocketClient, byte[], int, int, Task> onServerDataReceived,
+            Func<WebSocketClient, Task> onServerConnected,
+            Func<WebSocketClient, Task> onServerDisconnected,
+            Func<WebSocketClient, byte[], int, int, Task> onServerFragmentationStreamOpened,
+            Func<WebSocketClient, byte[], int, int, Task> onServerFragmentationStreamContinued,
+            Func<WebSocketClient, byte[], int, int, Task> onServerFragmentationStreamClosed)
             : this()
         {
             _onServerTextReceived = onServerTextReceived;
@@ -51,43 +51,43 @@ namespace Wombat.Network.WebSockets
             _onServerFragmentationStreamClosed = onServerFragmentationStreamClosed;
         }
 
-        public async Task OnServerConnected(AsyncWebSocketClient client)
+        public async Task OnServerConnected(WebSocketClient client)
         {
             if (_onServerConnected != null)
                 await _onServerConnected(client);
         }
 
-        public async Task OnServerTextReceived(AsyncWebSocketClient client, string text)
+        public async Task OnServerTextReceived(WebSocketClient client, string text)
         {
             if (_onServerTextReceived != null)
                 await _onServerTextReceived(client, text);
         }
 
-        public async Task OnServerBinaryReceived(AsyncWebSocketClient client, byte[] data, int offset, int count)
+        public async Task OnServerBinaryReceived(WebSocketClient client, byte[] data, int offset, int count)
         {
             if (_onServerBinaryReceived != null)
                 await _onServerBinaryReceived(client, data, offset, count);
         }
 
-        public async Task OnServerDisconnected(AsyncWebSocketClient client)
+        public async Task OnServerDisconnected(WebSocketClient client)
         {
             if (_onServerDisconnected != null)
                 await _onServerDisconnected(client);
         }
 
-        public async Task OnServerFragmentationStreamOpened(AsyncWebSocketClient client, byte[] data, int offset, int count)
+        public async Task OnServerFragmentationStreamOpened(WebSocketClient client, byte[] data, int offset, int count)
         {
             if (_onServerFragmentationStreamOpened != null)
                 await _onServerFragmentationStreamOpened(client, data, offset, count);
         }
 
-        public async Task OnServerFragmentationStreamContinued(AsyncWebSocketClient client, byte[] data, int offset, int count)
+        public async Task OnServerFragmentationStreamContinued(WebSocketClient client, byte[] data, int offset, int count)
         {
             if (_onServerFragmentationStreamContinued != null)
                 await _onServerFragmentationStreamContinued(client, data, offset, count);
         }
 
-        public async Task OnServerFragmentationStreamClosed(AsyncWebSocketClient client, byte[] data, int offset, int count)
+        public async Task OnServerFragmentationStreamClosed(WebSocketClient client, byte[] data, int offset, int count)
         {
             if (_onServerFragmentationStreamClosed != null)
                 await _onServerFragmentationStreamClosed(client, data, offset, count);

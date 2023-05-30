@@ -25,6 +25,7 @@ namespace Wombat.Core
 
         void UseConsoleLogger(bool isUseConsoleLogger = true);
 
+
         void UseFileLogger(bool isUseFileLogger);
 
 
