@@ -53,18 +53,21 @@ namespace Wombat.WebSockets.TestWebSocketClient
                             {
                                 if (text == "many")
                                 {
-                                    text = new string('x', 1024);
+                                    text = "";
+                                    for (int i = 0; i < 10000; i++)
+                                    {
+                                        text += $"{i},";
+                                    }
                                     Stopwatch watch = Stopwatch.StartNew();
-                                    int count = 10000;
-                                    for (int i = 1; i <= count; i++)
+                                    for (int i = 0; i <= 1000; i++)
                                     {
                                          _client.SendBinary(Encoding.UTF8.GetBytes(text));
                                         Console.WriteLine("Client [{0}] send binary -> Sequence[{1}] -> TextLength[{2}].",
-                                            _client.LocalEndPoint, i, text.Length);
+                                            _client.LocalEndPoint, text, text.Length);
                                     }
                                     watch.Stop();
                                     Console.WriteLine("Client [{0}] send binary -> Count[{1}] -> Cost[{2}] -> PerSecond[{3}].",
-                                        _client.LocalEndPoint, count, watch.ElapsedMilliseconds / 1000, count / (watch.ElapsedMilliseconds / 1000));
+                                        _client.LocalEndPoint, text.Length, watch.ElapsedMilliseconds / 1000, text.Length / (watch.ElapsedMilliseconds / 1000));
                                 }
                                 else if (text == "big1")
                                 {
