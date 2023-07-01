@@ -2,10 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>wombatwebcg</Authors>
+    <Company>wombatwebcg</Company>
+    <Description>Wombat核心库</Description>
+    <PackageProjectUrl>https://github.com/wombatwebcg/Wombat</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wombatwebcg/Wombat</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>core</PackageTags>
+    <Copyright>wombatwebcg</Copyright>
   </PropertyGroup>
 
+
+
   <ItemGroup>
-    <PackageReference Include="Wombat.Extensions.ObjectConversion" Version="1.0.0" />
+    <PackageReference Include="Castle.Core" Version="5.1.1" />
+    <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+	  <PackageReference Include="Wombat.Extensions.ObjectConversion" Version="1.0.3" />
+	  <PackageReference Include="Scrutor" Version="4.2.0" />
   </ItemGroup>
 
 </Project>

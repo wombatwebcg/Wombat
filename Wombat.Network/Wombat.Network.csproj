@@ -8,6 +8,8 @@
     <PackageTags>socket</PackageTags>
     <RepositoryUrl>https://github.com/wombatwebcg/Wombat</RepositoryUrl>
     <PackageProjectUrl>https://github.com/wombatwebcg/Wombat</PackageProjectUrl>
+    <Authors>wombatwebcg</Authors>
+    <Product>wombatwebcg</Product>
   </PropertyGroup>
 
   <ItemGroup>
