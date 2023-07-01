@@ -17,9 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketClient", "Tests\Wombat.Socket.TestTcpSocketClient\Wombat.Socket.TestTcpSocketClient.csproj", "{4186718C-9D41-4EC8-980B-66D62BC8F172}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSocketClient", "Wombat.WebSockets.TestWebSocketClient\Wombat.WebSockets.TestWebSocketClient.csproj", "{4E374FA0-0283-4C57-BFFF-B879D641BF98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSocketClient", "Tests\Wombat.WebSockets.TestWebSocketClient\Wombat.WebSockets.TestWebSocketClient.csproj", "{4E374FA0-0283-4C57-BFFF-B879D641BF98}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjectionTest", "Wombat.Core.DependencyInjectionTest\Wombat.Core.DependencyInjectionTest.csproj", "{3703C8D7-1071-4B49-A80D-61F90BC62343}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjectionTest", "Tests\Wombat.Core.DependencyInjectionTest\Wombat.Core.DependencyInjectionTest.csproj", "{3703C8D7-1071-4B49-A80D-61F90BC62343}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
