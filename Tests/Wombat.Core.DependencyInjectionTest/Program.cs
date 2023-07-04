@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using Wombat.Core.DependencyInjection;
-using Castle.Core;
 
 namespace Wombat.Core.DependencyInjectionTest
 {
@@ -11,11 +10,10 @@ namespace Wombat.Core.DependencyInjectionTest
         {
             ServiceCollection services = new ServiceCollection();
 
-            services.AddHzyScanDiService();
+            services.DependencyInjectionService();
             var serviceProvider = services.BuildServiceProvider();
-            var sss = serviceProvider.GetRequiredService<Class1>();
-
-
+            var sss = serviceProvider.GetRequiredService<Class2>();
+            sss.HelloWorld();
             string text = Console.ReadLine();
 
             //if (text=="1")
@@ -40,7 +38,7 @@ namespace Wombat.Core.DependencyInjectionTest
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddHzyScanDiService();
+            services.DependencyInjectionService();
 
             var serviceProvider = services.BuildServiceProvider();
 

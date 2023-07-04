@@ -12,6 +12,10 @@
     <Copyright>wombatwebcg</Copyright>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="DependencyInjection\Attributes\AopBaseAttribute.cs" />
+  </ItemGroup>
+
 
 
   <ItemGroup>

@@ -14,30 +14,20 @@ namespace Wombat.Core.DependencyInjectionTest
     public class Class2 
     {
 
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IClass _serviceProvider;
 
-        public Class2(IServiceProvider serviceProvider)
+        public Class2(IClass serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
-        [Transactional]
 
         public void HelloWorld()
         {
-            Console.WriteLine(222222222);
+            _serviceProvider.HelloWorld();
         }
 
 
-        public void Before()
-        {
-            Console.WriteLine("Before");
-        }
-
-        public void After()
-        {
-            Console.WriteLine("After");
-        }
 
     }
 }

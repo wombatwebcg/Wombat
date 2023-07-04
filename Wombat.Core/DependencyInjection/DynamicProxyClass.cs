@@ -31,7 +31,7 @@ namespace Wombat.Core.DependencyInjection
         private static IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// 注册 服务提供者
+        /// 注册服务提供者
         /// </summary>
         /// <param name="serviceProvider"></param>
         public static void UseServiceProvider(this IServiceProvider serviceProvider)
@@ -45,11 +45,6 @@ namespace Wombat.Core.DependencyInjection
         /// <returns></returns>
         public static IServiceProvider GetServiceProvider() => _serviceProvider;
 
-        /// <summary>
-        /// 创建服务域
-        /// </summary>
-        /// <returns></returns>
-        public static IServiceScope CreateScope() => _serviceProvider.CreateScope();
 
         #endregion
 
@@ -60,7 +55,7 @@ namespace Wombat.Core.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="assemblyFilter"></param>
-        public static void AddHzyScanDiService(this IServiceCollection serviceCollection, string assemblyFilter = "")
+        public static void DependencyInjectionService(this IServiceCollection serviceCollection, string assemblyFilter = "")
         {
             IEnumerable<Assembly> assemblies = default;
 
@@ -87,7 +82,7 @@ namespace Wombat.Core.DependencyInjection
             ScanComponent(serviceCollection, assemblies);
 
             // 动态代理注册
-            ScanningAopomponent(serviceCollection, assemblies);
+            //ScanningAopComponent(serviceCollection, assemblies);
         }
 
         /// <summary>
@@ -138,13 +133,54 @@ namespace Wombat.Core.DependencyInjection
         /// <summary>
         /// 服务自动注册
         /// </summary>
-        private static void ScanComponent(this IServiceCollection serviceCollection, ServiceLifetime serviceLifetime, IEnumerable<Assembly> assemblies)
+        private static void ScanComponent(this IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
         {
 
-            List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
+            //List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
 
-            foreach (var type in types)
+            foreach (var sl in Enum.GetValues(typeof(ServiceLifetime)))
             {
+                var serviceLifetime = (ServiceLifetime)(sl);
+                List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
+                foreach (var aType in types)
+                {
+                    //serviceCollection.Add(new ServiceDescriptor(aType, aType, serviceLifetime));
+                    var interfaces = assemblies.SelectMany(x => x.GetTypes()).ToArray().Where(x => x.IsAssignableFrom(aType) && x.IsInterface ).ToList();
+                    if (interfaces.Count == 0)
+                    {
+                        inject(serviceLifetime, aType);
+
+                    }
+                    var constructors = aType.GetConstructors()?.FirstOrDefault()?.GetParameters()?.Select(w => w.ParameterType)?.ToArray();
+
+                    foreach (var aInterface in interfaces)
+                    {
+                        inject(serviceLifetime, aType, aInterface);
+                        var classAopBaseAttributes = aType.GetCustomAttribute<AOPBaseAttribute>() != null;
+                        var propertyAopBaseAttributes = aType.GetProperties().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
+                        var methodAopBaseAttributes = aType.GetMethods().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
+                        // 找不到 AopBaseAttribute 标记的 class 一律跳过
+                        if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes) continue;
+                        //注入AOP
+
+                        if(propertyAopBaseAttributes)
+                        {
+
+                        }
+                        serviceCollection.Add(new ServiceDescriptor(aInterface, serviceProvider =>
+                        {
+                            CastleInterceptor castleInterceptor = new CastleInterceptor(serviceProvider);
+                            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                            //return _proxyGenerator.CreateClassProxy(aType, constructorArguments, castleInterceptor);
+                            return _proxyGenerator.CreateInterfaceProxyWithTarget(aInterface, serviceProvider.GetService(aType), castleInterceptor);
+                        }, serviceLifetime));
+                    }
+                }
+            }
+
+            void inject(ServiceLifetime serviceLifetime,Type type,Type typeInterface = null)
+            {
+
                 //服务非继承自接口的直接注入
                 switch (serviceLifetime)
                 {
@@ -152,9 +188,8 @@ namespace Wombat.Core.DependencyInjection
                     case ServiceLifetime.Scoped: serviceCollection.AddScoped(type); break;
                     case ServiceLifetime.Transient: serviceCollection.AddTransient(type); break;
                 }
-                Type typeInterface = type.GetInterfaces().FirstOrDefault();
                 if (typeInterface != null)
-                { 
+                {
                     //服务继承自接口的和接口一起注入
                     switch (serviceLifetime)
                     {
@@ -163,94 +198,27 @@ namespace Wombat.Core.DependencyInjection
                         case ServiceLifetime.Transient: serviceCollection.AddTransient(typeInterface, type); break;
                     }
                 }
-
             }
+
         }
 
-
         /// <summary>
-        /// 扫描符合代理类的服务自动注册
+        /// 创建代理类
         /// </summary>
-        /// <param name="serviceCollection"></param>
-        /// <param name="assemblies"></param>
-        private static void ScanningAopomponent(IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
+        /// <param name="_class"></param>
+        /// <param name="serviceProvider"></param>
+        /// <returns></returns>
+        private static object CreateClassProxy(Type _class, IServiceProvider serviceProvider)
         {
-            serviceCollection.AddTransient<IAsyncInterceptor, AopInterceptor>();
-            var typeDependencys = new List<ServiceLifetime>();
-            typeDependencys.Add(ServiceLifetime.Singleton);
-            typeDependencys.Add(ServiceLifetime.Scoped);
-            typeDependencys.Add(ServiceLifetime.Transient);
-            //将代码写入字典
-            var dicDependency = new Dictionary<string, Func<Type, Type, IServiceCollection>>();
-            dicDependency.Add(nameof(ServiceLifetime.Scoped), (_class, _interface) =>
-            serviceCollection.AddScoped(_interface, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            dicDependency.Add(nameof(ServiceLifetime.Singleton), (_class, _interface) =>
-            serviceCollection.AddSingleton(_interface, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            dicDependency.Add(nameof(ServiceLifetime.Transient), (_class, _interface) =>
-            serviceCollection.AddTransient(_interface, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            ////将代码写入字典
-            var dicSelfDependency = new Dictionary<string, Func<Type, IServiceCollection>>();
-            dicSelfDependency.Add(nameof(ServiceLifetime.Scoped), (_class) =>
-            serviceCollection.AddScoped(_class, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            dicSelfDependency.Add(nameof(ServiceLifetime.Singleton), (_class) =>
-            serviceCollection.AddSingleton(_class, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            dicSelfDependency.Add(nameof(ServiceLifetime.Transient), (_class) =>
-            serviceCollection.AddTransient(_class, (serviceProvider) => CreateClassProxy(_class, serviceProvider)));
-            //// 控制器服务注册 写入代码
-            //dicSelfDependency.Add(nameof(ControllerBase), (_class, _constructors) =>
-            //serviceCollection.AddTransient(_class, (serviceProvider) => CreateClassProxy(proxyGenerator, _class, _constructors, serviceProvider)));
-            //
-            //var prefix = "I";
-            //var suffix = "Dependency";
-            //var self = "Self";
-            //
-            foreach (var item in assemblies.Where(w => !w.IsDynamic))
-            {
-                // 必须是 class 并且 不能是 泛型类
-                var classList = item.ExportedTypes
-                    .Where(w => w.IsClass && !w.IsGenericType && w.IsPublic);
-                    //不包含 IDependency 接口直接跳过
-                    //.Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0);
+            var constructors = _class.GetConstructors()
+                   ?.FirstOrDefault()
+                   ?.GetParameters()
+                   ?.Select(w => w.ParameterType)
+                   ?.ToArray()
+                   ;
 
-                if (classList.Count() == 0)
-                {
-                    continue;
-                }
-
-
-                foreach (var _class in classList)
-                {
-
-                    //查找 class 接口
-                    var allInterfaces = _class.GetInterfaces();
-
-                    //检测类型种是否有 AopBaseAttribute 特性
-                    var propertyInfos = _class.GetProperties();
-                    var methodInfos = _class.GetMethods();
-                    //获取特性 从 类、属性、函数 获取特性，如果一个都找不到则跳过不生成代理类
-                    var classAopBaseAttributes = _class.GetCustomAttribute<AopBaseAttribute>() != null;
-                    var propertyAopBaseAttributes = propertyInfos.Count(w => w.GetCustomAttribute<AopBaseAttribute>() != null) > 0;
-                    var methodAopBaseAttributes = methodInfos.Count(w => w.GetCustomAttribute<AopBaseAttribute>() != null) > 0;
-                    // 找不到 AopBaseAttribute 标记的 class 一律跳过
-                    if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes) continue;
-
-                    //接口过滤
-                    //var interfaces = allInterfaces.Where(w => !typeDependencys.Contains(w.));
-
-
-                    // 服务注册
-                    var _interface = allInterfaces.FirstOrDefault();
-                    var key = Enum.GetName(typeof(ServiceLifetime), _class.GetCustomAttribute<ComponentAttribute>().Lifetime);
-                    if (_interface != null)
-                    {
-                        dicDependency[key]?.Invoke(_class, _interface);
-                    }
-
-                    // 服务注册 自身
-                    dicSelfDependency[key]?.Invoke(_class);
-
-                }
-            }
+            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+            return _proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
         }
 
         #endregion
@@ -263,16 +231,16 @@ namespace Wombat.Core.DependencyInjection
         /// <param name="_class"></param>
         /// <param name="serviceProvider"></param>
         /// <returns></returns>
-        private static object CreateClassProxy(Type _class, IServiceProvider serviceProvider)
-        {
-            var constructors = _class.GetConstructors()?.FirstOrDefault()
-                   ?.GetParameters()
-                   ?.Select(w => w.ParameterType)
-                   ?.ToArray();
+        //private static object CreateClassProxy(Type _class, IServiceProvider serviceProvider)
+        //{
+        //    var constructors = _class.GetConstructors()?.FirstOrDefault()
+        //           ?.GetParameters()
+        //           ?.Select(w => w.ParameterType)
+        //           ?.ToArray();
 
-            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
-            return _proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
-        }
+        //    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+        //    return _proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
+        //}
 
 
 
@@ -309,38 +277,43 @@ namespace Wombat.Core.DependencyInjection
 
 
 
-        private static void ScanComponent(IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
-        {
-            serviceCollection.Scan(w =>
-            {
-                w.FromAssemblies(assemblies)
-                  //接口注册Scoped
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-                      .AsImplementedInterfaces()
-                      .WithScopedLifetime()
-                  //接口注册Singleton
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
-                        .AsImplementedInterfaces()
-                        .WithSingletonLifetime()
-                  //接口注册Transient
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Transient))
-                        .AsImplementedInterfaces()
-                        .WithTransientLifetime()
-                  //具体类注册Scoped
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-                        .AsSelf()
-                        .WithScopedLifetime()
-                  //具体类注册Singleton
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
-                        .AsSelf()
-                        .WithSingletonLifetime()
-                  //具体类注册Transient
-                  .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-                        .AsSelf()
-                        .WithTransientLifetime();
-            });
+        //private static void ScanComponent(IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
+        //{
+        //    serviceCollection.Scan(w =>
+        //    {
+        //        w.FromAssemblies(assemblies)
+        //          //接口注册Scoped
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
+        //              .AsImplementedInterfaces()
+        //              .WithScopedLifetime()
+        //          //接口注册Singleton
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
+        //                .AsImplementedInterfaces()
+        //                .WithSingletonLifetime()
+        //          //接口注册Transient
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Transient))
+        //                .AsImplementedInterfaces()
+        //                .WithTransientLifetime()
+        //          //具体类注册Scoped
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
+        //                .AsSelf()
+        //                .WithScopedLifetime()
+        //          //具体类注册Singleton
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
+        //                .AsSelf()
+        //                .WithSingletonLifetime()
+        //          //具体类注册Transient
+        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
+        //                .AsSelf()
+        //                .WithTransientLifetime();
+        //    });
 
-        }
+        //}
+
+
+
+
+
 
     }
 }

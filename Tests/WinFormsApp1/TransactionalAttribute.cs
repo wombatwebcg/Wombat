@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Wombat.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Wombat.Core.DependencyInjectionTest
+namespace WinFormsApp1
 {
     /// <summary>
     /// 事务拦截
@@ -30,6 +30,7 @@ namespace Wombat.Core.DependencyInjectionTest
         public override Task After(IAOPContext context)
         {
             Console.WriteLine(22222);
+            context.ReturnValue = 123456;
             return base.After(context); 
         }
 

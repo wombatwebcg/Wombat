@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Wombat.Network\Wombat.Network.csproj" />
+    <ProjectReference Include="..\..\Wombat.Network\Wombat.Network.csproj" />
   </ItemGroup>
 
 </Project>

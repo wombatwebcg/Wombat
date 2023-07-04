@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjectionTest", "Tests\Wombat.Core.DependencyInjectionTest\Wombat.Core.DependencyInjectionTest.csproj", "{3703C8D7-1071-4B49-A80D-61F90BC62343}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsApp1", "Tests\WinFormsApp1\WinFormsApp1.csproj", "{170A2025-9A78-41B2-A57C-4489B1FE5964}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{3703C8D7-1071-4B49-A80D-61F90BC62343}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3703C8D7-1071-4B49-A80D-61F90BC62343}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3703C8D7-1071-4B49-A80D-61F90BC62343}.Release|Any CPU.Build.0 = Release|Any CPU
+		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +75,7 @@ Global
 		{4186718C-9D41-4EC8-980B-66D62BC8F172} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 		{4E374FA0-0283-4C57-BFFF-B879D641BF98} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 		{3703C8D7-1071-4B49-A80D-61F90BC62343} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{170A2025-9A78-41B2-A57C-4489B1FE5964} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DBA95CD-10E5-4DDD-8D56-1C8EF6FA4D09}
