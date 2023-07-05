@@ -52,7 +52,7 @@ namespace Wombat
             IEnumerable<string> enumerable = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory)
                 .Where(w => w.EndsWith(".dll"))
                 .Where(w => !ignoreList.Any(s => Path.GetFileName(w)?.Contains(s) ?? false))
-                .Where(w => !result.Any(s => s.Location == w));
+                .Where(w => !result.Any(s => s?.Location == w));
 
             if (assemblyNames != null && assemblyNames.Length != 0)
             {
@@ -69,11 +69,10 @@ namespace Wombat
                 try
                 {
                     Assembly assembly = LoadAssemblyByName(item);
-                    if (!result.Any(w => w.FullName == assembly.FullName))
+                    if (!result.Any(w => w?.FullName == assembly?.FullName))
                     {
                         result.Add(assembly);
                     }
-                    result.RemoveAll(i => i.IsDynamic);
 
                 }
                 catch (Exception)

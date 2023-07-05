@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Wombat.Core
 {
@@ -23,8 +24,20 @@ namespace Wombat.Core
         /// 获取服务提供者
         /// </summary>
         /// <returns></returns>
-        public static IServiceProvider GetServiceProvider() => _serviceProvider;
+        public static T GetService<T>()
+        {
+          return  _serviceProvider.GetService<T>();
+        }
 
+
+        /// <summary>
+        /// 获取服务提供者
+        /// </summary>
+        /// <returns></returns>
+        public static T GetRequiredService<T>()
+        {
+            return _serviceProvider.GetRequiredService<T>();
+        }
 
         #endregion
 

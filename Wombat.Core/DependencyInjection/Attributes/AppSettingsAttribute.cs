@@ -31,7 +31,6 @@ namespace Wombat.Core.DependencyInjection
         /// <param name="aopContext"></param>
         public override void After(IAOPContext aopContext)
         {
-            if (aopContext.Invocation.ReturnValue != null) return;
             var name = aopContext.Invocation.Method.Name;
             name = name.Replace("get_", "");
             name = name.Replace("Set_", "");
