@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Wombat.Core
@@ -39,6 +40,13 @@ namespace Wombat.Core
             return _serviceProvider.GetRequiredService<T>();
         }
 
+
+
+        public static IConfiguration GetConfiguration()
+        {
+            return _serviceProvider.GetRequiredService<IConfiguration>();
+
+        }
         #endregion
 
     }

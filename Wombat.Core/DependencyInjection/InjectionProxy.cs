@@ -27,13 +27,29 @@ namespace Wombat.Core.DependencyInjection
 
         }
 
+
+
+
         #region 动态服务注册
+
+
+        public static IConfiguration InjectionAppSettings(this IServiceCollection serviceCollection)
+        {
+            // 注入配置
+            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json")
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}.json", optional: true, reloadOnChange: false);
+            IConfiguration configuration = configurationBuilder.Build();
+            serviceCollection.AddSingleton(configuration);
+            return configuration;
+        }
+
+
         /// <summary>
         /// 扫描服务 自动注入服务
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="assemblyFilter"></param>
-        public static void DependencyInjectionService(this IServiceCollection serviceCollection,params string[] assemblyNames)
+        public static void InjectionService(this IServiceCollection serviceCollection,params string[] assemblyNames)
         {
             IEnumerable<Assembly> assemblies = default;
 
@@ -48,12 +64,6 @@ namespace Wombat.Core.DependencyInjection
             }
 
             if (assemblies == null) return;
-
-            // 注入配置
-            IConfigurationBuilder configurationBuilder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}.json", optional: true, reloadOnChange: false);
-            IConfiguration configurationRoot = configurationBuilder.Build();
-            serviceCollection.AddSingleton(configurationRoot);
 
 
             // 服务自动注册

@@ -9,8 +9,8 @@ namespace Wombat.Core.DependencyInjectionTest
         static void Main(string[] args)
         {
             ServiceCollection services = new ServiceCollection();
-
-            services.DependencyInjectionService();
+            services.InjectionAppSettings();
+            services.InjectionService();
             var serviceProvider = services.BuildServiceProvider();
             //var sss = serviceProvider.GetRequiredService<Class2>();
             //sss.HelloWorld();
@@ -41,15 +41,6 @@ namespace Wombat.Core.DependencyInjectionTest
         }
 
 
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            services.DependencyInjectionService();
 
-            var serviceProvider = services.BuildServiceProvider();
-
-            serviceProvider.UseServiceProvider();
-
-
-        }
     }
 }
