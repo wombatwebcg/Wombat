@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 //搬运了NeoSmart.AsyncLock的锁
 
-namespace Wombat.Core
+namespace Wombat
 {
     /// <summary>
     /// 同步异步锁

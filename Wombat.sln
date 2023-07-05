@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocket
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSocketClient", "Tests\Wombat.WebSockets.TestWebSocketClient\Wombat.WebSockets.TestWebSocketClient.csproj", "{4E374FA0-0283-4C57-BFFF-B879D641BF98}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinFormsApp1", "Tests\WinFormsApp1\WinFormsApp1.csproj", "{170A2025-9A78-41B2-A57C-4489B1FE5964}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjectionTest", "Tests\Wombat.Core.DependencyInjectionTest\Wombat.Core.DependencyInjectionTest.csproj", "{E0F96E23-0193-487C-B090-46E54CB9B575}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,10 +55,10 @@ Global
 		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E374FA0-0283-4C57-BFFF-B879D641BF98}.Release|Any CPU.Build.0 = Release|Any CPU
-		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{170A2025-9A78-41B2-A57C-4489B1FE5964}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0F96E23-0193-487C-B090-46E54CB9B575}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0F96E23-0193-487C-B090-46E54CB9B575}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0F96E23-0193-487C-B090-46E54CB9B575}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0F96E23-0193-487C-B090-46E54CB9B575}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,7 +68,7 @@ Global
 		{47222D41-D767-40AD-936E-4464C8274A4F} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 		{4186718C-9D41-4EC8-980B-66D62BC8F172} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 		{4E374FA0-0283-4C57-BFFF-B879D641BF98} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
-		{170A2025-9A78-41B2-A57C-4489B1FE5964} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
+		{E0F96E23-0193-487C-B090-46E54CB9B575} = {24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DBA95CD-10E5-4DDD-8D56-1C8EF6FA4D09}

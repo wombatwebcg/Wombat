@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using Wombat;
 using Microsoft.Extensions.DependencyInjection;
-
 using Castle.DynamicProxy;
 
 namespace Wombat.Core.DependencyInjection
@@ -49,85 +48,46 @@ namespace Wombat.Core.DependencyInjection
         #endregion
 
         #region 动态服务注册
-
         /// <summary>
         /// 扫描服务 自动注入服务
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="assemblyFilter"></param>
-        public static void DependencyInjectionService(this IServiceCollection serviceCollection, string assemblyFilter = "")
+        public static void DependencyInjectionService(this IServiceCollection serviceCollection, params string[] assemblyNames)
         {
             IEnumerable<Assembly> assemblies = default;
 
-            if (string.IsNullOrWhiteSpace(assemblyFilter))
+            if (assemblyNames.Length==0)
             {
-                assemblies = GetAssemblyList();
+                assemblies = AssemblyLoader.GetAssemblyList();
             }
-            //else
-            //{
-            //    assemblies = GetAssemblyList(w =>
-            //    {
-            //        var name = w.GetName().Name;
-            //        return name != null && name.StartsWith(assemblyFilter);
-            //    });
-            //}
+            else
+            {
+                assemblies = AssemblyLoader.GetAssemblyList(assemblyNames);
+            }
 
             if (assemblies == null) return;
 
             // 服务自动注册
-            //serviceCollection.ScanComponent(ServiceLifetime.Singleton, assemblies);
-            //serviceCollection.ScanComponent(ServiceLifetime.Scoped, assemblies);
-            //serviceCollection.ScanComponent(ServiceLifetime.Transient, assemblies);
-
             ScanComponent(serviceCollection, assemblies);
 
             // 动态代理注册
             //ScanningAopComponent(serviceCollection, assemblies);
         }
 
-        /// <summary>
-        /// 获取当前工程下所有要用到的dll
-        /// </summary>
-        /// <returns></returns>
-        private static List<Assembly> GetAssemblyList()
-        {
-            List<Assembly> loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            var loadedPaths = loadedAssemblies.Select(
-                a =>
-                {
-                    // prevent exception accessing Location
-                    try
-                    {
-                        return a.Location;
-                    }
-                    catch (Exception)
-                    {
-                        return null;
-                    }
-                }
-            ).ToArray();
-            var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
-            var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
-            toLoad.ForEach(
-                path =>
-                {
-                    // prevent exception loading some assembly
-                    try
-                    {
-                        loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path)));
-                    }
-                    catch (Exception)
-                    {
-                        ; // DO NOTHING
-                    }
-                }
-            );
 
-            // prevent loading of dynamic assembly, autofac doesn't support dynamic assembly
-            loadedAssemblies.RemoveAll(i => i.IsDynamic);
 
-            return loadedAssemblies;
-        }
+
+
+
+
+
+
+
+
+
+
+
 
 
         /// <summary>
@@ -221,29 +181,8 @@ namespace Wombat.Core.DependencyInjection
 
         }
 
-        /// <summary>
-        /// 创建代理类
-        /// </summary>
-        /// <param name="_class"></param>
-        /// <param name="serviceProvider"></param>
-        /// <returns></returns>
-        private static object CreateClassProxy(Type _class, IServiceProvider serviceProvider)
-        {
-            var constructors = _class.GetConstructors()
-                   ?.FirstOrDefault()
-                   ?.GetParameters()
-                   ?.Select(w => w.ParameterType)
-                   ?.ToArray()
-                   ;
-
-            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
-            return _proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
-        }
 
         #endregion
-
-
-
 
 
     }
