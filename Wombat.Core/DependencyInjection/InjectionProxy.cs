@@ -25,27 +25,6 @@ namespace Wombat.Core.DependencyInjection
             }
 
         }
-        #region  记录存储服务提供者
-
-        private static IServiceProvider _serviceProvider;
-
-        /// <summary>
-        /// 注册服务提供者
-        /// </summary>
-        /// <param name="serviceProvider"></param>
-        public static void UseServiceProvider(this IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        /// <summary>
-        /// 获取服务提供者
-        /// </summary>
-        /// <returns></returns>
-        public static IServiceProvider GetServiceProvider() => _serviceProvider;
-
-
-        #endregion
 
         #region 动态服务注册
         /// <summary>
