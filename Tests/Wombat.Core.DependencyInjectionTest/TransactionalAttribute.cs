@@ -22,15 +22,13 @@ namespace Wombat.Core.DependencyInjectionTest
         {
         }
 
-        public override Task Before(IAOPContext context)
+        public override void Before(IAOPContext context)
         {
             Console.WriteLine(11111);
-            return base.Before(context);    
         }
-        public override Task After(IAOPContext context)
+        public override void After(IAOPContext context)
         {
             Console.WriteLine(22222);
-            return base.After(context); 
         }
 
 

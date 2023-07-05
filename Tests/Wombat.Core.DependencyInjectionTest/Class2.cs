@@ -22,9 +22,9 @@ namespace Wombat.Core.DependencyInjectionTest
         }
 
 
-        public void HelloWorld()
+        [Transactional]
+        public virtual void HelloWorld()
         {
-            _serviceProvider.HelloWorld();
         }
 
 

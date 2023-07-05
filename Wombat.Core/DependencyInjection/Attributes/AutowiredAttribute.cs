@@ -10,21 +10,17 @@ namespace Wombat.Core.DependencyInjection
     public class AutowiredAttribute : AOPBaseAttribute
     {
 
-        public override Task Before(IAOPContext context)
-        {
-            return base.Before(context);
-        }
 
 
         /// <summary>
         /// 之后
         /// </summary>
         /// <param name="aopContext"></param>
-        public override Task After(IAOPContext aopContext)
+        public override void After(IAOPContext aopContext)
         {
             if (aopContext.Invocation.ReturnValue != null)
             {
-                return Task.CompletedTask;
+                return;
 
             }
             var name = aopContext.Invocation.Method.Name;
@@ -33,7 +29,7 @@ namespace Wombat.Core.DependencyInjection
             var type = aopContext.Invocation.Method.DeclaringType.GetProperty(name).PropertyType;
             var service = aopContext.ServiceProvider.GetService(type);
             aopContext.Invocation.ReturnValue = service;
-            return Task.CompletedTask;
+            return ;
         }
 
     }

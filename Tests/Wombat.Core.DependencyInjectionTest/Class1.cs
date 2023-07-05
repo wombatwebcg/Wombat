@@ -18,7 +18,6 @@ namespace Wombat.Core.DependencyInjectionTest
         public Class1(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            HelloWorld();
         }
 
 

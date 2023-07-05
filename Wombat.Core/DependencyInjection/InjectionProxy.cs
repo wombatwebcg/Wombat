@@ -14,11 +14,11 @@ namespace Wombat.Core.DependencyInjection
     /// <summary>
     /// IOC 依赖注入服务
     /// </summary>
-    public static class DynamicProxyClass
+    public static class InjectionProxy
     {
         private readonly static ProxyGenerator _proxyGenerator;
 
-        static DynamicProxyClass()
+        static InjectionProxy()
         {
             if (_proxyGenerator == null)
             {
@@ -89,7 +89,7 @@ namespace Wombat.Core.DependencyInjection
         /// 获取当前工程下所有要用到的dll
         /// </summary>
         /// <returns></returns>
-        public static List<Assembly> GetAssemblyList()
+        private static List<Assembly> GetAssemblyList()
         {
             List<Assembly> loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
             var loadedPaths = loadedAssemblies.Select(
@@ -137,47 +137,66 @@ namespace Wombat.Core.DependencyInjection
         {
 
             //List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
+            serviceCollection.AddTransient<IAsyncInterceptor, AOPInterceptor>();
 
             foreach (var sl in Enum.GetValues(typeof(ServiceLifetime)))
             {
                 var serviceLifetime = (ServiceLifetime)(sl);
-                List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
+                List<Type> types = assemblies.Where(w => !w.IsDynamic).SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
                 foreach (var aType in types)
                 {
                     //serviceCollection.Add(new ServiceDescriptor(aType, aType, serviceLifetime));
-                    var interfaces = assemblies.SelectMany(x => x.GetTypes()).ToArray().Where(x => x.IsAssignableFrom(aType) && x.IsInterface ).ToList();
+                    var interfaces = assemblies.Where(w => !w.IsDynamic).SelectMany(x => x.GetTypes()).ToArray().Where(x => x.IsAssignableFrom(aType) && x.IsInterface).ToList();
+
+                    var classAopBaseAttributes = aType.GetCustomAttribute<AOPBaseAttribute>() != null;
+                    var propertyAopBaseAttributes = aType.GetProperties().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
+                    var methodAopBaseAttributes = aType.GetMethods().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
+                    var constructors = aType.GetConstructors()?.FirstOrDefault()?.GetParameters()?.Select(w => w.ParameterType)?.ToArray();
+
                     if (interfaces.Count == 0)
                     {
                         inject(serviceLifetime, aType);
 
+                        if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes)
+                        {
+                            continue;
+                        }
+                        //injectProxy(serviceLifetime, aType);
+                        serviceCollection.Add(new ServiceDescriptor(aType, serviceProvider =>
+                        {
+                            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                            return _proxyGenerator.CreateClassProxy(aType, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
+                            //return _proxyGenerator.CreateClassProxyWithTarget(aType, serviceProvider.GetService(aType), castleInterceptor);
+                        }, serviceLifetime));
+                        continue;
                     }
-                    var constructors = aType.GetConstructors()?.FirstOrDefault()?.GetParameters()?.Select(w => w.ParameterType)?.ToArray();
 
                     foreach (var aInterface in interfaces)
                     {
                         inject(serviceLifetime, aType, aInterface);
-                        var classAopBaseAttributes = aType.GetCustomAttribute<AOPBaseAttribute>() != null;
-                        var propertyAopBaseAttributes = aType.GetProperties().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
-                        var methodAopBaseAttributes = aType.GetMethods().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
-                        // 找不到 AopBaseAttribute 标记的 class 一律跳过
-                        if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes) continue;
-                        //注入AOP
-
-                        if(propertyAopBaseAttributes)
+                        if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes)
                         {
-
+                            continue;
                         }
+                        //注入AOP
                         serviceCollection.Add(new ServiceDescriptor(aInterface, serviceProvider =>
                         {
-                            CastleInterceptor castleInterceptor = new CastleInterceptor(serviceProvider);
                             var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
-                            //return _proxyGenerator.CreateClassProxy(aType, constructorArguments, castleInterceptor);
-                            return _proxyGenerator.CreateInterfaceProxyWithTarget(aInterface, serviceProvider.GetService(aType), castleInterceptor);
+                            return _proxyGenerator.CreateInterfaceProxyWithTarget(aInterface, serviceProvider.GetService(aType), serviceProvider.GetService<IAsyncInterceptor>());
                         }, serviceLifetime));
+
+                        serviceCollection.Add(new ServiceDescriptor(aType, serviceProvider =>
+                        {
+                            var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                            return _proxyGenerator.CreateClassProxy(aType, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
+                        }, serviceLifetime));
+
+
+
+
                     }
                 }
             }
-
             void inject(ServiceLifetime serviceLifetime,Type type,Type typeInterface = null)
             {
 
@@ -222,94 +241,6 @@ namespace Wombat.Core.DependencyInjection
         }
 
         #endregion
-
-
-
-        /// <summary>
-        /// 创建代理类
-        /// </summary>
-        /// <param name="_class"></param>
-        /// <param name="serviceProvider"></param>
-        /// <returns></returns>
-        //private static object CreateClassProxy(Type _class, IServiceProvider serviceProvider)
-        //{
-        //    var constructors = _class.GetConstructors()?.FirstOrDefault()
-        //           ?.GetParameters()
-        //           ?.Select(w => w.ParameterType)
-        //           ?.ToArray();
-
-        //    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
-        //    return _proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /// <summary>
-        /// 创建代理类
-        /// </summary>
-        /// <param name="proxyGenerator"></param>
-        /// <param name="_class"></param>
-        /// <param name="constructors"></param>
-        /// <param name="serviceProvider"></param>
-        /// <returns></returns>
-        //private static object CreateClassProxy(ProxyGenerator proxyGenerator, Type _class, Type[] constructors, IServiceProvider serviceProvider)
-        //{
-        //    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
-        //    return proxyGenerator.CreateClassProxy(_class, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
-        //}
-
-
-
-
-
-
-        //private static void ScanComponent(IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
-        //{
-        //    serviceCollection.Scan(w =>
-        //    {
-        //        w.FromAssemblies(assemblies)
-        //          //接口注册Scoped
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-        //              .AsImplementedInterfaces()
-        //              .WithScopedLifetime()
-        //          //接口注册Singleton
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
-        //                .AsImplementedInterfaces()
-        //                .WithSingletonLifetime()
-        //          //接口注册Transient
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Transient))
-        //                .AsImplementedInterfaces()
-        //                .WithTransientLifetime()
-        //          //具体类注册Scoped
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-        //                .AsSelf()
-        //                .WithScopedLifetime()
-        //          //具体类注册Singleton
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Singleton))
-        //                .AsSelf()
-        //                .WithSingletonLifetime()
-        //          //具体类注册Transient
-        //          .AddClasses(classes => classes.WithAttribute<ComponentAttribute>(t => t.Lifetime == ServiceLifetime.Scoped))
-        //                .AsSelf()
-        //                .WithTransientLifetime();
-        //    });
-
-        //}
-
 
 
 
