@@ -10,6 +10,8 @@ namespace Wombat.Core.DependencyInjection
     public class AutowiredAttribute : AOPBaseAttribute
     {
 
+
+
         /// <summary>
         /// 之后
         /// </summary>

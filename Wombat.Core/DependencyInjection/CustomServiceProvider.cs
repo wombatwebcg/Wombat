@@ -4,22 +4,34 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Wombat.Core
+namespace Wombat.Core.DependencyInjection
 {
    public static class CustomServiceProvider
     {
         #region  记录存储服务提供者
 
-        private static IServiceProvider _serviceProvider;
+        internal static IServiceProvider _serviceProvider;
+        internal static IConfiguration _configuration;
 
         /// <summary>
         /// 注册服务提供者
         /// </summary>
         /// <param name="serviceProvider"></param>
-        public static void UseServiceProvider(this IServiceProvider serviceProvider)
+        public static void UseCustomServiceProvider(this IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
+
+        /// <summary>
+        /// 注册服务提供者
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        public static void UseCustomConfigurationProvider(this IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
+
 
         /// <summary>
         /// 获取服务提供者
@@ -44,7 +56,7 @@ namespace Wombat.Core
 
         public static IConfiguration GetConfiguration()
         {
-            return _serviceProvider.GetRequiredService<IConfiguration>();
+            return _configuration;
 
         }
         #endregion
