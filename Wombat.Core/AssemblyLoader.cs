@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Wombat
 {
@@ -18,13 +20,19 @@ namespace Wombat
 
 
             List<Assembly> result = new List<Assembly>();
-            List<string> ignoreList = new List<string> { "Microsoft", "System", "Swashbuckle.", "Npgsql.", "NPOI.", "FreeSql.", "Castle.", "Azure.", "netstandard" };
+            List<string> ignoreList = new List<string> { "Microsoft", "System"};
 
-            IEnumerable<Assembly> source = GetLoadedAssemblies()
-                .Where(w => !ignoreList.Any(s => (w.GetName().Name ?? "").Contains(s)))
-                .Where(w => !result.Any(s => (w.GetName().Name ?? "").Contains(s.GetName().Name ?? "")));
+            //IEnumerable<Assembly> source = from w in GetLoadedAssemblies()
+            //    .Where(w => !ignoreList.Any(s => (w.GetName().Name ?? "").Contains(s)))
+            //    .Where(w => !result.Any(s => (w.GetName().Name ?? "").Contains(s.GetName().Name ?? "")))
+            //                               select w;
+            IEnumerable<Assembly> source = from w in GetLoadedAssemblies()
+                                           where !ignoreList.Any(s => (w.GetName().Name ?? "").Contains(s))
+                                           where !result.Any(s => (w.GetName().Name ?? "").Contains(s.GetName().Name ?? ""))
+                                           select w;
 
             List<Assembly> collection = source.ToList();
+            collection.ForEach((c) => { if (c.FullName.Contains("KYDevicesGateway")) Console.WriteLine(c.FullName); });
 
             if (assemblyNames != null && assemblyNames.Length != 0)
             {
@@ -147,19 +155,20 @@ namespace Wombat
         private static IEnumerable<Assembly> GetLoadedAssemblies()
         {
             var loadedAssemblies = new List<Assembly>();
-            var entryAssembly = Assembly.GetEntryAssembly();
-            var executingAssembly = Assembly.GetExecutingAssembly();
-
-            // 添加入口程序集和当前执行程序集
-            AddIfNotNull(loadedAssemblies, entryAssembly);
-            AddIfNotNull(loadedAssemblies, executingAssembly);
-
-            // 获取其他加载的程序集
             var loadedAppDomainAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly.GetEntryAssembly().GetReferencedAssemblies().ForEach((name) => { AddIfNotAlreadyAdded(loadedAssemblies, Assembly.Load(name)); }) ;
             foreach (var assembly in loadedAppDomainAssemblies)
             {
                 AddIfNotAlreadyAdded(loadedAssemblies, assembly);
             }
+
+            var entryAssembly = Assembly.GetEntryAssembly();
+            var executingAssembly = Assembly.GetExecutingAssembly();
+
+            // 添加入口程序集和当前执行程序集
+            AddIfNotAlreadyAdded(loadedAssemblies, entryAssembly);
+            AddIfNotAlreadyAdded(loadedAssemblies, executingAssembly);
+            loadedAssemblies.RemoveAll(i => i.IsDynamic);
 
             return loadedAssemblies;
         }

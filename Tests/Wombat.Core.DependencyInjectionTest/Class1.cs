@@ -7,9 +7,9 @@ using Wombat.Core.DependencyInjection;
 
 namespace Wombat.Core.DependencyInjectionTest
 {
-    [Component(Lifetime = ServiceLifetime.Scoped)]
-    //[Transient]
-    public class Class1 : IClass
+    [Component((typeof(IClass)),Lifetime = ServiceLifetime.Scoped)]
+
+    public class Class1:IClass,IClass1
     {
 
         private readonly IServiceProvider _serviceProvider;
@@ -26,5 +26,9 @@ namespace Wombat.Core.DependencyInjectionTest
             Console.WriteLine("HelloWorld11111");
         }
 
+        public void HelloWorld2()
+        {
+            Console.WriteLine("HelloWorld22222222");
+        }
     }
 }

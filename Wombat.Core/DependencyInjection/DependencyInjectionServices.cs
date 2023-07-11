@@ -8,6 +8,7 @@ using Wombat;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Castle.DynamicProxy;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Wombat.Core.DependencyInjection
 {
@@ -102,17 +103,65 @@ namespace Wombat.Core.DependencyInjection
                 foreach (var localServiceLifetime in Enum.GetValues(typeof(ServiceLifetime)))
                 {
                     var serviceLifetime = (Microsoft.Extensions.DependencyInjection.ServiceLifetime)(localServiceLifetime);
-                    List<Type> types = assemblies.Where(w => !w.IsDynamic).SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime ==(ServiceLifetime)localServiceLifetime && t.IsClass && !t.IsAbstract).ToList();
+                    List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime ==(ServiceLifetime)localServiceLifetime && t.IsClass && !t.IsAbstract).ToList();
                     foreach (var aType in types)
                     {
-                        //serviceCollection.Add(new ServiceDescriptor(aType, aType, serviceLifetime));
-                        var interfaces = assemblies.Where(w => !w.IsDynamic).SelectMany(x => x.GetTypes()).ToArray().Where(x => x.IsAssignableFrom(aType) && x.IsInterface).ToList();
+                        var interfaces = assemblies.SelectMany(x => x.GetTypes()).ToArray().Where(x => x.IsAssignableFrom(aType) && x.IsInterface).ToList();
 
                         var classAopBaseAttributes = aType.GetCustomAttribute<AOPBaseAttribute>() != null;
                         var propertyAopBaseAttributes = aType.GetProperties().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
                         var methodAopBaseAttributes = aType.GetMethods().Count(w => w.GetCustomAttribute<AOPBaseAttribute>() != null) > 0;
                         var constructors = aType.GetConstructors()?.FirstOrDefault()?.GetParameters()?.Select(w => w.ParameterType)?.ToArray();
 
+                        #region 指定接口注入
+                        var componentInterface = aType.GetCustomAttribute<ComponentAttribute>().Interface;
+                        if (componentInterface != null)
+                        {
+                            var instacne = aType.GetCustomAttribute<ComponentAttribute>().Instance;
+                            if (instacne != null)
+                            {
+                                inject(serviceLifetime, instacne, componentInterface);
+                                if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes)
+                                {
+                                    continue;
+                                }
+                                serviceCollection.Add(new ServiceDescriptor(componentInterface, serviceProvider =>
+                                {
+                                    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                                    return _proxyGenerator.CreateInterfaceProxyWithTarget(componentInterface, serviceProvider.GetService(instacne), serviceProvider.GetService<IAsyncInterceptor>());
+                                }, serviceLifetime));
+
+                                serviceCollection.Add(new ServiceDescriptor(instacne, serviceProvider =>
+                                {
+                                    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                                    return _proxyGenerator.CreateClassProxy(instacne, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
+                                }, serviceLifetime));
+                                continue;
+                            }
+                            else
+                            {
+                                inject(serviceLifetime, aType, componentInterface);
+                                if (!classAopBaseAttributes && !propertyAopBaseAttributes && !methodAopBaseAttributes)
+                                {
+                                    continue;
+                                }
+                                serviceCollection.Add(new ServiceDescriptor(componentInterface, serviceProvider =>
+                                {
+                                    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                                    return _proxyGenerator.CreateInterfaceProxyWithTarget(componentInterface, serviceProvider.GetService(aType), serviceProvider.GetService<IAsyncInterceptor>());
+                                }, serviceLifetime));
+
+                                serviceCollection.Add(new ServiceDescriptor(aType, serviceProvider =>
+                                {
+                                    var constructorArguments = constructors.Select(w => serviceProvider.GetService(w)).ToArray();
+                                    return _proxyGenerator.CreateClassProxy(aType, constructorArguments, serviceProvider.GetService<IAsyncInterceptor>());
+                                }, serviceLifetime));
+                                continue;
+                            }
+                        }
+                        #endregion
+
+                        #region 继承接口注入
                         if (interfaces.Count == 0)
                         {
                             inject(serviceLifetime, aType);
@@ -130,7 +179,6 @@ namespace Wombat.Core.DependencyInjection
                             }, serviceLifetime));
                             continue;
                         }
-
                         foreach (var aInterface in interfaces)
                         {
                             inject(serviceLifetime, aType, aInterface);
@@ -155,6 +203,7 @@ namespace Wombat.Core.DependencyInjection
 
 
                         }
+                        #endregion
                     }
                 }
             }
@@ -189,6 +238,18 @@ namespace Wombat.Core.DependencyInjection
 
 
         #endregion
+
+        public static List<TypeInfo> GetTypesAssignableTo(this Assembly assembly, Type compareType)
+        {
+            var typeInfoList = assembly.DefinedTypes.Where(x => x.IsClass
+                                && !x.IsAbstract
+                                && x != compareType
+                                && x.GetInterfaces()
+                                        .Any(i => i.IsGenericType
+                                                && i.GetGenericTypeDefinition() == compareType))?.ToList();
+
+            return typeInfoList;
+        }
 
 
     }

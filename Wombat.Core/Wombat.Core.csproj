@@ -11,7 +11,7 @@
     <PackageTags>core</PackageTags>
     <Copyright>wombatwebcg</Copyright>
     <Version>1.0.5</Version>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
 
@@ -26,6 +26,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
 	<PackageReference Include="Wombat.Extensions.ObjectConversion" Version="1.0.3" />
   </ItemGroup>
 

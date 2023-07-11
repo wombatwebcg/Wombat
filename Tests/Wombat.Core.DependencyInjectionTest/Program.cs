@@ -12,10 +12,13 @@ namespace Wombat.Core.DependencyInjectionTest
             services.AddAppSettings();
             services.AddServicesPoxy();
             var serviceProvider = services.BuildServiceProvider();
-            //var sss = serviceProvider.GetRequiredService<Class2>();
-            //sss.HelloWorld();
-            var sss1 = serviceProvider.GetService<Setting>();
-            Console.WriteLine(sss1.Test1);
+            var sss = serviceProvider.GetRequiredService<IClass>();
+            sss.HelloWorld();
+            var sss1 = serviceProvider.GetRequiredService<IClass1>();
+            sss1.HelloWorld2();
+
+            //var sss1 = serviceProvider.GetService<Setting>();
+            //Console.WriteLine(sss1.Test1);
             //Console.WriteLine(sss.Value1.ToString());
             //Console.WriteLine(sss.Test1);
 
