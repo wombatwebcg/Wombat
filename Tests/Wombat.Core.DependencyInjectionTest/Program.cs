@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
-using Wombat.Core.DependencyInjection;
 
 namespace Wombat.Core.DependencyInjectionTest
 {

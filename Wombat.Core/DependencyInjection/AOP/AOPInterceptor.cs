@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Castle.DynamicProxy;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public class AOPInterceptor : IAsyncInterceptor
     {

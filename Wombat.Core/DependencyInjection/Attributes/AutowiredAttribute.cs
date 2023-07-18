@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// 属性注入实例

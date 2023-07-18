@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Wombat.Core;
@@ -25,8 +26,9 @@ namespace Wombat.Socket.TestTcpSocketServer
                 //config.FrameBuilder = new LineBasedFrameBuilder();
                 //config.FrameBuilder = new LengthPrefixedFrameBuilder();
                 //config.FrameBuilder = new LengthFieldBasedFrameBuilder();
+                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("192.168.0.103"), 7282);
 
-                _server = new TcpSocketServer(22222, new SimpleEventDispatcher(), config, frameBuilder: new LengthPrefixedFrameBuilder());
+                _server = new TcpSocketServer(remoteEP, new SimpleEventDispatcher(), config, frameBuilder: new LengthPrefixedFrameBuilder());
                 _server.UsgLogger(logger);
                 _server.Listen();
 

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
    public static class CustomServiceProvider
     {

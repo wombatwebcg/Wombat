@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class ComponentAttribute : Attribute

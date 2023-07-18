@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public interface IAOPContext
     {

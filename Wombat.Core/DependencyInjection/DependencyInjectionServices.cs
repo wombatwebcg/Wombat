@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Castle.DynamicProxy;
 using System.Security.Cryptography.X509Certificates;
 
-namespace Wombat.Core.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
     /// IOC 依赖注入服务
