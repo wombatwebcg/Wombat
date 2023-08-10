@@ -18,6 +18,8 @@ namespace Wombat.Core.DependencyInjectionTest
         public Class2(IClass serviceProvider)
         {
             _serviceProvider = serviceProvider;
+
+            var ssss = Test1;
         }
         [AppSettings("Test:Value1")]
         public virtual double Value1 { get; }

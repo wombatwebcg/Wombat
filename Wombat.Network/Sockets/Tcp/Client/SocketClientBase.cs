@@ -173,8 +173,8 @@ namespace Wombat.Network.Sockets
                 throw;
             }
         }
+        public void Connect(IPEndPoint remoteEndPoint) => ConnectAsync(remoteEndPoint);
 
-        public void Connect(IPEndPoint remoteEndPoint) => ConnectAsync(remoteEndPoint).Wait();
 
         private void SetSocketOptions()
         {
@@ -286,6 +286,23 @@ namespace Wombat.Network.Sockets
             Clean();
         }
 
+        private async void Close(bool shallNotifyUserSide)
+        {
+
+            if (Interlocked.Exchange(ref _state, _closed) == _closed)
+            {
+                return;
+            }
+            Shutdown();
+            if (shallNotifyUserSide)
+            {
+                _logger?.Debug($"Disconnected from server [{this.RemoteEndPoint}] " +
+                    $"on [{DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}].");
+
+            }
+
+            Clean();
+        }
 
         public void Close()
         {

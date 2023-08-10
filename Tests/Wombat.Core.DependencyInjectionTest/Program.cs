@@ -11,7 +11,8 @@ namespace Wombat.Core.DependencyInjectionTest
             services.AddAppSettings();
             services.AddServicesPoxy();
             var serviceProvider = services.BuildServiceProvider();
-            var sss = serviceProvider.GetRequiredService<IClass>();
+            var sss = serviceProvider.GetRequiredService<Class2>();
+            var ppp = sss.Test1;
             sss.HelloWorld();
             var sss1 = serviceProvider.GetRequiredService<IClass1>();
             sss1.HelloWorld2();
