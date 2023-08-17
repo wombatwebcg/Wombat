@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/wombatwebcg/Wombat</PackageProjectUrl>
     <Authors>wombatwebcg</Authors>
     <Product>wombatwebcg</Product>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

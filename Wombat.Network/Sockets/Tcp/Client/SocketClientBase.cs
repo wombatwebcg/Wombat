@@ -286,7 +286,7 @@ namespace Wombat.Network.Sockets
             Clean();
         }
 
-        private async void Close(bool shallNotifyUserSide)
+        private void Close(bool shallNotifyUserSide)
         {
 
             if (Interlocked.Exchange(ref _state, _closed) == _closed)
@@ -304,9 +304,9 @@ namespace Wombat.Network.Sockets
             Clean();
         }
 
-        public void Close()
+        public virtual void Close()
         {
-            CloseAsync(true).Wait(SocketConfiguration.ConnectTimeout); // close by external
+            Close(true);
         }
 
 
