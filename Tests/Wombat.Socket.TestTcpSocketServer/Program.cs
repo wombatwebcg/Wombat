@@ -2,8 +2,9 @@
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network.Sockets;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Wombat.Socket.TestTcpSocketServer
 {
@@ -13,7 +14,18 @@ namespace Wombat.Socket.TestTcpSocketServer
 
         static void Main(string[] args)
         {
-            var logger = new LoggerBuilder().LogEventLevel(LogEventLevel.Debug).UseConsoleLogger().UseFileLogger().CreateLogger();
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)//CategoryName以System开头的所有日志输出级别为Warning
+                    .AddFilter<ConsoleLoggerProvider>("Wombat.Socket.TestTcpSocketServer", LogLevel.Debug)
+                    .AddConsole();//在loggerFactory中添加 ConsoleProvider
+            });
+
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Example log message");
+
             try
             {
                 var config = new TcpSocketServerConfiguration();
@@ -26,7 +38,7 @@ namespace Wombat.Socket.TestTcpSocketServer
                 //config.FrameBuilder = new LineBasedFrameBuilder();
                 //config.FrameBuilder = new LengthPrefixedFrameBuilder();
                 //config.FrameBuilder = new LengthFieldBasedFrameBuilder();
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("192.168.0.103"), 7282);
+                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22222);
 
                 _server = new TcpSocketServer(remoteEP, new SimpleEventDispatcher(), config, frameBuilder: new LengthPrefixedFrameBuilder());
                 _server.UsgLogger(logger);
@@ -103,7 +115,7 @@ namespace Wombat.Socket.TestTcpSocketServer
                     }
                     catch (Exception ex)
                     {
-                        logger.Exception(ex.Message, ex);
+                        logger.LogError(ex.Message, ex);
                     }
                 }
 
@@ -112,7 +124,7 @@ namespace Wombat.Socket.TestTcpSocketServer
             }
             catch (Exception ex)
             {
-                logger.Exception(ex.Message, ex);
+                logger.LogError(ex.Message, ex);
             }
 
             Console.ReadKey();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -10,7 +11,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network.WebSockets.Extensions;
 using Wombat.Network.WebSockets.SubProtocols;
 
@@ -18,9 +18,11 @@ namespace Wombat.Network.WebSockets
 {
     public sealed class WebSocketSession : IDisposable
     {
+        public ILogger Logger => _logger;
+
         #region Fields
 
-        private static ILog _logger;
+        private static ILogger _logger;
         private TcpClient _tcpClient;
         private readonly WebSocketServerConfiguration _configuration;
         private readonly ISegmentBufferManager _bufferManager;
@@ -86,7 +88,9 @@ namespace Wombat.Network.WebSockets
 
         #endregion
 
-        public  void UsgLogger(ILog log)
+
+
+        public void UsgLogger(ILogger log)
         {
             _logger = log;
         }
@@ -194,7 +198,7 @@ namespace Wombat.Network.WebSockets
                     throw new ObjectDisposedException("This websocket session has been disposed after connected.");
                 }
 
-                _logger?.DebugFormat("Session started for [{0}] on [{1}] in module [{2}] with session count [{3}].",
+               _logger?.LogDebug("Session started for [{0}] on [{1}] in module [{2}] with session count [{3}].",
                     this.RemoteEndPoint,
                     this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _module.GetType().Name,
@@ -220,9 +224,10 @@ namespace Wombat.Network.WebSockets
                     await InternalClose(true); // user side handle tcp connection error occurred
                 }
             }
-            catch (Exception ex) when (ex is TimeoutException || ex is WebSocketException)
+            catch (Exception ex)
+            when(ex is TimeoutException || ex is WebSocketException)
             {
-                _logger?.Exception(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                _logger?.LogError(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
                 await InternalClose(true); // handle tcp connection error occurred
                 throw;
             }
@@ -256,7 +261,7 @@ namespace Wombat.Network.WebSockets
                     if (_configuration.SslPolicyErrorsBypassed)
                         return true;
                     else
-                        _logger?.ErrorFormat("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
+                        _logger?.LogError("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
                             this, this.RemoteEndPoint, sslPolicyErrors);
 
                     return false;
@@ -286,7 +291,7 @@ namespace Wombat.Network.WebSockets
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
             // to determine what security services are used by the SslStream. 
             // Check the IsMutuallyAuthenticated property to determine whether mutual authentication occurred.
-            _logger?.DebugFormat(
+           _logger?.LogDebug(
                 "Ssl Stream: SslProtocol[{0}], IsServer[{1}], IsAuthenticated[{2}], IsEncrypted[{3}], IsSigned[{4}], IsMutuallyAuthenticated[{5}], "
                 + "HashAlgorithm[{6}], HashStrength[{7}], KeyExchangeAlgorithm[{8}], KeyExchangeStrength[{9}], CipherAlgorithm[{10}], CipherStrength[{11}].",
                 sslStream.SslProtocol,
@@ -364,15 +369,9 @@ namespace Wombat.Network.WebSockets
             }
             catch (WebSocketHandshakeException ex)
             {
-                _logger?.Exception(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                _logger?.LogError(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
                 handshakeResult = false;
             }
-            catch (Exception)
-            {
-                handshakeResult = false;
-                throw;
-            }
-
             return handshakeResult;
         }
 
@@ -482,7 +481,7 @@ namespace Wombat.Network.WebSockets
                             }
                             catch (Exception ex)
                             {
-                                _logger?.Exception(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                                _logger?.LogError(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
                                 throw;
                             }
                             finally
@@ -615,7 +614,7 @@ namespace Wombat.Network.WebSockets
                     closeReason = Encoding.UTF8.GetString(payload, payloadOffset + 2, payloadCount - 2);
                 }
 #if DEBUG
-                _logger?.DebugFormat("Session [{0}] received client side close frame [{1}] [{2}].", this, closeCode, closeReason);
+               _logger?.LogDebug("Session [{0}] received client side close frame [{1}] [{2}].", this, closeCode, closeReason);
 #endif
                 // If an endpoint receives a Close frame and did not previously send a
                 // Close frame, the endpoint MUST send a Close frame in response.  (When
@@ -626,7 +625,7 @@ namespace Wombat.Network.WebSockets
             else
             {
 #if DEBUG
-                _logger?.DebugFormat("Session [{0}] received client side close frame but no status code.", this);
+               _logger?.LogDebug("Session [{0}] received client side close frame but no status code.", this);
 #endif
                 await Close(WebSocketCloseCode.InvalidPayloadData);
             }
@@ -652,7 +651,7 @@ namespace Wombat.Network.WebSockets
             // verify that the remote endpoint is still responsive.
             var ping = Encoding.UTF8.GetString(payload, payloadOffset, payloadCount);
 #if DEBUG
-            _logger?.DebugFormat("Session [{0}] received client side ping frame [{1}].", this, ping);
+           _logger?.LogDebug("Session [{0}] received client side ping frame [{1}].", this, ping);
 #endif
             if (State == ConnectionState.Connected)
             {
@@ -661,7 +660,7 @@ namespace Wombat.Network.WebSockets
                 var pong = new PongFrame(ping, false).ToArray(_frameBuilder);
                 await SendFrame(pong);
 #if DEBUG
-                _logger?.DebugFormat("Session [{0}] sends server side pong frame [{1}].", this, ping);
+               _logger?.LogDebug("Session [{0}] sends server side pong frame [{1}].", this, ping);
 #endif
             }
         }
@@ -683,7 +682,7 @@ namespace Wombat.Network.WebSockets
             var pong = Encoding.UTF8.GetString(payload, payloadOffset, payloadCount);
             StopKeepAliveTimeoutTimer();
 #if DEBUG
-            _logger?.DebugFormat("Session [{0}] received client side pong frame [{1}].", this, pong);
+           _logger?.LogDebug("Session [{0}] received client side pong frame [{1}].", this, pong);
 #endif
             await Task.CompletedTask;
         }
@@ -713,7 +712,7 @@ namespace Wombat.Network.WebSockets
                             await _stream.WriteAsync(closingHandshake, 0, closingHandshake.Length);
                             StartClosingTimer();
 #if DEBUG
-                            _logger?.DebugFormat("Session [{0}] sends server side close frame [{1}] [{2}].", this, closeCode, closeReason);
+                           _logger?.LogDebug("Session [{0}] sends server side close frame [{1}] [{2}].", this, closeCode, closeReason);
 #endif
                         }
                         catch (Exception ex)
@@ -746,7 +745,7 @@ namespace Wombat.Network.WebSockets
 
             if (shallNotifyUserSide)
             {
-                _logger?.DebugFormat("Session closed for [{0}] on [{1}] in dispatcher [{2}] with session count [{3}].",
+               _logger?.LogDebug("Session closed for [{0}] on [{1}] in dispatcher [{2}] with session count [{3}].",
                     this.RemoteEndPoint,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _module.GetType().Name,
@@ -861,7 +860,7 @@ namespace Wombat.Network.WebSockets
             // close the connection but MAY close the connection at any time after
             // sending and receiving a Close message, e.g., if it has not received a
             // TCP Close from the server in a reasonable time period.
-            _logger?.WarningFormat("Session [{0}] closing timer timeout [{1}] then close automatically.", this, CloseTimeout);
+            _logger?.LogWarning("Session [{0}] closing timer timeout [{1}] then close automatically.", this, CloseTimeout);
             await InternalClose(true); // close timeout
         }
 
@@ -911,7 +910,7 @@ namespace Wombat.Network.WebSockets
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError(ex.Message, ex);
 
                 await InternalClose(true); // catch specified exception then intend to close the session
 
@@ -923,7 +922,7 @@ namespace Wombat.Network.WebSockets
 
         private async Task HandleUserSideError(Exception ex)
         {
-            _logger?.Exception(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
+            _logger?.LogError(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
             await Task.CompletedTask;
         }
 
@@ -1018,7 +1017,7 @@ namespace Wombat.Network.WebSockets
 
         private async void OnKeepAliveTimeout()
         {
-            _logger?.WarningFormat("Session [{0}] keep-alive timer timeout [{1}].", this, KeepAliveTimeout);
+            _logger?.LogWarning("Session [{0}] keep-alive timer timeout [{1}].", this, KeepAliveTimeout);
             await Close(WebSocketCloseCode.AbnormalClosure, "Keep-Alive Timeout");
         }
 
@@ -1037,14 +1036,14 @@ namespace Wombat.Network.WebSockets
                         await SendFrame(keepAliveFrame);
                         StartKeepAliveTimeoutTimer();
 #if DEBUG
-                        _logger?.DebugFormat("Session [{0}] sends server side ping frame [{1}].", this, string.Empty);
+                       _logger?.LogDebug("Session [{0}] sends server side ping frame [{1}].", this, string.Empty);
 #endif
                         _keepAliveTracker.ResetTimer();
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Exception(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                    _logger?.LogError(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
                     await Close(WebSocketCloseCode.EndpointUnavailable);
                 }
                 finally
@@ -1169,7 +1168,7 @@ namespace Wombat.Network.WebSockets
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Exception(ex.Message, ex);
+                    _logger?.LogError(ex.Message, ex);
                 }
             }
         }

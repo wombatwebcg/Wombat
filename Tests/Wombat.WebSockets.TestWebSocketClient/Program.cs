@@ -2,21 +2,30 @@
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network.WebSockets;
 using Wombat.Network;
-
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace Wombat.WebSockets.TestWebSocketClient
 {
     class Program
     {
         static WebSocketClient _client;
-        static ILog logger;
 
         static void Main(string[] args)
         {
-            logger = new LoggerBuilder().LogEventLevel(LogEventLevel.Debug).UseConsoleLogger().UseFileLogger().CreateLogger();
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)//CategoryName以System开头的所有日志输出级别为Warning
+                    .AddFilter<ConsoleLoggerProvider>("Wombat.WebSockets.TestWebSocketClient", LogLevel.Debug)
+                    .AddConsole();//在loggerFactory中添加 ConsoleProvider
+            });
+
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Example log message");
 
             Task.Run(async () =>
             {
@@ -38,7 +47,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
                         OnServerDisconnected,
                         config);
                     _client.UsgLogger(logger);
-                    await _client.Connect();
+                    await _client.ConnectAsync();
 
                     Console.WriteLine("WebSocket client has connected to server [{0}].", uri);
                     Console.WriteLine("Type something to send to server...");
@@ -105,7 +114,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
                         }
                         catch (Exception ex)
                         {
-                           logger.Exception(ex.Message, ex);
+                           logger.LogError(ex.Message, ex);
                         }
                     }
 
@@ -114,7 +123,7 @@ namespace Wombat.WebSockets.TestWebSocketClient
                 }
                 catch (Exception ex)
                 {
-                    logger.Exception(ex.Message, ex);
+                    logger.LogError(ex.Message, ex);
                 }
             }).Wait();
 

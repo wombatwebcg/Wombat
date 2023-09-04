@@ -1,17 +1,17 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using Wombat.Core;
 
 namespace Wombat.Network.WebSockets
 {
     internal sealed class WebSocketServerHandshaker
     {
-        private static readonly ILog _logger = Logger.Get();
+
         private static readonly char[] _headerLineSplitter = new char[] { '\r', '\n' };
 
         internal static bool HandleOpenningHandshakeRequest(WebSocketSession session, byte[] buffer, int offset, int count,
@@ -23,7 +23,7 @@ namespace Wombat.Network.WebSockets
 
             var request = Encoding.UTF8.GetString(buffer, offset, count);
 #if DEBUG
-            _logger.DebugFormat("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, request);
+            session.Logger?.LogDebug("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, request);
 #endif
             try
             {
@@ -187,8 +187,8 @@ namespace Wombat.Network.WebSockets
             }
             catch (Exception ex)
             {
-                _logger.ErrorFormat("{0}{1}{2}", session, Environment.NewLine, request );
-                _logger.Exception(ex.Message, ex);
+                session.Logger?.LogError("{0}{1}{2}", session, Environment.NewLine, request );
+                session.Logger?.LogError(ex.Message, ex);
                 throw;
             }
 
@@ -280,7 +280,7 @@ namespace Wombat.Network.WebSockets
             // Sec-WebSocket-Protocol: chat
             var response = sb.ToString();
 #if DEBUG
-            _logger.DebugFormat("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, response);
+            session.Logger?.LogDebug("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, response);
 #endif
             return Encoding.UTF8.GetBytes(response);
         }
@@ -308,7 +308,7 @@ namespace Wombat.Network.WebSockets
 
             var response = sb.ToString();
 #if DEBUG
-            _logger.DebugFormat("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, response);
+            session.Logger?.LogDebug("[{0}]{1}{2}", session.RemoteEndPoint, Environment.NewLine, response);
 #endif
             return Encoding.UTF8.GetBytes(response);
         }

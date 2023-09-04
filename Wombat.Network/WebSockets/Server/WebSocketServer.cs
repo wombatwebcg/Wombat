@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 
 namespace Wombat.Network.WebSockets
 {
@@ -14,7 +14,7 @@ namespace Wombat.Network.WebSockets
     {
         #region Fields
 
-        private static  ILog _logger;
+        private static  ILogger _logger;
         private TcpListener _listener;
         private readonly ConcurrentDictionary<string, WebSocketSession> _sessions = new ConcurrentDictionary<string, WebSocketSession>();
         private readonly AsyncWebSocketServerModuleCatalog _catalog;
@@ -64,7 +64,7 @@ namespace Wombat.Network.WebSockets
 
         #endregion
 
-        public  void UsgLogger(ILog log)
+        public  void UsgLogger(ILogger log)
         {
             _logger = log;
         }
@@ -179,7 +179,7 @@ namespace Wombat.Network.WebSockets
             catch (Exception ex) when (!ShouldThrow(ex)) { }
             catch (Exception ex)
             {
-                _logger?.Exception(ex.Message, ex);
+               _logger?.LogError(ex.Message, ex);
             }
         }
 
@@ -189,7 +189,7 @@ namespace Wombat.Network.WebSockets
             if (_logger != null) session.UsgLogger(_logger);
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _logger?.DebugFormat("New session [{0}].", session);
+                _logger?.LogDebug("New session [{0}].", session);
                 try
                 {
                     await session.Start();
@@ -197,14 +197,14 @@ namespace Wombat.Network.WebSockets
                 catch (Exception ex)
                 when (ex is TimeoutException || ex is WebSocketException)
                 {
-                    _logger?.Exception(ex.Message, ex);
+                   _logger?.LogError(ex.Message, ex);
                 }
                 finally
                 {
                     WebSocketSession throwAway;
                     if (_sessions.TryRemove(session.SessionKey, out throwAway))
                     {
-                        _logger?.DebugFormat("Close session [{0}].", throwAway);
+                        _logger?.LogDebug("Close session [{0}].", throwAway);
                     }
                 }
             }
@@ -235,7 +235,7 @@ namespace Wombat.Network.WebSockets
             }
             else
             {
-                _logger?.WarningFormat("Cannot find session [{0}].", sessionKey);
+                _logger?.LogWarning("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -248,7 +248,7 @@ namespace Wombat.Network.WebSockets
             }
             else
             {
-                _logger?.WarningFormat("Send text data but cannot find session [{0}].", session);
+                _logger?.LogWarning("Send text data but cannot find session [{0}].", session);
             }
         }
 
@@ -266,7 +266,7 @@ namespace Wombat.Network.WebSockets
             }
             else
             {
-                _logger?.WarningFormat("Cannot find session [{0}].", sessionKey);
+                _logger?.LogWarning("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Wombat.Network.WebSockets
             }
             else
             {
-                _logger?.WarningFormat("Send binary data but cannot find session [{0}].", session);
+                _logger?.LogWarning("Send binary data but cannot find session [{0}].", session);
             }
         }
 

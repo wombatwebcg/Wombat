@@ -29,7 +29,7 @@ namespace Wombat.Network.Sockets
             KeepAlive = false;                          // Use keep-alives.
             KeepAliveInterval = TimeSpan.FromSeconds(5);// https://msdn.microsoft.com/en-us/library/system.net.sockets.socketoptionname(v=vs.110).aspx
             ReuseAddress = false;                       // Allows the socket to be bound to an address that is already in use.
-            ConnectTimeout = TimeSpan.FromSeconds(15);
+            ConnectTimeout = TimeSpan.FromSeconds(5);
         }
 
     }

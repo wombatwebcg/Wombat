@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network.Sockets;
 using Wombat.Network.WebSockets.Extensions;
 using Wombat.Network.WebSockets.SubProtocols;
@@ -15,7 +15,7 @@ namespace Wombat.Network.WebSockets
     {
 
 
-        void UsgLogger(ILog log);
+        void UsgLogger(ILogger log);
 
 
         #region Properties

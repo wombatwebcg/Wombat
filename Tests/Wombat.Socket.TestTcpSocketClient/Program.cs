@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
+using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network.Sockets;
 
 namespace Wombat.Socket.TestTcpSocketClient 
@@ -11,10 +12,19 @@ namespace Wombat.Socket.TestTcpSocketClient
     {
         static TcpSocketClient _client1;
         static TcpSocketClient _client2;
-        static ILog logger;
         static void Main(string[] args)
         {
-              logger = new LoggerBuilder().LogEventLevel(LogEventLevel.Debug).UseConsoleLogger().UseFileLogger().CreateLogger();
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)//CategoryName以System开头的所有日志输出级别为Warning
+                    .AddFilter<ConsoleLoggerProvider>("Wombat.Socket.TestTcpSocketClient ", LogLevel.Debug)
+                    .AddConsole();//在loggerFactory中添加 ConsoleProvider
+            });
+
+            ILogger logger = loggerFactory.CreateLogger<Program>();
+            logger.LogInformation("Example log message");
 
             try
             {
@@ -35,8 +45,8 @@ namespace Wombat.Socket.TestTcpSocketClient
                 _client2 = new TcpSocketClient(dispatcher: new SimpleEventDispatcher(),configuration: new TcpSocketClientConfiguration(), frameBuilder: new LengthPrefixedFrameBuilder());
                 _client2.UsgLogger(logger);
                 _client1.UsgLogger(logger);
-                //_client1.UseSubscribe();
-                //_client2.UseSubscribe();
+                _client1.UseSubscribe();
+                _client2.UseSubscribe();
                 _client1.ConnectAsync(remoteEP).Wait();
                 _client2.ConnectAsync(remoteEP).Wait();
                 Console.WriteLine("TCP client has connected to server [{0}].", remoteEP);
@@ -125,7 +135,7 @@ namespace Wombat.Socket.TestTcpSocketClient
                     }
                     catch (Exception ex)
                     {
-                        logger.Exception(ex.Message, ex);
+                        logger.LogError(ex.Message, ex);
                     }
                 }
 
@@ -136,7 +146,7 @@ namespace Wombat.Socket.TestTcpSocketClient
             }
             catch (Exception ex)
             {
-                logger.Exception(ex.Message, ex);
+                logger.LogError(ex.Message, ex);
             }
 
             Console.ReadKey();

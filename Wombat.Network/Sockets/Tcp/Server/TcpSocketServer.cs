@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 
 namespace Wombat.Network.Sockets
 {
@@ -13,7 +13,7 @@ namespace Wombat.Network.Sockets
     {
         #region Fields
 
-        private ILog _logger;
+        private ILogger _logger;
         private TcpListener _listener;
         private readonly ConcurrentDictionary<string, TcpSocketSession> _sessions = new ConcurrentDictionary<string, TcpSocketSession>();
         private readonly ITcpSocketServerEventDispatcher _dispatcher;
@@ -88,7 +88,7 @@ namespace Wombat.Network.Sockets
         {
         }
 
-        public void UsgLogger(ILog log)
+        public void UsgLogger(ILogger log)
         {
             _logger = log;
         }
@@ -197,7 +197,7 @@ namespace Wombat.Network.Sockets
             catch (Exception ex) when (!ShouldThrow(ex)) { }
             catch (Exception ex)
             {
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError(ex.Message, ex);
             }
         }
 
@@ -207,21 +207,21 @@ namespace Wombat.Network.Sockets
 
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _logger?.Debug($"New session [{session}]." );
+                _logger?.LogDebug($"New session [{session}]." );
                 try
                 {
                     await session.Start();
                 }
                 catch (TimeoutException ex)
                 {
-                    _logger?.Exception(ex.Message, ex);
+                    _logger?.LogError(ex.Message, ex);
                 }
                 finally
                 {
                     TcpSocketSession throwAway;
                     if (_sessions.TryRemove(session.SessionKey, out throwAway))
                     {
-                        _logger?.Debug($"Close session [{throwAway}].");
+                        _logger?.LogDebug($"Close session [{throwAway}].");
                     }
                 }
             }
@@ -257,7 +257,7 @@ namespace Wombat.Network.Sockets
             }
             else
             {
-                _logger?.Warning($"Cannot find session [{sessionKey}].");
+                _logger?.LogWarning($"Cannot find session [{sessionKey}].");
             }
         }
 
@@ -275,7 +275,7 @@ namespace Wombat.Network.Sockets
             }
             else
             {
-                _logger?.Warning($"Cannot find session [{session}].");
+                _logger?.LogWarning($"Cannot find session [{session}].");
             }
         }
 

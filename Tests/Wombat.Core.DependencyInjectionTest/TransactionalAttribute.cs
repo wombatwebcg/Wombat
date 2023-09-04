@@ -24,9 +24,12 @@ namespace Wombat.Core.DependencyInjectionTest
         public override void Before(IAOPContext context)
         {
             Console.WriteLine(11111);
+            context.Invocation.ReturnValue = 100;
+            return;
         }
         public override void After(IAOPContext context)
         {
+            Console.WriteLine(context.Invocation.ReturnValue);
             Console.WriteLine(22222);
         }
 

@@ -6,8 +6,8 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network;
+using Microsoft.Extensions.Logging;
 
 namespace Wombat.Network.Sockets
 {
@@ -195,7 +195,7 @@ namespace Wombat.Network.Sockets
             Shutdown();
             if (shallNotifyUserSide)
             {
-                _logger?.Debug($"Disconnected from server [{this.RemoteEndPoint}] " +
+                _logger?.LogDebug($"Disconnected from server [{this.RemoteEndPoint}] " +
                     $"with dispatcher [{_dispatcher.GetType().Name}] " +
                     $"on [{DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}].");
 
@@ -264,7 +264,7 @@ namespace Wombat.Network.Sockets
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError(ex.Message, ex);
 
                 await CloseAsync(false); // intend to close the session
 
@@ -276,7 +276,7 @@ namespace Wombat.Network.Sockets
 
         private async Task HandleUserSideError(Exception ex)
         {
-            _logger?.Error($"Client [{this}] error occurred in user side [{ex.Message}].");
+            _logger?.LogError($"Client [{this}] error occurred in user side [{ex.Message}].");
             await Task.CompletedTask;
         }
 

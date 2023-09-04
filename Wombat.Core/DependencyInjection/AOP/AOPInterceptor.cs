@@ -18,13 +18,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
 
         /// <summary>
-        /// 异步拦截函数 带有 Task 返回值
+        /// 异步拦截方法。
         /// </summary>
-        /// <param name="invocation"></param>
+        /// <param name="invocation">拦截上下文。</param>
         public void InterceptAsynchronous(IInvocation invocation)
         {
             invocation.ReturnValue = InternalInterceptAsynchronous(invocation);
         }
+
+        /// <summary>
+        /// 内部异步拦截方法。
+        /// </summary>
+        /// <param name="invocation">拦截上下文。</param>
         private async Task InternalInterceptAsynchronous(IInvocation invocation)
         {
             var aopBaseAttribute = GetAOPBaseAttribute(invocation);
@@ -32,107 +37,91 @@ namespace Microsoft.Extensions.DependencyInjection
             if (aopBaseAttribute == null)
             {
                 invocation.Proceed();
-                await (Task)invocation.ReturnValue;
+                await AwaitTask(invocation.ReturnValue);
                 return;
             }
 
             var aopContext = new AOPContext(invocation, _serviceProvider);
-            // 执行调用之前的函数
             aopBaseAttribute.Before(aopContext);
 
-            //如果需要拦截异常
-            if (aopBaseAttribute.ExceptionEvent != null)
+            try
             {
-                //执行函数返回数据
-                try
-                {
-                    invocation.Proceed();
-                    await (Task)invocation.ReturnValue;
-                    aopBaseAttribute.After(aopContext);
-                    return;
-                }
-                catch (Exception exception)
-                {
-                    aopBaseAttribute.ExceptionEvent(aopContext, exception);
-                }
+                invocation.Proceed();
+                await AwaitTask(invocation.ReturnValue);
+                aopBaseAttribute.After(aopContext);
             }
+            catch (Exception exception)
+            {
+                HandleException(aopBaseAttribute, aopContext, exception);
+            }
+        }
 
-            //执行函数返回数据
-            invocation.Proceed();
-            await (Task)invocation.ReturnValue;
-            aopBaseAttribute.After(aopContext);
+        private async Task AwaitTask(object task)
+        {
+            if (task is Task awaitableTask)
+            {
+                await awaitableTask;
+            }
         }
 
         /// <summary>
-        /// 异步拦截函数 带有 Task《T》 返回值
+        /// 异步拦截方法。
         /// </summary>
-        /// <typeparam name="TResult"></typeparam>
-        /// <param name="invocation"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <typeparam name="TResult">返回结果类型。</typeparam>
+        /// <param name="invocation">拦截上下文。</param>
         public void InterceptAsynchronous<TResult>(IInvocation invocation)
         {
 
             invocation.ReturnValue = InternalInterceptAsynchronous<TResult>(invocation);
         }
+
+        /// <summary>
+        /// 内部异步拦截方法。
+        /// </summary>
+        /// <typeparam name="TResult">返回结果类型。</typeparam>
+        /// <param name="invocation">拦截上下文。</param>
         private async Task<TResult> InternalInterceptAsynchronous<TResult>(IInvocation invocation)
         {
-
             var aopBaseAttribute = GetAOPBaseAttribute(invocation);
-
-            TResult result;
 
             if (aopBaseAttribute == null)
             {
                 invocation.Proceed();
-                result = await (Task<TResult>)invocation.ReturnValue;
-                return result;
+                return await AwaitTask((Task<TResult>)invocation.ReturnValue);
             }
 
             var aopContext = new AOPContext(invocation, _serviceProvider);
-            // 执行调用之前的函数
             aopBaseAttribute.Before<TResult>(aopContext);
 
-            #region 检查返回值有无 如果有了则不执行函数直接返回数据
             if (invocation.ReturnValue != null)
             {
-                if (invocation.ReturnValue.GetType().Name == "Task`1")
-                {
-                    return await (Task<TResult>)invocation.ReturnValue;
-                }
-
-                return (TResult)invocation.ReturnValue;
+                return await AwaitTask((Task<TResult>)invocation.ReturnValue);
             }
-            #endregion
 
-            //如果需要拦截异常
-            if (aopBaseAttribute.ExceptionEvent != null)
+            try
             {
-                //执行函数返回数据
-                try
-                {
-                    invocation.Proceed();
-                    result = await (Task<TResult>)invocation.ReturnValue;
-                    aopBaseAttribute.After(aopContext, result);
-                    return result;
-                }
-                catch (Exception exception)
-                {
-                    aopBaseAttribute.ExceptionEvent(aopContext, exception);
-                }
+                invocation.Proceed();
+                var result = await AwaitTask((Task<TResult>)invocation.ReturnValue);
+                aopBaseAttribute.After(aopContext, result);
+                return result;
+            }
+            catch (Exception exception)
+            {
+                HandleException(aopBaseAttribute, aopContext, exception);
             }
 
-            //执行函数返回数据
-            invocation.Proceed();
-            result = await (Task<TResult>)invocation.ReturnValue;
-            aopBaseAttribute.After(aopContext, result);
-            return result;
+            return default; // 根据实际情况返回默认值
+        }
+
+        private async Task<TResult> AwaitTask<TResult>(Task<TResult> task)
+        {
+            return await task;
         }
 
         /// <summary>
-        /// 同步拦截函数
+        /// 同步拦截方法。
         /// </summary>
-        /// <param name="invocation"></param>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <param name="invocation">拦截上下文。</param>
         public void InterceptSynchronous(IInvocation invocation)
         {
 
@@ -152,54 +141,50 @@ namespace Microsoft.Extensions.DependencyInjection
             var result = invocation.ReturnValue;
             if (result != null)
             {
-                //aopBaseAttribute.After(aopContext);
+                aopBaseAttribute.After(aopContext);
                 return;
             }
             #endregion
-
-            //如果需要拦截异常
-            if (aopBaseAttribute.ExceptionEvent != null)
+            try
             {
-                try
-                {
-                    invocation.Proceed();
-                    aopBaseAttribute.After(aopContext);
-                }
-                catch (Exception exception)
-                {
-                    aopBaseAttribute.ExceptionEvent(aopContext, exception);
-                }
+                invocation.Proceed();
+                aopBaseAttribute.After(aopContext);
             }
-
-            //执行函数返回数据
-            invocation.Proceed();
-            aopBaseAttribute.After(aopContext);
+            catch (Exception exception)
+            {
+                HandleException(aopBaseAttribute, aopContext, exception);
+            }
         }
 
+        private void HandleException(AOPBaseAttribute aopBaseAttribute, AOPContext aopContext, Exception exception)
+        {
+            if (aopBaseAttribute.ExceptionEvent != null)
+            {
+                aopBaseAttribute.ExceptionEvent(aopContext, exception);
+            }
+            else
+            {
+                throw exception; // 或者其他异常处理
+            }
+        }
         /// <summary>
-        /// 获取 AOPBaseAttribute
+        /// 获取AOP基础特性。
         /// </summary>
-        /// <param name="invocation"></param>
-        /// <returns></returns>
+        /// <param name="invocation">拦截上下文。</param>
+        /// <returns>AOP基础特性。</returns>
         private AOPBaseAttribute GetAOPBaseAttribute(IInvocation invocation)
         {
 
-            var sss = invocation.TargetType.GetMethods().Where(x => x.GetCustomAttribute<AOPBaseAttribute>()!=null);
-
-            // 从函数上拿取标记
-
-            var sssss = invocation.MethodInvocationTarget;
-
             var aopBaseAttribute = invocation.Method.GetCustomAttribute<AOPBaseAttribute>();
 
-            // 从类上拿取标记
+            // 从类上获取标记
             if (aopBaseAttribute == null)
             {
                 aopBaseAttribute = invocation.MethodInvocationTarget.GetCustomAttribute<AOPBaseAttribute>();
             }
 
             var name = invocation.MethodInvocationTarget.Name;
-            // 从属性上拿取标记
+            // 从属性上获取标记
             if (aopBaseAttribute == null && (name.StartsWith("get_") || name.StartsWith("set_")))
             {
                 name = name.Replace("get_", "");

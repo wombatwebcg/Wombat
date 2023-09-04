@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Security;
@@ -6,7 +7,6 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network;
 
 namespace Wombat.Network.Sockets
@@ -15,7 +15,7 @@ namespace Wombat.Network.Sockets
     {
         #region Fields
 
-        private static ILog _logger;
+        private static ILogger _logger;
         private TcpClient _tcpClient;
         private readonly TcpSocketServerConfiguration _configuration;
         private readonly ISegmentBufferManager _bufferManager;
@@ -45,7 +45,7 @@ namespace Wombat.Network.Sockets
             ISegmentBufferManager bufferManager,
             ITcpSocketServerEventDispatcher dispatcher,
             IFrameBuilder frameBuilder,
-            ILog logger,
+            ILogger logger,
             TcpSocketServer server)
         {
             if (tcpClient == null)
@@ -162,7 +162,7 @@ namespace Wombat.Network.Sockets
                     throw new ObjectDisposedException("This tcp socket session has been disposed after connected.");
                 }
 
-                _logger?.Debug($"Session started for [{this.RemoteEndPoint}] on [{this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}] " +
+                _logger?.LogDebug($"Session started for [{this.RemoteEndPoint}] on [{this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}] " +
                     $"in dispatcher [{_dispatcher.GetType().Name}] with session count [{this.Server.SessionCount}]."
                     );
                 bool isErrorOccurredInUserSide = false;
@@ -187,7 +187,7 @@ namespace Wombat.Network.Sockets
             }
             catch (Exception ex) // catch exceptions then log then re-throw
             {
-                _logger?.Error($"Session [{this}] exception occurred, [{ ex.Message}].");
+                _logger?.LogError($"Session [{this}] exception occurred, [{ ex.Message}].");
                 await Close(true); // handle tcp connection error occurred
                 throw;
             }
@@ -306,7 +306,7 @@ namespace Wombat.Network.Sockets
                     if (Security.SslPolicyErrorsBypassed)
                         return true;
                     else
-                        _logger?.Error($"Session [{this}] error occurred when validating remote certificate: [{this.RemoteEndPoint}], [{sslPolicyErrors}].");
+                        _logger?.LogError($"Session [{this}] error occurred when validating remote certificate: [{this.RemoteEndPoint}], [{sslPolicyErrors}].");
 
                     return false;
                 });
@@ -335,7 +335,7 @@ namespace Wombat.Network.Sockets
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
             // to determine what security services are used by the SslStream. 
             // Check the IsMutuallyAuthenticated property to determine whether mutual authentication occurred.
-                        _logger?.Debug($"Ssl Stream: SslProtocol[{sslStream.SslProtocol}], " +
+                        _logger?.LogDebug($"Ssl Stream: SslProtocol[{sslStream.SslProtocol}], " +
                 $"IsServer[{sslStream.IsServer}]," +
                 $" IsAuthenticated[{sslStream.IsAuthenticated}], " +
                 $"IsEncrypted[{sslStream.IsEncrypted}], IsSigned[{sslStream.IsSigned}], " +
@@ -371,7 +371,7 @@ namespace Wombat.Network.Sockets
 
             if (shallNotifyUserSide)
             {
-               _logger?.Debug($"Session closed for [{this.RemoteEndPoint}] " +
+               _logger?.LogDebug($"Session closed for [{this.RemoteEndPoint}] " +
                     $"on [{DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}] " +
                     $"in dispatcher [{_dispatcher.GetType().Name}] with session count [{this.Server.SessionCount - 1}].");
                 try
@@ -479,7 +479,7 @@ namespace Wombat.Network.Sockets
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError(ex.Message, ex);
 
                 await Close(true); // catch specified exception then intend to close the session
 
@@ -491,7 +491,7 @@ namespace Wombat.Network.Sockets
 
         private async Task HandleUserSideError(Exception ex)
         {
-            _logger?.Exception(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
+            _logger?.LogError(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
             await Task.CompletedTask;
         }
 

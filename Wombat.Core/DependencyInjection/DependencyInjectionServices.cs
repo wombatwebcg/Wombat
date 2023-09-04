@@ -65,13 +65,8 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             if (assemblies == null) return;
-
-
             // 服务自动注册
             ScanComponent(serviceCollection, assemblies);
-
-            // 动态代理注册
-            //ScanningAopComponent(serviceCollection, assemblies);
         }
 
 
@@ -94,10 +89,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         private static void ScanComponent(this IServiceCollection serviceCollection, IEnumerable<Assembly> assemblies)
         {
-
-            //List<Type> types = assemblies.SelectMany(t => t.GetTypes()).Where(t => t.GetCustomAttributes(typeof(ComponentAttribute), false).Length > 0 && t.GetCustomAttribute<ComponentAttribute>()?.Lifetime == serviceLifetime && t.IsClass && !t.IsAbstract).ToList();
             serviceCollection.AddTransient<IAsyncInterceptor, AOPInterceptor>();
-
             try
             {
                 foreach (var localServiceLifetime in Enum.GetValues(typeof(ServiceLifetime)))
@@ -212,24 +204,24 @@ namespace Microsoft.Extensions.DependencyInjection
                 Console.WriteLine(ex.Message);
                 throw ex; 
             }
-            void inject(Microsoft.Extensions.DependencyInjection.ServiceLifetime serviceLifetime,Type type,Type typeInterface = null)
+            void inject(ServiceLifetime serviceLifetime,Type type,Type typeInterface = null)
             {
 
                 //服务非继承自接口的直接注入
                 switch (serviceLifetime)
                 {
-                    case Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton: serviceCollection.AddSingleton(type); break;
-                    case Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped: serviceCollection.AddScoped(type); break;
-                    case Microsoft.Extensions.DependencyInjection.ServiceLifetime.Transient: serviceCollection.AddTransient(type); break;
+                    case ServiceLifetime.Singleton: serviceCollection.AddSingleton(type); break;
+                    case ServiceLifetime.Scoped: serviceCollection.AddScoped(type); break;
+                    case ServiceLifetime.Transient: serviceCollection.AddTransient(type); break;
                 }
                 if (typeInterface != null)
                 {
                     //服务继承自接口的和接口一起注入
                     switch (serviceLifetime)
                     {
-                        case Microsoft.Extensions.DependencyInjection.ServiceLifetime.Singleton: serviceCollection.AddSingleton(typeInterface, type); break;
-                        case Microsoft.Extensions.DependencyInjection.ServiceLifetime.Scoped: serviceCollection.AddScoped(typeInterface, type); break;
-                        case Microsoft.Extensions.DependencyInjection. ServiceLifetime.Transient: serviceCollection.AddTransient(typeInterface, type); break;
+                        case ServiceLifetime.Singleton: serviceCollection.AddSingleton(typeInterface, type); break;
+                        case ServiceLifetime.Scoped: serviceCollection.AddScoped(typeInterface, type); break;
+                        case  ServiceLifetime.Transient: serviceCollection.AddTransient(typeInterface, type); break;
                     }
                 }
             }

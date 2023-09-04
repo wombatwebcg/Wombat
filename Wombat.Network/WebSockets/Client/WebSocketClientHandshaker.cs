@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
-using Wombat.Core;
 
 namespace Wombat.Network.WebSockets
 {
     internal static  class WebSocketClientHandshaker
     {
-        private static readonly ILog _logger = Logger.Get();
+        private static readonly ILogger _logger;
         private static readonly char[] _headerLineSplitter = new char[] { '\r', '\n' };
 
         internal static byte[] CreateOpenningHandshakeRequest(WebSocketClient client, out string secWebSocketKey)
@@ -106,7 +106,7 @@ namespace Wombat.Network.WebSockets
             // Origin: http://example.com
             var request = sb.ToString();
 #if DEBUG
-            _logger?.DebugFormat("[{0}]{1}{2}", client.RemoteEndPoint, Environment.NewLine, request);
+            _logger?.LogDebug("[{0}]{1}{2}", client.RemoteEndPoint, Environment.NewLine, request);
 #endif
             return Encoding.UTF8.GetBytes(request);
         }
@@ -119,7 +119,7 @@ namespace Wombat.Network.WebSockets
 
             var response = Encoding.UTF8.GetString(buffer, offset, count);
 #if DEBUG
-            _logger?.DebugFormat("[{0}]{1}{2}", client.RemoteEndPoint, Environment.NewLine, response);
+            _logger?.LogDebug("[{0}]{1}{2}", client.RemoteEndPoint, Environment.NewLine, response);
 #endif
             try
             {
@@ -255,8 +255,8 @@ namespace Wombat.Network.WebSockets
             }
             catch (Exception ex)
             {
-                _logger?.ErrorFormat("{0}{1}{2}",client, Environment.NewLine,response);
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError("{0}{1}{2}",client, Environment.NewLine,response);
+                _logger?.LogError(ex.Message, ex);
                 throw;
             }
 

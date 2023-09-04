@@ -8,8 +8,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Wombat.Core;
 using Wombat.Network;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Wombat.Network.Sockets
 {
@@ -17,7 +18,7 @@ namespace Wombat.Network.Sockets
     {
         #region Fields
 
-        protected internal ILog _logger;
+        protected internal ILogger _logger;
         private Socket _socket;
 
         protected internal TcpSocketClientConfiguration _configuration;
@@ -93,7 +94,7 @@ namespace Wombat.Network.Sockets
 
         #endregion
 
-        public virtual void UsgLogger(ILog log)
+        public virtual void UsgLogger(ILogger log)
         {
             _logger = log;
         }
@@ -168,7 +169,8 @@ namespace Wombat.Network.Sockets
             }
             catch (Exception ex) // catch exceptions then log then re-throw
             {
-                _logger?.Exception(ex.Message, ex);
+              
+                _logger?.LogError(ex.Message, ex);
                 await CloseAsync(true); // handle tcp connection error occurred
                 throw;
             }
@@ -214,7 +216,7 @@ namespace Wombat.Network.Sockets
                     if (SecurityOptions.SslPolicyErrorsBypassed)
                         return true;
                     else
-                        _logger?.Error($"Error occurred when validating remote certificate: [{ this.RemoteEndPoint}], [{sslPolicyErrors}]");
+                        _logger?.LogError($"Error occurred when validating remote certificate: [{ this.RemoteEndPoint}], [{sslPolicyErrors}]");
                     return false;
                 });
 
@@ -242,7 +244,7 @@ namespace Wombat.Network.Sockets
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
             // to determine what security services are used by the SslStream. 
             // Check the IsMutuallyAuthenticated property to determine whether mutual authentication occurred.
-            _logger?.Debug(
+            _logger?.LogDebug(
                 $"Ssl Stream: SslProtocol[{sslStream.SslProtocol}]," +
                 $" IsServer[{sslStream.IsServer}], " +
                 $"IsAuthenticated[{sslStream.IsAuthenticated}], " +
@@ -278,7 +280,7 @@ namespace Wombat.Network.Sockets
             await Task.Run(() => { Shutdown(); });
             if (shallNotifyUserSide)
             {
-                _logger?.Debug($"Disconnected from server [{this.RemoteEndPoint}] " +
+                _logger?.LogDebug($"Disconnected from server [{this.RemoteEndPoint}] " +
                     $"on [{DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}].");
 
             }
@@ -296,7 +298,7 @@ namespace Wombat.Network.Sockets
             Shutdown();
             if (shallNotifyUserSide)
             {
-                _logger?.Debug($"Disconnected from server [{this.RemoteEndPoint}] " +
+                _logger?.LogDebug($"Disconnected from server [{this.RemoteEndPoint}] " +
                     $"on [{DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff")}].");
 
             }
@@ -392,7 +394,7 @@ namespace Wombat.Network.Sockets
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _logger?.Exception(ex.Message, ex);
+                _logger?.LogError(ex.Message, ex);
 
                 await CloseAsync(false); // intend to close the session
 
@@ -529,7 +531,7 @@ namespace Wombat.Network.Sockets
                     }
                     catch (Exception ex)
                     {
-                        _logger?.Exception(ex.Message, ex);
+                        _logger?.LogError(ex.Message, ex);
                     }
                     // TODO: 释放托管状态(托管对象)
                 }

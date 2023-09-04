@@ -34,6 +34,7 @@ namespace Wombat.Core.DependencyInjectionTest
         [Transactional]
         public virtual void HelloWorld()
         {
+            Console.WriteLine("执行");
         }
 
 

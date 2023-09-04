@@ -7,6 +7,7 @@ namespace Wombat.Core.DependencyInjectionTest
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss:fff"));
             ServiceCollection services = new ServiceCollection();
             services.AddAppSettings();
             services.AddServicesPoxy();
@@ -14,8 +15,9 @@ namespace Wombat.Core.DependencyInjectionTest
             var sss = serviceProvider.GetRequiredService<Class2>();
             var ppp = sss.Test1;
             sss.HelloWorld();
-            var sss1 = serviceProvider.GetRequiredService<IClass1>();
-            sss1.HelloWorld2();
+            //var sss1 = serviceProvider.GetRequiredService<IClass1>();
+            //sss1.HelloWorld2();
+            Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss:fff"));
 
             //var sss1 = serviceProvider.GetService<Setting>();
             //Console.WriteLine(sss1.Test1);
