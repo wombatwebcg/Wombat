@@ -47,7 +47,7 @@ namespace Wombat.Core.FileLogger
             {
                 builder.SetMinimumLevel(level: LogLevel.Trace);
                 builder.AddConsole();
-                builder.AddDefalutFileLogger();
+                builder.AddDefalutFileLogger(splitTypes:SplitTypes.SplitByLogLevel);
             });
             ServiceProvider sp = services.BuildServiceProvider();
             // create logger

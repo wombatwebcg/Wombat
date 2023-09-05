@@ -17,7 +17,7 @@ namespace Microsoft.Extensions.Logging
         static string LogFilePath(string LogEvent) =>
     $@"{AppDomain.CurrentDomain.BaseDirectory}/AppLogs/{DateTime.Now.Year}/{DateTime.Now.Month}_{DateTime.Now.Day}/{LogEvent}/.log";
 
-        public static void AddDefalutFileLogger(this ILoggingBuilder loggingBuilder, LogLevel logLevel = LogLevel.Trace, SplitTypes splitTypes = SplitTypes.Default)
+        public static ILoggingBuilder AddDefalutFileLogger(this ILoggingBuilder loggingBuilder, LogLevel logLevel = LogLevel.Trace, SplitTypes splitTypes = SplitTypes.Default)
         {
             //var minLevel2 = new Dictionary<string, LogLevel>();
             //minLevel2.Add("Default", LogLevel.Warning);
@@ -155,6 +155,7 @@ namespace Microsoft.Extensions.Logging
                 default:
                     break;
             }
+            return loggingBuilder;
         }
     }
 }

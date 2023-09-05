@@ -57,7 +57,7 @@ namespace Wombat.Socket.TestTcpSocketServer
                         {
                             if (text == "many")
                             {
-                                text = new string('x', 8192);
+                                text = new string('x', 1024);
                                 for (int i = 0; i < 100; i++)
                                 {
                                     await _server.BroadcastAsync(Encoding.UTF8.GetBytes(text));

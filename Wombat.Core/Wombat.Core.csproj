@@ -10,7 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>core</PackageTags>
     <Copyright>wombatwebcg</Copyright>
-    <Version>1.0.7</Version>
+    <Version>1.0.9</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 

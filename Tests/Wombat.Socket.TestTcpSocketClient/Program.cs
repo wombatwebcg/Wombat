@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using System;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Wombat.Network.Sockets;
 
@@ -14,16 +16,18 @@ namespace Wombat.Socket.TestTcpSocketClient
         static TcpSocketClient _client2;
         static void Main(string[] args)
         {
-            using var loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)//CategoryName以System开头的所有日志输出级别为Warning
-                    .AddFilter<ConsoleLoggerProvider>("Wombat.Socket.TestTcpSocketClient ", LogLevel.Debug)
-                    .AddConsole();//在loggerFactory中添加 ConsoleProvider
-            });
+            var services = new ServiceCollection();
 
-            ILogger logger = loggerFactory.CreateLogger<Program>();
+            services.AddLogging(builder =>
+            {
+                builder.SetMinimumLevel(level: LogLevel.Trace);
+                builder.AddConsole();
+                builder.AddDefalutFileLogger();
+            });
+            ServiceProvider sp = services.BuildServiceProvider();
+            // create logger
+            ILogger<Program> logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
+
             logger.LogInformation("Example log message");
 
             try
@@ -78,9 +82,10 @@ namespace Wombat.Socket.TestTcpSocketClient
 
                                     await _client2.SendAsync(Encoding.UTF8.GetBytes(text));
                                     var c2 =  _client2.ReceiveAsync(buff2, 0, buff2.Length).Result;
-
-                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client1.LocalEndPoint, Encoding.ASCII.GetString(buff1).Trim());
-                                    Console.WriteLine("Client [{0}] send text -> [{1}].", _client2.LocalEndPoint, Encoding.ASCII.GetString(buff2).Trim());
+                                    Thread.Sleep(100);
+                                    logger.LogDebug("Client [{0}] send text -> [{1}].", _client1.LocalEndPoint, Encoding.ASCII.GetString(buff1).Trim());
+                                    Thread.Sleep(100);
+                                    logger.LogDebug("Client [{0}] send text -> [{1}].", _client2.LocalEndPoint, Encoding.ASCII.GetString(buff2).Trim());
 
                                 }
                             }
