@@ -1,2 +1,2 @@
-# Wombat.IndustrialCommunication
-开源的基础工业通讯库
+# Wombat
+日志、注入、AOP、Network的基础项目库

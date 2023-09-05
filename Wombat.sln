@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.33423.256
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core", "Wombat.Core\Wombat.Core.csproj", "{E14EB623-307C-4F56-9A1F-0C4D752B5419}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat_Test", "Wombat_Test\Wombat_Test.csproj", "{03AA41F7-EE8D-4213-96B2-DE9374A7F812}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Network", "Wombat.Network\Wombat.Network.csproj", "{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}"
@@ -21,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.WebSockets.TestWebSo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjectionTest", "Tests\Wombat.Core.DependencyInjectionTest\Wombat.Core.DependencyInjectionTest.csproj", "{E0F96E23-0193-487C-B090-46E54CB9B575}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.Core.FileLogger", "Tests\Wombat.Core.FileLogger\Wombat.Core.FileLogger.csproj", "{D3722939-E508-47F1-A035-67F1CD69D2B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.FileLogger", "Tests\Wombat.Core.FileLogger\Wombat.Core.FileLogger.csproj", "{D3722939-E508-47F1-A035-67F1CD69D2B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +31,6 @@ Global
 		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03AA41F7-EE8D-4213-96B2-DE9374A7F812}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
