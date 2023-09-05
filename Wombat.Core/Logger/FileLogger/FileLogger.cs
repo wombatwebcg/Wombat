@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     using FileGroupsDictionary = Dictionary<(IFileLogEntryTextBuilder TextBuilder, bool IncludeScopes), (ILogFileSettings Settings, LogLevel MinLevel)[]>;
 
@@ -57,13 +57,13 @@ namespace Karambolo.Extensions.Logging.File
         {
             return (settings.Files ?? Enumerable.Empty<ILogFileSettings>())
                 .Where(file => file != null && !string.IsNullOrEmpty(file.Path))
-                .Select(file => 
-                    (Settings: file, 
+                .Select(file =>
+                    (Settings: file,
                      MinLevel: file.GetMinLevel(CategoryName)))
                 .Where(file => file.MinLevel != LogLevel.None)
                 .GroupBy(
-                    file => 
-                        (file.Settings.TextBuilder ?? settings.TextBuilder ?? FileLogEntryTextBuilder.Instance, 
+                    file =>
+                        (file.Settings.TextBuilder ?? settings.TextBuilder ?? FileLogEntryTextBuilder.Instance,
                          file.Settings.IncludeScopes ?? settings.IncludeScopes ?? false),
                     file => file)
                 .ToDictionary(group => group.Key, group => group.ToArray());

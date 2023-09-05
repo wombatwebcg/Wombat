@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public interface IFileAppender
     {

@@ -10,7 +10,7 @@ namespace Wombat.Core.DependencyInjectionTest
             Console.WriteLine(DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss:fff"));
             ServiceCollection services = new ServiceCollection();
             services.AddAppSettings();
-            services.AddServicesPoxy();
+            services.AddServices();
             var serviceProvider = services.BuildServiceProvider();
             var sss = serviceProvider.GetRequiredService<Class2>();
             var ppp = sss.Test1;

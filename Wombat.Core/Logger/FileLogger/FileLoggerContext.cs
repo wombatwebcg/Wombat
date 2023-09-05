@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public class FileLoggerContext
     {

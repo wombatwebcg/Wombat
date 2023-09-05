@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     [ProviderAlias(Alias)]
     public partial class FileLoggerProvider : ILoggerProvider, ISupportExternalScope, IAsyncDisposable
@@ -40,9 +40,10 @@ namespace Karambolo.Extensions.Logging.File
             : this(context, options, null) { }
 
         public FileLoggerProvider(FileLoggerContext context, IOptionsMonitor<FileLoggerOptions> options, string optionsName)
-            : this(context, options != null ? options.Get(optionsName ?? Options.DefaultName) : throw new ArgumentNullException(nameof(options)))
+            : this(context, options != null ? options.Get(optionsName ?? Options.Options.DefaultName) : throw new ArgumentNullException(nameof(options)))
         {
-            _optionsName = optionsName ?? Options.DefaultName;
+            
+            _optionsName = optionsName ?? Options.Options.DefaultName;
             _settingsChangeToken = options.OnChange(HandleOptionsChanged);
         }
 

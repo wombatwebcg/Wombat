@@ -10,20 +10,19 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.FileProviders;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
-    public interface IFileLoggerProcessor : IDisposable
-    {
+    public interface IFileLoggerProcessor : IDisposable    {
         Task Completion { get; }
-
         void Enqueue(FileLogEntry entry, ILogFileSettings fileSettings, IFileLoggerSettings settings);
-
         Task ResetAsync(Action onQueuesCompleted = null);
         Task CompleteAsync();
     }
 
-    public  class FileLoggerProcessor : IFileLoggerProcessor
+    public class FileLoggerProcessor : IFileLoggerProcessor
     {
+        private Wombat.AsyncLock _asyncLock = new Wombat.AsyncLock();
+
         private enum Status
         {
             Running,
@@ -31,6 +30,100 @@ namespace Karambolo.Extensions.Logging.File
             Completed,
         }
 
+        protected internal class LogFileInfo
+        {
+            private Stream _appendStream;
+
+            private Wombat.AsyncLock _asyncLock = new Wombat.AsyncLock();
+            public LogFileInfo(FileLoggerProcessor processor, ILogFileSettings fileSettings, IFileLoggerSettings settings)
+            {
+
+                BasePath = settings.BasePath ?? string.Empty;
+                PathFormat = fileSettings.Path;
+                PathPlaceholderResolver = GetActualPathPlaceholderResolver(fileSettings.PathPlaceholderResolver ?? settings.PathPlaceholderResolver);
+                FileAppender = settings.FileAppender ?? processor._fallbackFileAppender.Value;
+                AccessMode = fileSettings.FileAccessMode ?? settings.FileAccessMode ?? LogFileAccessMode.Default;
+                Encoding = fileSettings.FileEncoding ?? settings.FileEncoding ?? Encoding.UTF8;
+                DateFormat = fileSettings.DateFormat ?? settings.DateFormat ?? "yyyyMMdd";
+                CounterFormat = fileSettings.CounterFormat ?? settings.CounterFormat;
+                MaxSize = fileSettings.MaxFileSize ?? settings.MaxFileSize ?? 0;
+
+                Queue = processor.CreateLogFileQueue(fileSettings, settings);
+                // important: closure must pick up the current token!
+                CancellationToken forcedCompleteToken = processor._forcedCompleteTokenSource.Token;
+                WriteFileTask = Task.Run(() => processor.WriteFileAsync(this, forcedCompleteToken));
+            }
+
+           private static LogFilePathPlaceholderResolver GetActualPathPlaceholderResolver(LogFilePathPlaceholderResolver resolver) =>resolver == null ?s_defaultPathPlaceholderResolver :
+                (placeholderName, inlineFormat, context) => resolver(placeholderName, inlineFormat, context) ?? s_defaultPathPlaceholderResolver(placeholderName, inlineFormat, context);
+
+            public string BasePath { get; }
+            public string PathFormat { get; }
+            public LogFilePathPlaceholderResolver PathPlaceholderResolver { get; }
+            public IFileAppender FileAppender { get; }
+            public LogFileAccessMode AccessMode { get; }
+            public Encoding Encoding { get; }
+            public string DateFormat { get; }
+            public string CounterFormat { get; }
+            public long MaxSize { get; }
+
+            public Channel<FileLogEntry> Queue { get; }
+            public Task WriteFileTask { get; }
+
+            public int Counter { get; set; }
+            public string CurrentPath { get; set; }
+
+            public bool IsOpen => _appendStream != null;
+            public long? Size => _appendStream?.Length;
+
+            internal bool ShouldEnsurePreamble { get; private set; }
+
+            internal void Open(IFileInfo fileInfo)
+            {
+                _appendStream = FileAppender.CreateAppendStream(fileInfo);
+
+                ShouldEnsurePreamble = true;
+            }
+
+            internal async ValueTask EnsurePreambleAsync(CancellationToken cancellationToken)
+            {
+                if (_appendStream.Length == 0)
+                    await WriteBytesAsync(Encoding.GetPreamble(), cancellationToken).ConfigureAwait(false);
+
+                ShouldEnsurePreamble = false;
+            }
+
+            internal async Task WriteTextAsync(string text, Encoding encoding, CancellationToken cancellationToken)
+            {
+                using (await _asyncLock.LockAsync(cancellationToken))
+                {
+                    var bytes = encoding.GetBytes(text);
+                    await _appendStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+                }
+            }
+
+            internal async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken)
+            {
+                using (await _asyncLock.LockAsync(cancellationToken))
+                {
+                    await _appendStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+                }
+            }
+
+            internal void Flush()
+            {
+                // FlushAsync is extremely slow currently
+                // https://github.com/dotnet/corefx/issues/32837
+                _appendStream.Flush();
+            }
+
+            internal void Close()
+            {
+                Stream appendStream = _appendStream;
+                _appendStream = null;
+                appendStream.Dispose();
+            }
+        }
 
         protected class LogFilePathFormatContext : ILogFilePathFormatContext
         {
@@ -89,6 +182,7 @@ namespace Karambolo.Extensions.Logging.File
         private CancellationTokenSource _forcedCompleteTokenSource;
         private Status _status;
 
+
         public FileLoggerProcessor(FileLoggerContext context)
         {
             if (context == null)
@@ -113,17 +207,14 @@ namespace Karambolo.Extensions.Logging.File
                 if (_status != Status.Completed)
                 {
                     _completeTokenRegistration.Dispose();
-
                     _forcedCompleteTokenSource.Cancel();
                     _forcedCompleteTokenSource.Dispose();
-
                     _completeTaskCompletionSource.TrySetResult(null);
 
                     if (_fallbackFileAppender.IsValueCreated)
                         _fallbackFileAppender.Value.Dispose();
 
                     DisposeCore();
-
                     _status = Status.Completed;
                 }
         }
@@ -138,7 +229,6 @@ namespace Karambolo.Extensions.Logging.File
         {
             CancellationTokenSource forcedCompleteTokenSource;
             Task[] completionTasks;
-
             lock (_logFiles)
             {
                 if (_status != Status.Running)
@@ -163,8 +253,9 @@ namespace Karambolo.Extensions.Logging.File
 
                 if (complete)
                     _status = Status.Completing;
-            }
 
+
+            }
             try
             {
                 var hasCompletionTimedOut = false;
@@ -259,10 +350,13 @@ namespace Karambolo.Extensions.Logging.File
 
                 if (!_logFiles.TryGetValue(fileSettings, out logFile))
                     _logFiles.Add(fileSettings, logFile = CreateLogFile(fileSettings, settings));
+
             }
 
             if (!logFile.Queue.Writer.TryWrite(entry))
+            {
                 Context.ReportDiagnosticEvent(new FileLoggerDiagnosticEvent.LogEntryDropped(this, logFile, entry));
+            }
         }
 
         protected virtual string GetDate(string inlineFormat, LogFileInfo logFile, FileLogEntry entry)
@@ -453,105 +547,20 @@ namespace Karambolo.Extensions.Logging.File
 
         private async Task WriteFileAsync(LogFileInfo logFile, CancellationToken forcedCompleteToken)
         {
-            ChannelReader<FileLogEntry> queue = logFile.Queue.Reader;
-            while (await queue.WaitToReadAsync(forcedCompleteToken).ConfigureAwait(false))
-                while (queue.TryRead(out FileLogEntry entry))
-                    await WriteEntryAsync(logFile, entry, forcedCompleteToken).ConfigureAwait(false);
-        }
-
-
-        protected internal class LogFileInfo
-        {
-            private Stream _appendStream;
-
-            public LogFileInfo(FileLoggerProcessor processor, ILogFileSettings fileSettings, IFileLoggerSettings settings)
+            using (await _asyncLock.LockAsync())
             {
-                BasePath = settings.BasePath ?? string.Empty;
-                PathFormat = fileSettings.Path;
-                PathPlaceholderResolver = GetActualPathPlaceholderResolver(fileSettings.PathPlaceholderResolver ?? settings.PathPlaceholderResolver);
-                FileAppender = settings.FileAppender ?? processor._fallbackFileAppender.Value;
-                AccessMode = fileSettings.FileAccessMode ?? settings.FileAccessMode ?? LogFileAccessMode.Default;
-                Encoding = fileSettings.FileEncoding ?? settings.FileEncoding ?? Encoding.UTF8;
-                DateFormat = fileSettings.DateFormat ?? settings.DateFormat ?? "yyyyMMdd";
-                CounterFormat = fileSettings.CounterFormat ?? settings.CounterFormat;
-                MaxSize = fileSettings.MaxFileSize ?? settings.MaxFileSize ?? 0;
-
-                Queue = processor.CreateLogFileQueue(fileSettings, settings);
-
-                // important: closure must pick up the current token!
-                CancellationToken forcedCompleteToken = processor._forcedCompleteTokenSource.Token;
-                WriteFileTask = Task.Run(() => processor.WriteFileAsync(this, forcedCompleteToken));
-
-            }
-
-            private static LogFilePathPlaceholderResolver GetActualPathPlaceholderResolver(LogFilePathPlaceholderResolver resolver) => resolver == null ? s_defaultPathPlaceholderResolver :
-                  (placeholderName, inlineFormat, context) => resolver(placeholderName, inlineFormat, context) ?? s_defaultPathPlaceholderResolver(placeholderName, inlineFormat, context);
-
-            public string BasePath { get; }
-            public string PathFormat { get; }
-            public LogFilePathPlaceholderResolver PathPlaceholderResolver { get; }
-            public IFileAppender FileAppender { get; }
-            public LogFileAccessMode AccessMode { get; }
-            public Encoding Encoding { get; }
-            public string DateFormat { get; }
-            public string CounterFormat { get; }
-            public long MaxSize { get; }
-
-            public Channel<FileLogEntry> Queue { get; }
-            public Task WriteFileTask { get; }
-
-            public int Counter { get; set; }
-            public string CurrentPath { get; set; }
-
-            public bool IsOpen => _appendStream != null;
-            public long? Size => _appendStream?.Length;
-
-            internal bool ShouldEnsurePreamble { get; private set; }
-
-            internal void Open(IFileInfo fileInfo)
-            {
-                _appendStream = FileAppender.CreateAppendStream(fileInfo);
-
-                ShouldEnsurePreamble = true;
-            }
-
-            internal Task WriteTextAsync(string text, Encoding encoding, CancellationToken cancellationToken)
-            {
-                var bytes = encoding.GetBytes(text);
-                return _appendStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
-            }
-
-            internal Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken)
-            {
-                return _appendStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
-            }
-
-            internal async ValueTask EnsurePreambleAsync(CancellationToken cancellationToken)
-            {
-                if (_appendStream.Length == 0)
-                    await WriteBytesAsync(Encoding.GetPreamble(), cancellationToken).ConfigureAwait(false);
-
-                ShouldEnsurePreamble = false;
-            }
-
-            internal void Flush()
-            {
-                // FlushAsync is extremely slow currently
-                // https://github.com/dotnet/corefx/issues/32837
-                _appendStream.Flush();
-            }
-
-            internal void Close()
-            {
-                Stream appendStream = _appendStream;
-                _appendStream = null;
-                appendStream.Dispose();
+                ChannelReader<FileLogEntry> queue = logFile.Queue.Reader;
+                while (await queue.WaitToReadAsync(forcedCompleteToken).ConfigureAwait(false))
+                {
+                    while (queue.TryRead(out FileLogEntry entry))
+                    {
+                        await WriteEntryAsync(logFile, entry, forcedCompleteToken).ConfigureAwait(false);
+                    }
+                }
             }
         }
+
+
 
     }
-
-
-
-
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public interface IFileLoggerDiagnosticEvent
     {

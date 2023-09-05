@@ -50,7 +50,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="assemblyFilter"></param>
-        public static void AddServicesPoxy(this IServiceCollection serviceCollection,params string[] assemblyNames)
+        public static void AddServices(this IServiceCollection serviceCollection,params string[] assemblyNames)
         {
             IEnumerable<Assembly> assemblies = default;
 

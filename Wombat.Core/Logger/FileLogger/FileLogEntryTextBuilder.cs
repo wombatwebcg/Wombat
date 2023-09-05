@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public interface IFileLogEntryTextBuilder
     {

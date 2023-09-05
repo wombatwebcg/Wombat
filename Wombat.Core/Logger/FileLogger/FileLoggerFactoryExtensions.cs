@@ -1,5 +1,5 @@
 ﻿using System;
-using Karambolo.Extensions.Logging.File;
+using Microsoft.Extensions.Logging.File;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

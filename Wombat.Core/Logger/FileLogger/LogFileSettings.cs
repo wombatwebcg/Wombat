@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public enum LogFileAccessMode
     {

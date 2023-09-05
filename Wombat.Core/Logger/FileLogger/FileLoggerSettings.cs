@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Karambolo.Extensions.Logging.File
+namespace Microsoft.Extensions.Logging.File
 {
     public interface IFileLoggerSettings : ILogFileSettingsBase
     {
