@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
-	<PackageReference Include="Wombat.Extensions.ObjectConversion" Version="1.0.3" />
+    <PackageReference Include="Wombat.Extensions.DataTypeExtensions" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

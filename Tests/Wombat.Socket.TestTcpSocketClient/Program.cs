@@ -51,8 +51,8 @@ namespace Wombat.Socket.TestTcpSocketClient
                 _client1.UsgLogger(logger);
                 _client1.UseSubscribe();
                 _client2.UseSubscribe();
-                _client1.ConnectAsync(remoteEP).Wait();
-                _client2.ConnectAsync(remoteEP).Wait();
+                _client1.Connect(remoteEP);
+                _client2.Connect(remoteEP);
                 Console.WriteLine("TCP client has connected to server [{0}].", remoteEP);
                 Console.WriteLine("Type something to send to server...");
                 while (true)

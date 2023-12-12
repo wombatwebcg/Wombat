@@ -12,15 +12,14 @@ namespace Wombat.Core.FileLogger
         static void Main(string[] args)
         {
 
-            using var loggerFactory = LoggerFactory.Create(builder =>
+             var logger = LoggerFactory.Create(builder =>
             {
-                builder
-                    .AddFilter("Microsoft", LogLevel.Warning)
-                    .AddFilter("System", LogLevel.Warning)//CategoryName以System开头的所有日志输出级别为Warning
-                    .AddFilter<ConsoleLoggerProvider>("Wombat.Socket.TestTcpSocketServer", LogLevel.Debug)
-                    .AddConsole();//在loggerFactory中添加 ConsoleProvider
-            });
+                builder.SetMinimumLevel(level: LogLevel.Trace);
+                builder.AddConsole();
+                builder.AddDefalutFileLogger(splitTypes: SplitTypes.SplitByLogLevel);
+            }).CreateLogger<Program>();
 
+            //loggerFactory.LogDebug("Program");
             var services = new ServiceCollection();
 
             //var configuration = new ConfigurationBuilder()
@@ -51,7 +50,7 @@ namespace Wombat.Core.FileLogger
             });
             ServiceProvider sp = services.BuildServiceProvider();
             // create logger
-            ILogger<Program> logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
+            //ILogger<Program> logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger<Program>();
 
             try
             {

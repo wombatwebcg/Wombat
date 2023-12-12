@@ -175,7 +175,7 @@ namespace Wombat.Network.Sockets
                 throw;
             }
         }
-        public void Connect(IPEndPoint remoteEndPoint) => ConnectAsync(remoteEndPoint);
+        public void Connect(IPEndPoint remoteEndPoint) => ConnectAsync(remoteEndPoint).Wait();
 
 
         private void SetSocketOptions()

@@ -201,7 +201,6 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
                 throw ex; 
             }
             void inject(ServiceLifetime serviceLifetime,Type type,Type typeInterface = null)

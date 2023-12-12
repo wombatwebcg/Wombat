@@ -13,12 +13,21 @@
     <Version>1.0.3</Version>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Sockets\Tcp\Client\TcpSocketBaseClient.cs" />
     <Compile Remove="WebSockets\Client\WebSocketClientBase.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Pipelines" Version="8.0.0-rc.1.23419.4" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
   </ItemGroup>
 

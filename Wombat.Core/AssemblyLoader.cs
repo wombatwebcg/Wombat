@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text;
 using System.Xml.Linq;
+using Wombat.Extensions.DataTypeExtensions;
 
 namespace Wombat
 {
