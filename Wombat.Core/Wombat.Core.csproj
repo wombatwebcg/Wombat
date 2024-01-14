@@ -10,7 +10,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>core</PackageTags>
     <Copyright>wombatwebcg</Copyright>
-    <Version>1.0.9</Version>
+    <Version>1.0.11</Version>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
-    <PackageReference Include="Wombat.Extensions.DataTypeExtensions" Version="1.0.0" />
+    <PackageReference Include="Wombat.Extensions.DataTypeExtensions" Version="1.0.2" />
   </ItemGroup>
 
 </Project>

@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/wombatwebcg/Wombat</PackageProjectUrl>
     <Authors>wombatwebcg</Authors>
     <Product>wombatwebcg</Product>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
