@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Wombat.Core.DependencyInjectionTest
+namespace Wombat.DependencyInjectionTest
 {
     /// <summary>
     /// 事务拦截

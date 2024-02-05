@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Wombat.Core\Wombat.Core.csproj" />
     <ProjectReference Include="..\..\Wombat.Network\Wombat.Network.csproj" />
   </ItemGroup>
 

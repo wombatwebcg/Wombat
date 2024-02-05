@@ -21,6 +21,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.FileLogger", "Tests\Wombat.Core.FileLogger\Wombat.Core.FileLogger.csproj", "{D3722939-E508-47F1-A035-67F1CD69D2B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.DependencyInjection", "Wombat.DependencyInjection\Wombat.DependencyInjection.csproj", "{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.Logger", "Wombat.Logger\Wombat.Logger.csproj", "{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,14 @@ Global
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

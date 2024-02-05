@@ -14,12 +14,27 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
 
-
-
-
-
+  <ItemGroup>
+    <Compile Remove="DependencyInjection\**" />
+    <Compile Remove="Logger\**" />
+    <EmbeddedResource Remove="DependencyInjection\**" />
+    <EmbeddedResource Remove="Logger\**" />
+    <None Remove="DependencyInjection\**" />
+    <None Remove="Logger\**" />
+  </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Wombat.Extensions.DataTypeExtensions" Version="1.0.2" />
+  </ItemGroup>
+
+
+
+
+
+
+
+
+  <!--<ItemGroup>
     <PackageReference Include="Castle.Core" Version="5.1.1" />
     <PackageReference Include="Castle.Core.AsyncInterceptor" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
@@ -32,9 +47,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
     <PackageReference Include="System.Threading.Channels" Version="7.0.0" />
     <PackageReference Include="Wombat.Extensions.DataTypeExtensions" Version="1.0.2" />
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>
