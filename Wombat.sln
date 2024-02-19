@@ -1,12 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.33423.256
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core", "Wombat.Core\Wombat.Core.csproj", "{E14EB623-307C-4F56-9A1F-0C4D752B5419}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Network", "Wombat.Network\Wombat.Network.csproj", "{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{24F48D5F-A5F0-4D68-A27E-67FFDAE36E9A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Socket.TestTcpSocketServer", "Tests\Wombat.Socket.TestTcpSocketServer\Wombat.Socket.TestTcpSocketServer.csproj", "{3BD082EF-9CF4-4130-A603-20250FDDF90D}"
@@ -21,9 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.DependencyInjec
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wombat.Core.FileLogger", "Tests\Wombat.Core.FileLogger\Wombat.Core.FileLogger.csproj", "{D3722939-E508-47F1-A035-67F1CD69D2B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.DependencyInjection", "Wombat.DependencyInjection\Wombat.DependencyInjection.csproj", "{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat.Logger", "Wombat.Logger\Wombat.Logger.csproj", "{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wombat", "Wombat\Wombat.csproj", "{61DB2788-899E-451E-9F2B-82306D601C53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,14 +25,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E14EB623-307C-4F56-9A1F-0C4D752B5419}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A28FFBA1-FA83-4B43-A39E-88F867C32AAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3BD082EF-9CF4-4130-A603-20250FDDF90D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,14 +49,10 @@ Global
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3722939-E508-47F1-A035-67F1CD69D2B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8ED95D43-DAAC-4F2C-B1CE-B72C02C443BF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F190AEC9-9B81-47FE-BCCE-B95DFADB77D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61DB2788-899E-451E-9F2B-82306D601C53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61DB2788-899E-451E-9F2B-82306D601C53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61DB2788-899E-451E-9F2B-82306D601C53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61DB2788-899E-451E-9F2B-82306D601C53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

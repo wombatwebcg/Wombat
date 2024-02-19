@@ -20,7 +20,4 @@
 		<PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
 		<PackageReference Include="System.Threading.Channels" Version="7.0.0" />
 	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\Wombat.Core\Wombat.Core.csproj" />
-	</ItemGroup>
 </Project>
